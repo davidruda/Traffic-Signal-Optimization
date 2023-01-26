@@ -48,3 +48,5 @@ e: $(E_IN)
 
 f: $(F_IN)
 	$(PYTHON) main.py < $< > $(F_OUT)
+
+all: a b c d e f
