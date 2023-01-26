@@ -1,5 +1,6 @@
 
 import os
+import sys
 
 class Street:
     def __init__(self, id: int, start: int, end: int, name: str, length: int):
@@ -86,29 +87,39 @@ def read_input(file):
 
     return Simulation(duration, intersections, streets, cars, bonus)
 
-def create_output_default(simulation: Simulation):
-    os.makedirs(OUTPUT_FOLDER, exist_ok=True)
-    with open(os.path.join(OUTPUT_FOLDER, FILENAME + EXTENSION_OUT), 'w') as f:
-        f.write(str(len(simulation.intersections)) + '\n')
-        for intersection in simulation.intersections:
-            f.write(str(intersection.id) + '\n')
-            f.write(str(len(intersection.incoming)) + '\n')
-            for incoming in intersection.incoming:
-                f.write(incoming.name + ' 1\n')
+#def create_output_default(simulation: Simulation):
+#    os.makedirs(OUTPUT_FOLDER, exist_ok=True)
+#    with open(os.path.join(OUTPUT_FOLDER, FILENAME + EXTENSION_OUT), 'w') as f:
+#        f.write(str(len(simulation.intersections)) + '\n')
+#        for intersection in simulation.intersections:
+#            f.write(str(intersection.id) + '\n')
+#            f.write(str(len(intersection.incoming)) + '\n')
+#            for incoming in intersection.incoming:
+#                f.write(incoming.name + ' 1\n')
+
+def create_output_default(simulation: Simulation, file):
+    file.write(str(len(simulation.intersections)) + '\n')
+    for intersection in simulation.intersections:
+        file.write(str(intersection.id) + '\n')
+        file.write(str(len(intersection.incoming)) + '\n')
+        for incoming in intersection.incoming:
+            file.write(incoming.name + ' 1\n')
     
 
 if __name__ == '__main__':
-    DATA_FOLDER = 'input_data'
+    #DATA_FOLDER = 'input_data'
     OUTPUT_FOLDER = 'output'
-    EXTENSION_IN = '.in.txt'
-    EXTENSION_OUT = '.out.txt'
-    FILENAME = 'a_an_example'
+    #EXTENSION_IN = '.in.txt'
+    #EXTENSION_OUT = '.out.txt'
+    #FILENAME = 'a_an_example'
     #FILENAME = 'b_by_the_ocean'
     #FILENAME = 'c_checkmate'
     #FILENAME = 'd_daily_commute'
     #FILENAME = 'e_etoile'
     #FILENAME = 'f_forever_jammed'
-    with open(os.path.join(DATA_FOLDER, FILENAME + EXTENSION_IN), 'r') as f:
-        simulation = read_input(f)
-    print(simulation)
-    create_output_default(simulation)
+    #with open(os.path.join(DATA_FOLDER, FILENAME + EXTENSION_IN), 'r') as f:
+    simulation = read_input(sys.stdin)
+    #print(simulation)
+    os.makedirs(OUTPUT_FOLDER, exist_ok=True)
+    #with open(os.path.join(OUTPUT_FOLDER, FILENAME + EXTENSION_OUT), 'w') as f:
+    create_output_default(simulation, sys.stdout)
