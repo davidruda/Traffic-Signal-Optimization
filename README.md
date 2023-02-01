@@ -4,3 +4,7 @@
 [Problem submission and interactive page](https://codingcompetitions.withgoogle.com/hashcode/round/00000000004361e2/0000000000c617e4)  
 [Google Hash Code archive](https://codingcompetitions.withgoogle.com/hashcode/archive)  
 [Kaggle competition with additional data](https://www.kaggle.com/competitions/hashcode-2021-oqr-extension/overview)  
+
+## Solutions
+-  `7,885,740` - 1 sec green for every incoming street
+- `8,925,614` - 1 sec green for every used (with at least one car going through) incoming street
