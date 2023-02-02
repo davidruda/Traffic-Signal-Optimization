@@ -1,4 +1,4 @@
-# david_ruda
+# Traffic signaling
 
 ## [Problem description](https://storage.googleapis.com/coding-competitions.appspot.com/HC/2021/hashcode_2021_online_qualification_round.pdf)  
 [Problem submission and interactive page](https://codingcompetitions.withgoogle.com/hashcode/round/00000000004361e2/0000000000c617e4)  
