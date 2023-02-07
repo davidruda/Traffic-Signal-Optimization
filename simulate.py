@@ -19,13 +19,12 @@ def read_plan(file: FileIO, simulation: Simulation):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    #parser.add_argument('input', help='Input file.')
+    parser.add_argument('input', help='Input file.')
     parser.add_argument('plan', help='File with the traffic light plan.')
     args = parser.parse_args()
 
-    #with open(args.input, 'r') as f:
-    #    simulation = read_input(f)
-    simulation = read_input(sys.stdin)
+    with open(args.input, 'r') as f:
+        simulation = read_input(f)
     with open(args.plan, 'r') as f:
         read_plan(f, simulation)
 
