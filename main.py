@@ -9,41 +9,41 @@ from street import Street
 from car import Car
 from simulation import Simulation
 
-def read_input(file):
+def read_input(filename):
+    with open(filename, 'r') as file:
+        D, I, S, V, F = file.readline().split()
 
-    D, I, S, V, F = file.readline().split()
+        duration = int(D)
+        num_of_intersections = int(I)
+        num_of_streets = int(S)
+        num_of_cars = int(V)
+        bonus = int(F)
 
-    duration = int(D)
-    num_of_intersections = int(I)
-    num_of_streets = int(S)
-    num_of_cars = int(V)
-    bonus = int(F)
+        intersections = [Intersection(i) for i in range(num_of_intersections)]
 
-    intersections = [Intersection(i) for i in range(num_of_intersections)]
+        lines = file.read().splitlines()
+        streets = []
+        street_mapping = {}
+        for i, line in enumerate(lines[:num_of_streets]):
+            start, end, name, length = line.split()
+            street = Street(
+                i, intersections[int(start)], intersections[int(end)], name, int(length)
+                )
+            streets.append(street)
+            street_mapping[street.name] = street
+            street.start.outgoing.append(street)
+            street.end.incoming.append(street)
 
-    lines = file.read().splitlines()
-    streets = []
-    street_mapping = {}
-    for i, line in enumerate(lines[:num_of_streets]):
-        start, end, name, length = line.split()
-        street = Street(
-            i, intersections[int(start)], intersections[int(end)], name, int(length)
-            )
-        streets.append(street)
-        street_mapping[street.name] = street
-        street.start.outgoing.append(street)
-        street.end.incoming.append(street)
+        cars = []
+        for i, line in enumerate(lines[num_of_streets:]):
+            street_names = line.split()[1:]
+            path = list(map(street_mapping.get , street_names))
+            car = Car(i, len(path), path)
+            cars.append(car)
+            for street in car.path:
+                street.used = True
 
-    cars = []
-    for i, line in enumerate(lines[num_of_streets:]):
-        street_names = line.split()[1:]
-        path = list(map(street_mapping.get , street_names))
-        car = Car(i, len(path), path)
-        cars.append(car)
-        for street in car.path:
-            street.used = True
-
-    return Simulation(duration, intersections, streets, cars, street_mapping, bonus)
+        return Simulation(duration, intersections, streets, cars, street_mapping, bonus)
 
 def create_output_default(simulation: Simulation, file):
     """
@@ -88,8 +88,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     OUTPUT_FOLDER = 'output'
-    with open(args.input, 'r') as f:
-        simulation = read_input(f)
+    simulation = read_input(args.input)
     #print(simulation)
 
     #os.makedirs(OUTPUT_FOLDER, exist_ok=True)
@@ -100,4 +99,5 @@ if __name__ == '__main__':
     #    #create_output_default(simulation, f)
     #    create_output_used(simulation, f)
 
-    create_output_used(simulation, sys.stdout)
+    create_output_default(simulation, sys.stdout)
+    #create_output_used(simulation, sys.stdout)

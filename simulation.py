@@ -56,6 +56,8 @@ class Simulation:
             for car in self.cars:
                 car.move(t)
 
+        return self
+
 #    def run(self):
 #        #moving_cars = copy.copy(self.cars)
 #        #for t in range(self.duration):
@@ -104,3 +106,28 @@ class Simulation:
         print(f'Min Score {minimum} car ID {min_idx}')
         print(f'Arrival time: {self.cars[min_idx].finish_time}')
         return score
+
+    def read_plan(self, filename):
+        with open(filename, 'r') as file:
+            num_of_intersections = int(file.readline())
+            for _ in range(num_of_intersections):
+                intersection_id = int(file.readline())
+                num_of_streets = int(file.readline())
+
+                intersection = self.intersections[intersection_id]
+                for _ in range(num_of_streets):
+                    street_name, green_time = file.readline().split()
+
+                    street = self.street_mapping[street_name]
+                    intersection.plan.extend([street] * int(green_time))
+                    
+        return self
+
+    def create_default_plan(self):
+        """
+        For every intersection and every incoming street, set green for 1 second.
+        """
+        for intersection in self.intersections:
+            intersection.plan.extend(intersection.incoming)
+
+        return self
