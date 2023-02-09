@@ -32,21 +32,21 @@ F_IN=$(INPUT_FOLDER)$(F_DATA)$(IN_SUFFIX)
 F_OUT=$(OUTPUT_FOLDER)$(F_DATA)$(OUT_SUFFIX)
 
 a: $(A_IN)
-	$(PYTHON) main.py $< > $(A_OUT)
+	$(PYTHON) create_output.py < $< > $(A_OUT)
 
 b: $(B_IN)
-	$(PYTHON) main.py $< > $(B_OUT)
+	$(PYTHON) create_output.py < $< > $(B_OUT)
 
 c: $(C_IN)
-	$(PYTHON) main.py $< > $(C_OUT)
+	$(PYTHON) create_output.py < $< > $(C_OUT)
 
 d: $(D_IN)
-	$(PYTHON) main.py $< > $(D_OUT)
+	$(PYTHON) create_output.py < $< > $(D_OUT)
 
 e: $(E_IN)
-	$(PYTHON) main.py $< > $(E_OUT)
+	$(PYTHON) create_output.py < $< > $(E_OUT)
 
 f: $(F_IN)
-	$(PYTHON) main.py $< > $(F_OUT)
+	$(PYTHON) create_output.py < $< > $(F_OUT)
 
 all: a b c d e f

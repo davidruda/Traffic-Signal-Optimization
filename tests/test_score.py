@@ -5,25 +5,26 @@ import sys
 import unittest
 
 # Add parent directory to path
+# TODO: Ugly - Find a better way to do this
 sys.path.append('.')
 
-from main import read_input
+from simulation import Simulation
 
 class TestScore(unittest.TestCase):
 
     def setUp(self):
         self.data = [
-            {'input': read_input(args.input_a), 'output': 1_001},
-            {'input': read_input(args.input_b), 'output': 4_565_642},
-            {'input': read_input(args.input_c), 'output': 1_231_878},
-            {'input': read_input(args.input_d), 'output': 969_685},
-            {'input': read_input(args.input_e), 'output': 661_797},
-            {'input': read_input(args.input_f), 'output': 455_737}
+            {'input': Simulation.from_file(args.input_a), 'output': 1_001},
+            {'input': Simulation.from_file(args.input_b), 'output': 4_565_642},
+            {'input': Simulation.from_file(args.input_c), 'output': 1_231_878},
+            {'input': Simulation.from_file(args.input_d), 'output': 969_685},
+            {'input': Simulation.from_file(args.input_e), 'output': 661_797},
+            {'input': Simulation.from_file(args.input_f), 'output': 455_737}
         ]
 
     def test_default_solution(self):
         for data in self.data:
-            score = data['input'].create_default_plan().run().score()
+            score = data['input'].create_plan_default().run().score()
             self.assertEqual(score, data['output'])
 
 if __name__ == '__main__':

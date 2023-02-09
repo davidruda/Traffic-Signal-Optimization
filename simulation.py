@@ -1,4 +1,7 @@
 
+from collections import Counter
+import sys
+
 from intersection import Intersection
 from street import Street
 from car import Car
@@ -19,6 +22,45 @@ class Simulation:
         self.street_mapping = street_mapping
         self.cars = cars
         self.bonus = bonus
+
+    @classmethod
+    def from_file(cls, filename):
+        if filename:
+            file = open(filename, 'r')
+        else:
+            file = sys.stdin
+
+        D, I, S, V, F = file.readline().split()
+        duration = int(D)
+        num_of_intersections = int(I)
+        num_of_streets = int(S)
+        num_of_cars = int(V)
+        bonus = int(F)
+        intersections = [Intersection(i) for i in range(num_of_intersections)]
+        lines = file.read().splitlines()
+        streets = []
+        street_mapping = {}
+        for i, line in enumerate(lines[:num_of_streets]):
+            start, end, name, length = line.split()
+            street = Street(
+                i, intersections[int(start)], intersections[int(end)], name, int(length)
+                )
+            streets.append(street)
+            street_mapping[street.name] = street
+            street.start.outgoing.append(street)
+            street.end.incoming.append(street)
+
+        cars = []
+        for i, line in enumerate(lines[num_of_streets:]):
+            street_names = line.split()[1:]
+            path = list(map(street_mapping.get , street_names))
+            car = Car(i, len(path), path)
+            cars.append(car)
+            for street in car.path:
+                street.used = True
+
+        file.close()
+        return cls(duration, intersections, streets, cars, street_mapping, bonus)
 
     def __str__(self):
         lines = []
@@ -123,7 +165,7 @@ class Simulation:
                     
         return self
 
-    def create_default_plan(self):
+    def create_plan_default(self):
         """
         For every intersection and every incoming street, set green for 1 second.
         """
@@ -131,3 +173,39 @@ class Simulation:
             intersection.plan.extend(intersection.incoming)
 
         return self
+
+    def create_plan_used(self):
+        """
+        Set green for 1 second for every used incoming street. 
+        Exclude streets that aren't used.
+        """
+        # TODO: Maybe not ideal, try to fix this
+        for intersection in self.intersections:
+            for street in intersection.incoming:
+                if street.used:
+                    intersection.plan.append(street)
+
+        return self
+
+    def create_output(self, filename):
+        if filename:
+            file = open(filename, 'w')
+        else:
+            file = sys.stdout
+
+            # TODO: Not ideal, try to come up with a better solution
+            intersections_used = []
+            for intersection in self.intersections:
+                if intersection.plan:
+                    intersections_used.append(intersection)
+
+            file.write(str(len(intersections_used)) + '\n')
+
+            for intersection in intersections_used:
+                file.write(str(intersection.id) + '\n')
+                counter = Counter(intersection.plan)
+                file.write(str(len(counter)) + '\n')
+                for street, time in counter.items():
+                    file.write(f'{street.name} {str(time)}\n')
+
+        file.close()
