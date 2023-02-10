@@ -25,27 +25,19 @@ stages:          # List of stages for jobs, and their order of execution
 
 build-job:       # This job runs in the build stage, which runs first.
   stage: build
-  allow_failure: true
   script:
     - make all
 
 unit-test-job:
   stage: test
-  allow_failure: true
   script:
-    - py tests/test_score.py
+    - python3 tests/test_score.py
 
 unit-test-job-2:
   stage: test
   allow_failure: true
   script:
-    - python3 tests/test_score.py
-
-unit-test-job-3:
-  stage: test
-  allow_failure: true
-  script:
-    - ./tests/test_score.py
+    - python tests/test_score.py
 
 #lint-test-job:   # This job also runs in the test stage.
 #  stage: test    # It can run at the same time as unit-test-job (in parallel).
