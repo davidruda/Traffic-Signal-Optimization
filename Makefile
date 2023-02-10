@@ -32,6 +32,9 @@ E_OUT=$(OUTPUT_FOLDER)$(E_DATA)$(OUT_SUFFIX)
 F_IN=$(INPUT_FOLDER)$(F_DATA)$(IN_SUFFIX)
 F_OUT=$(OUTPUT_FOLDER)$(F_DATA)$(OUT_SUFFIX)
 
+output-folder:
+	mkdir -p $(OUTPUT_FOLDER)
+
 a: $(A_IN)
 	$(PYTHON) create_output.py < $< > $(A_OUT)
 
@@ -50,7 +53,7 @@ e: $(E_IN)
 f: $(F_IN)
 	$(PYTHON) create_output.py < $< > $(F_OUT)
 
-all: a b c d e f
+all: output-folder a b c d e f
 
 a-win: $(A_IN)
 	$(PYTHON_WIN) create_output.py < $< > $(A_OUT)
@@ -70,4 +73,4 @@ e-win: $(E_IN)
 f-win: $(F_IN)
 	$(PYTHON_WIN) create_output.py < $< > $(F_OUT)
 
-all-win: a-win b-win c-win d-win e-win f-win
+all-win: output-folder a-win b-win c-win d-win e-win f-win
