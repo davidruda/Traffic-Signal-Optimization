@@ -6,6 +6,7 @@ class Intersection:
         self.outgoing = []
         self.plan = []
         self._last_used_time = -1
+        self._cars_waiting = 0
 
     def __str__(self):
         lines = []

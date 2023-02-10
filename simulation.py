@@ -6,6 +6,8 @@ from intersection import Intersection
 from street import Street
 from car import Car
 
+from stable_priority_queue import StablePriorityQueue
+
 class Simulation:
     def __init__(
         self, 
@@ -74,49 +76,64 @@ class Simulation:
         return '\n'.join(lines)
 
     def run(self):
+        time = 0
+        event_queue = StablePriorityQueue(maxsize=1000)
         for car in self.cars:
-            car.path[car.current_street_index].queueing_cars.put(car)
-            car.queueing = True
+            street = car.current_street()
+            street.queueing_cars.put(car)
+            if street.queueing_cars.qsize() == 1:
+                event_queue.put((street.next_green(time), street))
 
-            intersections_used = []
-            for intersection in self.intersections:
-                for street in intersection.incoming:
-                    if street.used:
-                        intersections_used.append(intersection)
-                        break
-
-        for t in range(self.duration):
-            #print(t)
-            for intersection in intersections_used:
-                street = intersection.green(t)
+        while not event_queue.empty():
+            time, object = event_queue.get()
+            if time > self.duration:
+                break
+            if isinstance(object, Street):
+                street = object
+                car = street.go(time)
+                event_queue.put((time + car.current_street().length, car))
                 if not street.queueing_cars.empty():
-                    car = street.queueing_cars.get()
-                    car.queueing = False
-                    car.current_street_index += 1
-                    car.current_distance = 0
+                    event_queue.put((street.next_green(time), street))
 
-            for car in self.cars:
-                car.move(t)
+            elif isinstance(object, Car):
+                car = object
+                if car.final_destination():
+                    car.finished = True
+                    car.finish_time = time
+                else:
+                    street = car.current_street()
+                    street.queueing_cars.put(car)
+                    if street.queueing_cars.qsize() == 1:
+                        event_queue.put((street.next_green(time), street))              
 
         return self
 
 #    def run(self):
-#        #moving_cars = copy.copy(self.cars)
-#        #for t in range(self.duration):
-#        for t in range(self.duration + 1):
-#            #print(f'TIME {t}')
+#        for car in self.cars:
+#            car.path[car.current_street_index].queueing_cars.put(car)
+#            car.queueing = True
+#
+#            intersections_used = []
+#            for intersection in self.intersections:
+#                for street in intersection.incoming:
+#                    if street.used:
+#                        intersections_used.append(intersection)
+#                        break
+#
+#        for t in range(self.duration):
+#            #print(t)
+#            for intersection in intersections_used:
+#                street = intersection.green(t)
+#                if not street.queueing_cars.empty():
+#                    car = street.queueing_cars.get()
+#                    car.queueing = False
+#                    car.current_street_index += 1
+#                    car.current_distance = 0
+#
 #            for car in self.cars:
 #                car.move(t)
-#                #if car.finished:
-#                #    moving_cars.remove(car)
-#            #if not moving_cars:
-#            #    break
-#            #for intersection in self.intersections:
-#            #    if intersection.plan:
-#            #        print(f'Intersection: {intersection.id}')
-#            #        green_street = intersection.green(t)
-#            #        print(f'Green: {green_street}')
-#            #        print(f'Last used time: {intersection._last_used_time}')
+#
+#        return self
 
     def score(self):
         score = 0

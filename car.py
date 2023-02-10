@@ -21,6 +21,13 @@ class Car:
     def final_destination(self):
         return self.path[-1] == self.path[self.current_street_index]
 
+    def current_street(self):
+        return self.path[self.current_street_index]
+
+    def move_to_next_street(self):
+        self.current_street_index += 1
+        return self
+
     def move(self, time: int):
         if not self.finished and not self.queueing:
             self.current_distance += 1
