@@ -1,4 +1,5 @@
-PYTHON=py
+PYTHON=python3
+PYTHON_WIN=py
 
 INPUT_FOLDER=input_data/
 OUTPUT_FOLDER=output/
@@ -50,3 +51,23 @@ f: $(F_IN)
 	$(PYTHON) create_output.py < $< > $(F_OUT)
 
 all: a b c d e f
+
+a-win: $(A_IN)
+	$(PYTHON_WIN) create_output.py < $< > $(A_OUT)
+
+b-win: $(B_IN)
+	$(PYTHON_WIN) create_output.py < $< > $(B_OUT)
+
+c-win: $(C_IN)
+	$(PYTHON_WIN) create_output.py < $< > $(C_OUT)
+
+d-win: $(D_IN)
+	$(PYTHON_WIN) create_output.py < $< > $(D_OUT)
+
+e-win: $(E_IN)
+	$(PYTHON_WIN) create_output.py < $< > $(E_OUT)
+
+f-win: $(F_IN)
+	$(PYTHON_WIN) create_output.py < $< > $(F_OUT)
+
+all-win: a-win b-win c-win d-win e-win f-win
