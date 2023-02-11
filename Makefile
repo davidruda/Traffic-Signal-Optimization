@@ -18,11 +18,11 @@ DATA = \
 DATA_IN := $(addprefix $(INPUT_FOLDER), $(addsuffix $(IN_SUFFIX), $(DATA)))
 DATA_OUT := $(addprefix $(OUTPUT_FOLDER), $(addsuffix $(OUT_SUFFIX), $(DATA)))
 
-all: $(OUTPUT_FOLDER) $(DATA_OUT)
+all: clean $(OUTPUT_FOLDER) $(DATA_OUT)
 
 .PHONY: all all-win python-win clean
 
-all-win: $(OUTPUT_FOLDER) python-win $(DATA_OUT)
+all-win: clean $(OUTPUT_FOLDER) python-win $(DATA_OUT)
 
 $(OUTPUT_FOLDER)%$(OUT_SUFFIX): $(INPUT_FOLDER)%$(IN_SUFFIX)
 	$(PYTHON) create_output.py -i $< -o $@

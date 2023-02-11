@@ -2,6 +2,8 @@
 from collections import Counter
 import sys
 
+import numpy as np
+
 from intersection import Intersection
 from street import Street
 from car import Car
@@ -27,41 +29,47 @@ class Simulation:
 
     @classmethod
     def from_file(cls, filename):
-        if filename:
-            file = open(filename, 'r')
+        if filename is not None:
+            with open(filename, 'r') as file:
+                return cls._from_file(file)
         else:
-            file = sys.stdin
+            return cls._from_file(sys.stdin)
 
+    @classmethod
+    def _from_file(cls, file):
         D, I, S, V, F = file.readline().split()
         duration = int(D)
         num_of_intersections = int(I)
         num_of_streets = int(S)
         num_of_cars = int(V)
         bonus = int(F)
-        intersections = [Intersection(i) for i in range(num_of_intersections)]
-        lines = file.read().splitlines()
-        streets = []
+        intersections = np.empty(num_of_intersections, dtype=Intersection)
+        streets = np.empty(num_of_streets, dtype=Street)
         street_mapping = {}
-        for i, line in enumerate(lines[:num_of_streets]):
-            start, end, name, length = line.split()
-            street = Street(
-                i, intersections[int(start)], intersections[int(end)], name, int(length)
-                )
-            streets.append(street)
+        for i in range(num_of_streets):
+            start, end, name, length = file.readline().split()
+            start = int(start)
+            end = int(end)
+            length = int(length)
+            if intersections[start] is None:
+                intersections[start] = Intersection(start)
+            if intersections[end] is None:
+                intersections[end] = Intersection(end)
+            street = Street(i, intersections[start], intersections[end], name, length)
+            streets[i] = street
             street_mapping[street.name] = street
             street.start.outgoing.append(street)
             street.end.incoming.append(street)
 
-        cars = []
-        for i, line in enumerate(lines[num_of_streets:]):
-            street_names = line.split()[1:]
-            path = list(map(street_mapping.get , street_names))
+        cars = np.empty(num_of_cars, dtype=Car)
+        for i in range(num_of_cars):
+            street_names = file.readline().split()[1:]
+            path = [street_mapping[name] for name in street_names]
             car = Car(i, len(path), path)
-            cars.append(car)
+            cars[i] = car
             for street in car.path:
                 street.used = True
 
-        file.close()
         return cls(duration, intersections, streets, cars, street_mapping, bonus)
 
     def __str__(self):
@@ -205,24 +213,25 @@ class Simulation:
         return self
 
     def create_output(self, filename):
-        if filename:
-            file = open(filename, 'w')
+        if filename is not None:
+            with open(filename, 'w') as file:
+                self._create_output(file)
         else:
-            file = sys.stdout
+            self._create_output(sys.stdout)
 
-            # TODO: Not ideal, try to come up with a better solution
-            intersections_used = []
-            for intersection in self.intersections:
-                if intersection.plan:
-                    intersections_used.append(intersection)
+    def _create_output(self, file):
+        # TODO: Not ideal, try to come up with a better solution
+        intersections_used = []
+        for intersection in self.intersections:
+            if intersection.plan:
+                intersections_used.append(intersection)
 
-            file.write(str(len(intersections_used)) + '\n')
+        file.write(str(len(intersections_used)) + '\n')
 
-            for intersection in intersections_used:
-                file.write(str(intersection.id) + '\n')
-                counter = Counter(intersection.plan)
-                file.write(str(len(counter)) + '\n')
-                for street, time in counter.items():
-                    file.write(f'{street.name} {str(time)}\n')
 
-        file.close()
+        for intersection in intersections_used:
+            file.write(str(intersection.id) + '\n')
+            counter = Counter(intersection.plan)
+            file.write(str(len(counter)) + '\n')
+            for street, time in counter.items():
+                file.write(f'{street.name} {str(time)}\n')

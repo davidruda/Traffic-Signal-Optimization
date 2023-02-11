@@ -40,23 +40,3 @@ class Car:
                     street = self.path[self.current_street_index]
                     street.queueing_cars.put(self)
                     self.queueing = True
-
-#    def move(self, time: int):
-#        if not self.finished:
-#            street = self.path[self.current_street_index]
-#
-#            if self.current_distance < street.length:
-#                self.current_distance += 1
-#
-#
-#            elif self.current_distance == street.length:
-#                if self.final_destination():
-#                    # The car is at the final destination
-#                    self.finished = True
-#                    self.finish_time = time
-#                else:
-#                    intersection = street.end
-#                    if intersection.is_green(time, street) and not intersection.car_passed(time):
-#                        intersection.use(time)
-#                        self.current_street_index += 1
-#                        self.current_distance = 1
