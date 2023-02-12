@@ -206,6 +206,8 @@ class Simulation:
                 self._create_output(file)
         else:
             self._create_output(sys.stdout)
+            
+        return self
 
     def _create_output(self, file):
         # TODO: Not ideal, try to come up with a better solution
