@@ -105,7 +105,7 @@ class Simulation:
 
             elif isinstance(object, Car):
                 car = object
-                if car.final_destination():
+                if car.is_final_destination():
                     car.finished = True
                     car.finish_time = time
                 else:
@@ -116,62 +116,42 @@ class Simulation:
 
         return self
 
-#    def run(self):
-#        for car in self.cars:
-#            car.path[car.current_street_index].queueing_cars.put(car)
-#            car.queueing = True
-#
-#            intersections_used = []
-#            for intersection in self.intersections:
-#                for street in intersection.incoming:
-#                    if street.used:
-#                        intersections_used.append(intersection)
-#                        break
-#
-#        for t in range(self.duration):
-#            #print(t)
-#            for intersection in intersections_used:
-#                street = intersection.green(t)
-#                if not street.queueing_cars.empty():
-#                    car = street.queueing_cars.get()
-#                    car.queueing = False
-#                    car.current_street_index += 1
-#                    car.current_distance = 0
-#
-#            for car in self.cars:
-#                car.move(t)
-#
-#        return self
-
-    def score(self):
-        score = 0
-        finished = 0
-        maximum = 0
-        max_idx = -1
-        minimum = float('inf')
-        min_idx = -1
-        time_driven = 0
-        count = 0
-        for car in self.cars:
+    def score(self, verbose=False):
+        if verbose:
+            return self._score_verbose()
+        
+        scores = np.zeros(len(self.cars), dtype=int)
+        for i, car in enumerate(self.cars):
             if car.finished:
-                finished += 1
-                car_score = self.bonus + (self.duration - car.finish_time)
-                score += car_score
-                time_driven += car.finish_time
-                count += 1
-                if maximum < car_score:
-                    maximum = car_score
-                    max_idx = car.id
-                if minimum > car_score:
-                    minimum = car_score
-                    min_idx = car.id
-        print('#########################################')
-        print(f'Finished cars {finished}')
-        print(f'Average ride time: {time_driven / count:0.2f}')
-        print(f'Max Score {maximum} car ID {max_idx}')
-        print(f'Arrival time: {self.cars[max_idx].finish_time}')
-        print(f'Min Score {minimum} car ID {min_idx}')
-        print(f'Arrival time: {self.cars[min_idx].finish_time}')
+                scores[i] = self.bonus + (self.duration - car.finish_time)
+        return np.sum(scores)
+
+    def _score_verbose(self):
+        scores = np.zeros(len(self.cars), dtype=int)
+        finish_times = np.zeros(len(self.cars), dtype=int)
+        for i, car in enumerate(self.cars):
+            if car.finished:
+                scores[i] = self.bonus + (self.duration - car.finish_time)
+                finish_times[i] = car.finish_time
+        avg_ride_time = np.mean(finish_times[finish_times > 0])
+        scores_masked = np.ma.MaskedArray(scores, scores == 0)
+        finished = scores_masked.count()
+        max_idx = np.argmax(scores_masked)
+        min_idx = np.argmin(scores_masked)
+        score = np.sum(scores)
+        print('#' * 80)
+        print(f'The submission scored **{score:,} points**.') 
+        print(f'This is the sum of {finished * self.bonus:,} bonus points for ' \
+            f'cars arriving before the deadline ({self.bonus:,} points each) and '\
+            f'{score - finished * self.bonus:,} points for early arrival times.')
+        print(f'{finished} of {len(self.cars)} cars arrived before the deadline ' \
+            f'({int(finished / len(self.cars) * 100):,} %).')
+        print(f'The earliest car (ID {max_idx}) arrived at its destination after ' \
+            f'{finish_times[max_idx]} seconds scoring {scores[max_idx]:,} points,')
+        print(f'whereas the last car (ID {min_idx}) arrived at its destination ' \
+            f'after {finish_times[min_idx]} seconds scoring {scores[min_idx]:,} points.')
+        print(f'Cars that arrived within the deadline drove for an average of ' \
+            f'{avg_ride_time:0.2f} seconds to arrive at their destination.')
         return score
 
     def read_plan(self, filename):
@@ -182,11 +162,14 @@ class Simulation:
                 num_of_streets = int(file.readline())
 
                 intersection = self.intersections[intersection_id]
+                plan = intersection.plan
                 for _ in range(num_of_streets):
                     street_name, green_time = file.readline().split()
+                    green_time = int(green_time)
 
-                    street = self.street_mapping[street_name]
-                    intersection.plan.extend([street] * int(green_time))
+                    street = self.get_street_by_name(street_name)
+                    street._green_interval = range(len(plan), len(plan) + green_time)
+                    plan.extend([street] * green_time)
                     
         return self
 
@@ -195,7 +178,10 @@ class Simulation:
         For every intersection and every incoming street, set green for 1 second.
         """
         for intersection in self.intersections:
-            intersection.plan.extend(intersection.incoming)
+            plan = intersection.plan
+            for street in intersection.incoming:
+                street._green_interval = range(len(plan), len(plan) + 1)
+                plan.append(street)
 
         return self
 
@@ -208,7 +194,9 @@ class Simulation:
         for intersection in self.intersections:
             for street in intersection.incoming:
                 if street.used:
-                    intersection.plan.append(street)
+                    plan = intersection.plan
+                    street._green_interval = range(len(plan), len(plan) + 1)
+                    plan.append(street)
 
         return self
 
@@ -228,10 +216,12 @@ class Simulation:
 
         file.write(str(len(intersections_used)) + '\n')
 
-
         for intersection in intersections_used:
             file.write(str(intersection.id) + '\n')
             counter = Counter(intersection.plan)
             file.write(str(len(counter)) + '\n')
             for street, time in counter.items():
                 file.write(f'{street.name} {str(time)}\n')
+
+    def get_street_by_name(self, name):
+        return self.street_mapping[name]

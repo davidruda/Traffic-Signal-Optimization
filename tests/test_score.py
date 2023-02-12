@@ -24,8 +24,9 @@ class TestScore(unittest.TestCase):
 
     def test_default_solution(self):
         for data in self.data:
-            score = data['input'].create_plan_default().run().score()
+            score = data['input'].create_plan_default().run().score(verbose=True)
             self.assertEqual(score, data['output'])
+        print(f'TOTAL SUM: {sum(data["output"] for data in self.data):,}')
 
 if __name__ == '__main__':
     DEFAULT_INPUT_FOLDER = 'input_data'

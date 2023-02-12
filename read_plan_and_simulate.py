@@ -9,5 +9,5 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     simulation = Simulation.from_file(args.input)
-    score = simulation.read_plan(args.plan).run().score()
+    score = simulation.read_plan(args.plan).run().score(verbose=True)
     print(score)

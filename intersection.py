@@ -5,7 +5,6 @@ class Intersection:
         self.incoming = []
         self.outgoing = []
         self.plan = []
-        self._last_used_time = -1
 
     def __str__(self):
         lines = []
@@ -24,17 +23,3 @@ class Intersection:
 
     def is_green(self, time, street):
         return self.green(time) == street
-
-    def use(self, time):
-        """
-        Indicates that a car has passed the street with a green light at time.
-        """
-        self._last_used_time = time
-
-    def car_passed(self, time):
-        """
-        Returns whether some car has already passed the green light at time.
-        """
-        if time == self._last_used_time:
-            return True
-        return False
