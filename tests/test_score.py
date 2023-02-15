@@ -12,8 +12,8 @@ from simulation import Simulation
 
 class TestScore(unittest.TestCase):
 
-    def setUp(self):
-        self.data = [
+    def test_default_solution(self):
+        data = [
             {'input': Simulation.from_file(args.input_a), 'output': 1_001},
             {'input': Simulation.from_file(args.input_b), 'output': 4_565_642},
             {'input': Simulation.from_file(args.input_c), 'output': 1_231_878},
@@ -21,12 +21,24 @@ class TestScore(unittest.TestCase):
             {'input': Simulation.from_file(args.input_e), 'output': 661_797},
             {'input': Simulation.from_file(args.input_f), 'output': 455_737}
         ]
+        for d in data:
+            score = d['input'].create_plan_default().run().score(verbose=True)
+            self.assertEqual(score, d['output'])
+        print(f'TOTAL SUM: {sum(d["output"] for d in data):,}')
 
-    def test_default_solution(self):
-        for data in self.data:
-            score = data['input'].create_plan_default().run().score(verbose=True)
-            self.assertEqual(score, data['output'])
-        print(f'TOTAL SUM: {sum(data["output"] for data in self.data):,}')
+    def test_used_solution(self):
+        data = [
+            {'input': Simulation.from_file(args.input_a), 'output': 1_001},
+            {'input': Simulation.from_file(args.input_b), 'output': 4_566_576},
+            {'input': Simulation.from_file(args.input_c), 'output': 1_299_357},
+            {'input': Simulation.from_file(args.input_d), 'output': 1_573_100},
+            {'input': Simulation.from_file(args.input_e), 'output': 684_769},
+            {'input': Simulation.from_file(args.input_f), 'output': 819_083}
+        ]
+        for d in data:
+            score = d['input'].create_plan_used().run().score(verbose=True)
+            self.assertEqual(score, d['output'])
+        print(f'TOTAL SUM: {sum(d["output"] for d in data):,}')
 
 if __name__ == '__main__':
     DEFAULT_INPUT_FOLDER = 'input_data'

@@ -63,11 +63,18 @@ class Simulation:
 
         cars = np.empty(num_of_cars, dtype=Car)
         for i in range(num_of_cars):
-            street_names = file.readline().split()[1:]
-            path = [street_mapping[name] for name in street_names]
-            car = Car(i, len(path), path)
+            tokens = file.readline().split()
+            path_length = int(tokens[0])
+            path = np.empty(path_length, dtype=Street)
+            street_names = tokens[1:]
+            for j in range(path_length):
+                path[j] = street_mapping[street_names[j]]
+            car = Car(i, path_length, path)
             cars[i] = car
-            for street in car.path:
+
+            # The last street in path is not marked as used because it doesn't 
+            # use the traffic light
+            for street in car.path[:-1]:
                 street.used = True
 
         return cls(duration, intersections, streets, cars, street_mapping, bonus)
