@@ -38,6 +38,8 @@
 
 ---
 
+### Competition-related papers
+
 [**Building a Simulator and Emulator for Traffic Signalling**](https://victorzxy.github.io/project/traffic-sim/) ([PDF](https://victorzxy.github.io/project/traffic-sim/TrafficSim-Report.pdf))  
 - based on the same problem from the Hash Code 2021 qualification round  
 
