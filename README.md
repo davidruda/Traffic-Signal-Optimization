@@ -15,6 +15,29 @@
 ---
 
 ## References
+
+### Algorithms - general  
+
+[**Essentials of Metaheuristics**](https://cs.gmu.edu/~sean/book/metaheuristics/)  
+
+[**Introduction to Evolutionary Computing**](https://link.springer.com/book/10.1007/978-3-662-44874-8)  
+
+[**An Introduction to Genetic Algorithms**](https://www.boente.eti.br/fuzzy/ebook-fuzzy-mitchell.pdf)  
+
+[**Artificial Intelligence: A Modern Approach**](https://aima.cs.berkeley.edu/) ([PDF](https://github.com/yanshengjia/ml-road/blob/master/resources/Artificial%20Intelligence%20-%20A%20Modern%20Approach%20(3rd%20Edition).pdf))
+
+---
+
+### Surrogate models
+
+[Feature Extraction for Surrogate Models in Genetic Programming](https://github.com/martinpilat/gp-surrogate)  
+
+[Managing computational complexity using surrogate models: a critical review](https://link.springer.com/article/10.1007/s00163-020-00336-7)  
+
+[Learning surrogate models for simulation-based optimization](https://aiche.onlinelibrary.wiley.com/doi/10.1002/aic.14418)  
+
+---
+
 [**Building a Simulator and Emulator for Traffic Signalling**](https://victorzxy.github.io/project/traffic-sim/) ([PDF](https://victorzxy.github.io/project/traffic-sim/TrafficSim-Report.pdf))  
 - based on the same problem from the Hash Code 2021 qualification round  
 
