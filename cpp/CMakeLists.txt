@@ -3,7 +3,9 @@ project(cpp)
 
 set(CMAKE_CXX_STANDARD 20)
 
-add_executable(cpp main.cpp stable_priority_queue.hpp intersection_shared.hpp intersection_instance.hpp intersection_instance.cpp intersection_shared.cpp)
+add_executable(cpp src/main.cpp src/intersection_instance.cpp src/street_instance.cpp src/car_instance.cpp src/simulation_instance.cpp src/plan_instance.cpp src/simulation_shared.cpp)
+
+target_include_directories(cpp PUBLIC include)
 
 if (MSVC)
     # all warnings and all warnings as errors
