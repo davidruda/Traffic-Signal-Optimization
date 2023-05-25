@@ -3,21 +3,24 @@
 
 #include <utility>
 #include <vector>
+#include <functional>
 
 #include "street_shared.hpp"
 
 class CarShared {
 public:
     CarShared(
-        const int id,
-        const int path_length,
-        std::vector<const StreetShared *> path
-    ) : id_(id), path_length_(path_length), path_(std::move(path)) {}
+            int id,
+            int path_length,
+            std::vector<std::reference_wrapper<const StreetShared>> path
+            );
+
+    friend std::ostream& operator<<(std::ostream& os, const CarShared& obj);
 
 private:
     const int id_;
     const int path_length_;
-    const std::vector<const StreetShared *> path_;
+    const std::vector<std::reference_wrapper<const StreetShared>> path_;
 };
 
 #endif

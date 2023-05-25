@@ -11,49 +11,29 @@ class IntersectionShared;
 class StreetShared {
 public:
     StreetShared(
-        const int id,
-        IntersectionShared *const start,
-        IntersectionShared *const end,
-        std::string name,
-        const int length
-    ) : id_(id), start_(start), end_(end), name_(std::move(name)), length_(length), used_(false) {}
+            int id,
+            IntersectionShared &start,
+            IntersectionShared &end,
+            std::string name,
+            int length);
 
-    int id() const {
-        return id_;
-    }
+    int id() const;
+    IntersectionShared &start() const;
+    IntersectionShared &end() const;
+    const std::string &name() const;
+    int length() const;
+    bool is_used() const;
+    void set_used(bool used);
 
-    IntersectionShared *const start() {
-        return start_;
-    }
-
-    IntersectionShared *const end() {
-        return end_;
-    }
-
-    const std::string &name() const {
-        return name_;
-    }
-
-    int length() const {
-        return length_;
-    }
-
-    bool is_used() const {
-        return used_;
-    }
-
-    void set_used(bool used) {
-        used_ = used;
-    }
+    friend std::ostream &operator<<(std::ostream &os, const StreetShared &obj);
 
 private:
     const int id_;
-    IntersectionShared *const start_;
-    IntersectionShared *const end_;
+    IntersectionShared &start_;
+    IntersectionShared &end_;
     const std::string name_;
     const int length_;
     bool used_;
 };
-
 
 #endif
