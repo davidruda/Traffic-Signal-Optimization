@@ -10,7 +10,7 @@ public:
 
     int time() const;
 
-    bool operator<(const Event& other) const;
+    bool operator<(const Event &other) const;
 
 protected:
     explicit Event(int time);
