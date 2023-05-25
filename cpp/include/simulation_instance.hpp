@@ -7,14 +7,17 @@
 #include "car_instance.hpp"
 
 class SimulationInstance {
-private:
-
 public:
-    const SimulationShared* const data;
+    explicit SimulationInstance(const SimulationShared &data);
 
-    std::vector<IntersectionInstance> intersections;
-    std::vector<StreetInstance> streets;
-    std::vector<CarInstance> cars;
+    void run();
+
+private:
+    const SimulationShared & data_;
+
+    std::vector<IntersectionInstance> intersections_;
+    std::vector<StreetInstance> streets_;
+    std::vector<CarInstance> cars_;
 };
 
 

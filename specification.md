@@ -15,12 +15,12 @@
     - `car event` - a car arrives at the end of a street at a given time
     - `street event`- the first car in the queue at the end of this street goes through an intersection at a given time
 - streets that are not used by any car should be removed
-- for intersections with exactly one used street, the optimal plan is fixed - set green for 1 second for this street and 0 seconds for the rest of the streets - streets within this intersection should also be excluded from the plan optimization to avoid unnecessary computations
+- for intersections with exactly one used street, the optimal schedule is fixed - set green for 1 second for this street and 0 seconds for the rest of the streets - streets within this intersection should also be excluded from the schedule optimization to avoid unnecessary computations
 - no explicit parallelization of the simulation, only within the libraries
 
 ## Python API for the simulation
 - mostly just straightforward wrappers for the C++ classes
-- the only exception is the `PlanInstance` class, which needs to be able to get the underlying datastructure of green times and street orderings from Python easily and efficiently
+- the only exception is the `ScheduleInstance` class, which needs to be able to get the underlying datastructure of green times and street orderings from Python easily and efficiently
 
 ## Rough outline of the classes in the simulation
 - written in Cpp-like pseudocode
@@ -38,7 +38,7 @@ class IntersectionInstance {
     const IntersectionShared{*&} const data;
 
     // dynamic data
-    auto plan;
+    auto schedule;
 
     void print();
 
@@ -109,17 +109,17 @@ class CarInstance {
 
 ```cpp
 // static data
-class PlanShared {
+class ScheduleShared {
 
 };
 
 // API for getting green times for each intersection and each incoming street and the ordering
-class PlanInstance {
+class ScheduleInstance {
     // static data - may be redundant
-    const PlanShared{*&} const data;
+    const ScheduleShared{*&} const data;
 
-    // precompute the green intervals once at the initialization of the plan
-    PlanInstance(...);
+    // precompute the green intervals once at the initialization of the schedule
+    ScheduleInstance(...);
 
     int get_next_green_time(int time);
 
@@ -152,7 +152,7 @@ class SimulationInstance {
     std::vector<StreetInstance> streets;
     std::vector<CarInstance> cars;
 
-    PlanInstance plan;
+    ScheduleInstance schedule;
 
     // functions
     void print();
@@ -164,17 +164,17 @@ class SimulationInstance {
     // Calculate and return the score.
     float score();
 
-    // Read and initialize the plan of the simulation from file.
-    void read_plan(std::string filename);
+    // Read and initialize the schedule of the simulation from file.
+    void read_schedule(std::string filename);
 
-    // Initialize the plan of the simulation.
+    // Initialize the schedule of the simulation.
     // For every intersection and every incoming street, set green for 1 second.
-    void create_plan_default();
+    void create_schedule_default();
 
-    // Initialize the plan of the simulation.
+    // Initialize the schedule of the simulation.
     // Set green for 1 second for every used incoming street. 
     // Exclude streets that aren't used.
-    void create_plan_used();
+    void create_schedule_used();
 
     // Create the output file.
     void create_output(std::string filename);

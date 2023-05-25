@@ -70,6 +70,18 @@ SimulationShared::SimulationShared(const std::string &filename) {
 
 }
 
+const std::vector<IntersectionShared> &SimulationShared::intersections() const {
+    return intersections_;
+}
+
+const std::vector<StreetShared> &SimulationShared::streets() const {
+    return streets_;
+}
+
+const std::vector<CarShared> &SimulationShared::cars() const {
+    return cars_;
+}
+
 std::ostream &operator<<(std::ostream &os, const SimulationShared &obj) {
     os << "Duration: " << obj.duration_ << "\n"
        << "Number of intersections: " << obj.intersections_.size() << "\n"

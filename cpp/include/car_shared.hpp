@@ -15,6 +15,10 @@ public:
             std::vector<std::reference_wrapper<const StreetShared>> path
             );
 
+    int id() const;
+    int path_length() const;
+    const std::vector<std::reference_wrapper<const StreetShared>> &path() const;
+
     friend std::ostream& operator<<(std::ostream& os, const CarShared& obj);
 
 private:

@@ -5,8 +5,10 @@
 
 class IntersectionInstance {
 public:
+    explicit IntersectionInstance(const IntersectionShared &data);
+
 private:
-    const IntersectionShared *const data;
+    const IntersectionShared &data_;
 };
 
 
