@@ -6,8 +6,7 @@
 CarShared::CarShared(
         int id,
         int path_length,
-        std::vector<std::reference_wrapper<const StreetShared>> path
-        ) : id_(id), path_length_(path_length), path_(std::move(path)) {}
+        std::vector<std::reference_wrapper<const StreetShared>> path) : id_(id), path_length_(path_length), path_(std::move(path)) {}
 
 int CarShared::id() const {
     return id_;

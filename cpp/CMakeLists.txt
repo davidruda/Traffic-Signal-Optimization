@@ -14,7 +14,7 @@ else ()
 
     if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
         # enable exceptions for clang
-        add_compile_options(-fexceptions )# -fcxx-exceptions)
+        add_compile_options(-fexceptions)# -fcxx-exceptions)
     endif ()
 endif ()
 
@@ -31,7 +31,7 @@ add_executable(
         src/simulation_instance.cpp
         src/schedule_instance.cpp
         src/event.cpp
-        )
+)
 
 target_include_directories(cpp PUBLIC include)
 

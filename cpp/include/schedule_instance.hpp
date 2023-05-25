@@ -5,7 +5,6 @@
 
 class ScheduleInstance {
 public:
-
 private:
     const ScheduleShared &data;
 };

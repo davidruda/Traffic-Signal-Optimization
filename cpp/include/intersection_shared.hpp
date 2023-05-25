@@ -1,8 +1,8 @@
 #ifndef INTERSECTION_SHARED_HPP
 #define INTERSECTION_SHARED_HPP
 
-#include <vector>
 #include <functional>
+#include <vector>
 
 #include "street_shared.hpp"
 
@@ -14,11 +14,11 @@ public:
 
     int id() const;
 
-    void add_incoming(const StreetShared& street);
+    void add_incoming(const StreetShared &street);
 
-    void add_outgoing(const StreetShared& street);
+    void add_outgoing(const StreetShared &street);
 
-    friend std::ostream& operator<<(std::ostream& os, const IntersectionShared& obj);
+    friend std::ostream &operator<<(std::ostream &os, const IntersectionShared &obj);
 
 private:
     const int id_;

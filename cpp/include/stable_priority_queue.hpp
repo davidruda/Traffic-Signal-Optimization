@@ -1,10 +1,10 @@
 #ifndef STABLE_PRIORITY_QUEUE_HPP
 #define STABLE_PRIORITY_QUEUE_HPP
 
-#include <queue>
-#include <utility>
 #include <limits>
+#include <queue>
 #include <stdexcept>
+#include <utility>
 
 /*
 template<

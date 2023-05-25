@@ -8,8 +8,7 @@ StreetShared::StreetShared(
         IntersectionShared &start,
         IntersectionShared &end,
         std::string name,
-        int length
-        ) : id_(id), start_(start), end_(end), name_(std::move(name)), length_(length), used_(false) {}
+        int length) : id_(id), start_(start), end_(end), name_(std::move(name)), length_(length), used_(false) {}
 
 int StreetShared::id() const {
     return id_;

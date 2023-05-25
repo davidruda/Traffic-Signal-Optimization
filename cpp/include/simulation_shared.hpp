@@ -1,27 +1,27 @@
 #ifndef SIMULATION_SHARED_HPP
 #define SIMULATION_SHARED_HPP
 
-#include <utility>
-#include <vector>
-#include <unordered_map>
+#include <functional>
 #include <string>
 #include <string_view>
-#include <functional>
+#include <unordered_map>
+#include <utility>
+#include <vector>
 
+#include "car_shared.hpp"
 #include "intersection_shared.hpp"
 #include "street_shared.hpp"
-#include "car_shared.hpp"
 
 
 class SimulationShared {
 public:
-    explicit SimulationShared(const std::string& filename);
+    explicit SimulationShared(const std::string &filename);
 
     const std::vector<IntersectionShared> &intersections() const;
     const std::vector<StreetShared> &streets() const;
     const std::vector<CarShared> &cars() const;
 
-    friend std::ostream& operator<<(std::ostream& os, const SimulationShared& obj);
+    friend std::ostream &operator<<(std::ostream &os, const SimulationShared &obj);
 
 private:
     int duration_;

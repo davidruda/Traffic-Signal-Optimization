@@ -1,6 +1,6 @@
-#include <string>
 #include <fstream>
 #include <iostream>
+#include <string>
 
 #include "simulation_shared.hpp"
 
@@ -12,8 +12,7 @@ SimulationShared::SimulationShared(const std::string &filename) {
     int number_of_cars;
     int bonus;
 
-    data_file >> duration >> number_of_intersections >> number_of_streets
-            >> number_of_cars >> bonus;
+    data_file >> duration >> number_of_intersections >> number_of_streets >> number_of_cars >> bonus;
 
     duration_ = duration;
     bonus_ = bonus;
@@ -38,7 +37,7 @@ SimulationShared::SimulationShared(const std::string &filename) {
     for (int i = 0; i < number_of_streets; ++i) {
         data_file >> start >> end >> name >> length;
         std::cout << start << " " << end << " " << name << " " << length << "\n";
-        auto&& street = streets_.emplace_back(i, intersections_[start], intersections_[end], name, length);
+        auto &&street = streets_.emplace_back(i, intersections_[start], intersections_[end], name, length);
         street_mapping_.emplace(street.name(), std::ref(street));
         street.start().add_outgoing(street);
         street.end().add_incoming(street);
@@ -55,7 +54,7 @@ SimulationShared::SimulationShared(const std::string &filename) {
         for (int j = 0; j < path_length; ++j) {
             data_file >> street_name;
             std::cout << street_name << " ";
-            auto&& street = street_mapping_.at(street_name).get();
+            auto &&street = street_mapping_.at(street_name).get();
             path.emplace_back(std::ref(street));
 
             // The last street in path is not marked as used because it doesn't
@@ -67,7 +66,6 @@ SimulationShared::SimulationShared(const std::string &filename) {
         cars_.emplace_back(i, path_length, path);
         std::cout << "\n";
     }
-
 }
 
 const std::vector<IntersectionShared> &SimulationShared::intersections() const {
@@ -87,11 +85,11 @@ std::ostream &operator<<(std::ostream &os, const SimulationShared &obj) {
        << "Number of intersections: " << obj.intersections_.size() << "\n"
        << "Bonus: " << obj.bonus_ << "\n"
        << "Number of streets: " << obj.streets_.size() << "\n";
-    for (auto&& s:obj.streets_) {
+    for (auto &&s: obj.streets_) {
         os << s << "\n";
     }
     os << "Number of cars: " << obj.cars_.size() << "\n";
-    for (auto&& c:obj.cars_) {
+    for (auto &&c: obj.cars_) {
         os << c << "\n";
     }
     return os;

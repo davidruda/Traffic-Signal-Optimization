@@ -10,7 +10,6 @@ Event::~Event() = default;
 
 Event::Event(int time) : time_(time) {
     if (counter_ == std::numeric_limits<size_t>::max()) {
-
         // Doesn't work with Clang in CLion (can't enable exceptions)
         //throw std::overflow_error{"Event counter overflow"};
     }

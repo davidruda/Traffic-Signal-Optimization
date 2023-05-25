@@ -18,12 +18,13 @@ void IntersectionShared::add_outgoing(const StreetShared &street) {
 }
 
 std::ostream &operator<<(std::ostream &os, const IntersectionShared &obj) {
-    os << obj.id_ << "\n" << "Incoming streets:\n";
-    for (auto&& s:obj.incoming_) {
+    os << obj.id_ << "\n"
+       << "Incoming streets:\n";
+    for (auto &&s: obj.incoming_) {
         os << s.get() << "\n";
     }
     os << "Outgoing streets:\n";
-    for (auto&& s:obj.outgoing_) {
+    for (auto &&s: obj.outgoing_) {
         os << s.get() << "\n";
     }
     return os;
