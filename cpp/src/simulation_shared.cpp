@@ -94,3 +94,11 @@ std::ostream &operator<<(std::ostream &os, const SimulationShared &obj) {
     }
     return os;
 }
+
+int SimulationShared::duration() const {
+    return duration_;
+}
+
+int SimulationShared::bonus() const {
+    return bonus_;
+}

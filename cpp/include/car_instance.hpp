@@ -10,11 +10,24 @@ class CarInstance {
 public:
     explicit CarInstance(const CarShared &data);
 
-    size_t current_street_index() const;
+    const StreetShared &current_street() const;
+    void move_to_next_street();
+    bool at_final_destination() const;
+
+    const CarShared &data() const;
+    void set_finished(bool finished);
+    void set_finish_time(int finishTime);
+    int finish_time() const;
+    bool finished() const;
+
 
 private:
     const CarShared &data_;
-    size_t current_street_index_;
+
+    size_t street_in_path_index_;
+    //TODO: finished is redundant, finish_time is enough
+    int finish_time_;
+    bool finished_;
 };
 
 #endif

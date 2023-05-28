@@ -23,7 +23,8 @@ public:
 private:
     const int id_;
     std::vector<std::reference_wrapper<const StreetShared>> incoming_;
-    std::vector<std::reference_wrapper<const StreetShared>> outgoing_;// redundant
+    //TODO: outgoing is never needed and therefore redundant
+    std::vector<std::reference_wrapper<const StreetShared>> outgoing_;
 };
 
 #endif

@@ -93,7 +93,7 @@ class CarInstance {
     const CarShared{*&} const data;
     // dynamic data
     ?int current_street_index;
-    bool finished;
+    bool finished_;
     int finish_time;
 
     void print();
@@ -189,11 +189,11 @@ class Event {
     int time;
 };
 
-class CarEvent : public Event {
+class CAR_EVENT_TYPE : public Event {
     CarInstance *car;
 };
 
-class StreetEvent : public Event {
+class STREET_EVENT_TYPE : public Event {
     StreetInstance *street;
 };
 ```

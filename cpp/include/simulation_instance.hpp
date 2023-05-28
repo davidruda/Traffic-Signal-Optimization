@@ -11,6 +11,7 @@ public:
     explicit SimulationInstance(const SimulationShared &data);
 
     void run();
+    int score(bool verbose) const;
 
 private:
     const SimulationShared &data_;

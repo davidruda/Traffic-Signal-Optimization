@@ -20,6 +20,8 @@ public:
     const std::vector<IntersectionShared> &intersections() const;
     const std::vector<StreetShared> &streets() const;
     const std::vector<CarShared> &cars() const;
+    int duration() const;
+    int bonus() const;
 
     friend std::ostream &operator<<(std::ostream &os, const SimulationShared &obj);
 
