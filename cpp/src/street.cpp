@@ -4,58 +4,58 @@
 
 #include "street.hpp"
 
-StreetShared::StreetShared(
+Street::Street(
         int id,
-        IntersectionShared &start,
-        IntersectionShared &end,
+        Intersection &start,
+        Intersection &end,
         std::string name,
         int length) : id_(id), start_(start), end_(end), name_(std::move(name)), length_(length), used_(false) {}
 
-int StreetShared::id() const {
+int Street::id() const {
     return id_;
 }
 
-IntersectionShared &StreetShared::start() const {
+Intersection &Street::start() const {
     return start_;
 }
 
-IntersectionShared &StreetShared::end() const {
+Intersection &Street::end() const {
     return end_;
 }
 
-const std::string &StreetShared::name() const {
+const std::string &Street::name() const {
     return name_;
 }
 
-int StreetShared::length() const {
+int Street::length() const {
     return length_;
 }
 
-bool StreetShared::is_used() const {
+bool Street::is_used() const {
     return used_;
 }
 
-void StreetShared::set_used(bool used) {
+void Street::set_used(bool used) {
     used_ = used;
 }
 
-std::ostream &operator<<(std::ostream &os, const StreetShared &obj) {
+std::ostream &operator<<(std::ostream &os, const Street &obj) {
     os << "[" << obj.id_ << " " << obj.name_ << " " << obj.start_.id()
        << " -> " << obj.end_.id() << " length: " << obj.length_ << "]";
     return os;
 }
 
-StreetInstance::StreetInstance(const StreetShared &data) : data_(data), last_used_time_(-1) {}
+Street::Instance::Instance(const Street &data) : data_(data), last_used_time_(-1) {}
 
-void StreetInstance::add_car(CarInstance &car) {
+void Street::Instance::add_car(Car::Instance &car) {
     car_queue_.emplace(std::ref(car));
 }
 
-size_t StreetInstance::car_queue_size() const {
+size_t Street::Instance::car_queue_size() const {
     return car_queue_.size();
 }
 
-CarInstance &StreetInstance::get_car(int time) {
+Car::Instance &Street::Instance::get_car(int time) {
     auto &&car = car_queue_.front().get();
     car_queue_.pop();
     last_used_time_ = time;

@@ -6,37 +6,40 @@
 
 #include "street.hpp"
 
-class StreetShared;
+class Street;
 
-class IntersectionShared {
+class Intersection {
 public:
-    explicit IntersectionShared(int id);
+    explicit Intersection(int id);
 
     int id() const;
 
-    void add_incoming(const StreetShared &street);
+    void add_incoming(const Street &street);
 
-    void add_outgoing(const StreetShared &street);
+    void add_outgoing(const Street &street);
 
-    const std::vector<std::reference_wrapper<const StreetShared>> &incoming() const;
+    const std::vector<std::reference_wrapper<const Street>> &incoming() const;
 
-    friend std::ostream &operator<<(std::ostream &os, const IntersectionShared &obj);
+    friend std::ostream &operator<<(std::ostream &os, const Intersection &obj);
+
+    class Instance;
 
 private:
     const int id_;
-    std::vector<std::reference_wrapper<const StreetShared>> incoming_;
+    std::vector<std::reference_wrapper<const Street>> incoming_;
     //TODO: outgoing is never needed and therefore redundant
-    std::vector<std::reference_wrapper<const StreetShared>> outgoing_;
+    std::vector<std::reference_wrapper<const Street>> outgoing_;
 };
 
-class IntersectionInstance {
+class Intersection::Instance {
 public:
-    explicit IntersectionInstance(const IntersectionShared &data);
+    explicit Instance(const Intersection &data);
 
-    const IntersectionShared &data() const;
+    int id() const;
+    const std::vector<std::reference_wrapper<const Street>> &incoming() const;
 
 private:
-    const IntersectionShared &data_;
+    const Intersection &data_;
 };
 
 #endif

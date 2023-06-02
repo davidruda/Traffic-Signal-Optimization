@@ -58,7 +58,7 @@ SimulationShared::SimulationShared(const std::string &filename) {
     for (int i = 0; i < number_of_cars; ++i) {
         data_file >> path_length;
         std::cout << path_length << " ";
-        std::vector<std::reference_wrapper<const StreetShared>> path;
+        std::vector<std::reference_wrapper<const Street>> path;
         for (int j = 0; j < path_length; ++j) {
             data_file >> street_name;
             std::cout << street_name << " ";
@@ -76,15 +76,15 @@ SimulationShared::SimulationShared(const std::string &filename) {
     }
 }
 
-const std::vector<IntersectionShared> &SimulationShared::intersections() const {
+const std::vector<Intersection> &SimulationShared::intersections() const {
     return intersections_;
 }
 
-const std::vector<StreetShared> &SimulationShared::streets() const {
+const std::vector<Street> &SimulationShared::streets() const {
     return streets_;
 }
 
-const std::vector<CarShared> &SimulationShared::cars() const {
+const std::vector<Car> &SimulationShared::cars() const {
     return cars_;
 }
 
@@ -175,7 +175,7 @@ void SimulationInstance::run() {
 
 int SimulationInstance::score(bool verbose) const {
     if (!verbose) {
-        auto count_score = [this](int total, const CarInstance &car) {
+        auto count_score = [this](int total, const Car::Instance &car) {
             if (car.finished()) {
                 total += this->data_.bonus() + this->data_.duration() - car.finish_time();
             }
@@ -188,8 +188,8 @@ int SimulationInstance::score(bool verbose) const {
     int total_score = 0;
     int max_score = 0;
     int min_score = std::numeric_limits<int>::max();
-    const CarInstance *earliest_car = nullptr;
-    const CarInstance *latest_car = nullptr;
+    const Car::Instance *earliest_car = nullptr;
+    const Car::Instance *latest_car = nullptr;
     for (auto &&c: cars_) {
         if (c.finished()) {
             ++finished_count;
@@ -213,23 +213,23 @@ int SimulationInstance::score(bool verbose) const {
               << total_score - finished_count * data_.bonus() << " points for early arrival times.\n"
               << finished_count << " of " << cars_.size() << " cars arrived before the deadline "
               << "(" << static_cast<float>(finished_count) / static_cast<float>(cars_.size()) * 100 << "%).\n"
-              << "The earliest car (ID " << earliest_car->data().id() << ") arrived at its destination after "
+              << "The earliest car (ID " << earliest_car->id() << ") arrived at its destination after "
               << earliest_car->finish_time() << " seconds scoring " << max_score << " points,\n"
-              << "whereas the last car (ID " << latest_car->data().id() << ") arrived at its destination "
+              << "whereas the last car (ID " << latest_car->id() << ") arrived at its destination "
               << "after " << latest_car->finish_time() << " seconds scoring " << min_score << " points.\n"
               << "Cars that arrived within the deadline drove for an average of "
               << std::setprecision(3) << average_ride_time << " seconds to arrive at their destination.\n";
     return total_score;
 }
 
-const std::vector<IntersectionInstance> &SimulationInstance::intersections() const {
+const std::vector<Intersection::Instance> &SimulationInstance::intersections() const {
     return intersections_;
 }
 
-const std::vector<StreetInstance> &SimulationInstance::streets() const {
+const std::vector<Street::Instance> &SimulationInstance::streets() const {
     return streets_;
 }
 
-const std::vector<CarInstance> &SimulationInstance::cars() const {
+const std::vector<Car::Instance> &SimulationInstance::cars() const {
     return cars_;
 }

@@ -12,14 +12,13 @@
 #include "intersection.hpp"
 #include "street.hpp"
 
-
 class SimulationShared {
 public:
     explicit SimulationShared(const std::string &filename);
 
-    const std::vector<IntersectionShared> &intersections() const;
-    const std::vector<StreetShared> &streets() const;
-    const std::vector<CarShared> &cars() const;
+    const std::vector<Intersection> &intersections() const;
+    const std::vector<Street> &streets() const;
+    const std::vector<Car> &cars() const;
     int duration() const;
     int bonus() const;
 
@@ -27,10 +26,10 @@ public:
 
 private:
     int duration_;
-    std::vector<IntersectionShared> intersections_;
-    std::vector<StreetShared> streets_;
-    std::vector<CarShared> cars_;
-    std::unordered_map<std::string_view, std::reference_wrapper<StreetShared>> street_mapping_;
+    std::vector<Intersection> intersections_;
+    std::vector<Street> streets_;
+    std::vector<Car> cars_;
+    std::unordered_map<std::string_view, std::reference_wrapper<Street>> street_mapping_;
     int bonus_;
 };
 
@@ -41,16 +40,16 @@ public:
     void run();
     int score(bool verbose) const;
 
-    const std::vector<IntersectionInstance> &intersections() const;
-    const std::vector<StreetInstance> &streets() const;
-    const std::vector<CarInstance> &cars() const;
+    const std::vector<Intersection::Instance> &intersections() const;
+    const std::vector<Street::Instance> &streets() const;
+    const std::vector<Car::Instance> &cars() const;
 
 private:
     const SimulationShared &data_;
 
-    std::vector<IntersectionInstance> intersections_;
-    std::vector<StreetInstance> streets_;
-    std::vector<CarInstance> cars_;
+    std::vector<Intersection::Instance> intersections_;
+    std::vector<Street::Instance> streets_;
+    std::vector<Car::Instance> cars_;
 };
 
 #endif

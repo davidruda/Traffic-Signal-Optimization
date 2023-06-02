@@ -3,7 +3,7 @@
 
 #include "plan.hpp"
 
-PlanInstance::PlanInstance(const SimulationInstance &simulation, const std::string &filename)
+Plan::Instance::Instance(const SimulationInstance &simulation, const std::string &filename)
     : simulation_(simulation) {
     std::ifstream data_file{filename};
     int number_of_intersections;
@@ -24,7 +24,7 @@ PlanInstance::PlanInstance(const SimulationInstance &simulation, const std::stri
     }
 }
 
-//PlanInstance::PlanInstance(const PlanShared &data) : data_(data) {}
+//PlanInstance::PlanInstance(const Plan &data) : data_(data) {}
 
 //void PlanInstance::create_default(const SimulationInstance &simulation, bool used) {
 //    std::unordered_map<int, std::vector<std::ranges::iota_view<size_t>>> plan;

@@ -8,19 +8,21 @@
 
 #include "simulation.hpp"
 
-class PlanShared {
+class Plan {
+public:
+    class Instance;
 };
 
-class PlanInstance {
+class Plan::Instance {
 public:
-    explicit PlanInstance(const SimulationInstance &simulation, const std::string &filename);
-    //explicit PlanInstance(const PlanShared &data);
+    explicit Instance(const SimulationInstance &simulation, const std::string &filename);
+    //explicit PlanInstance(const Plan &data);
 
     void create_default(const SimulationInstance &simulation, bool used);
 
 private:
     const SimulationInstance &simulation_;
-    //const PlanShared &data_;
+    //const Plan &data_;
 
     std::unordered_map<int, std::vector<std::ranges::iota_view<size_t>>> plan_;
 };

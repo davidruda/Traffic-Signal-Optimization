@@ -29,24 +29,24 @@ protected:
 
 class CarEvent : public Event {
 public:
-    CarEvent(int time, CarInstance &car);
+    CarEvent(int time, Car::Instance &car);
 
     EventType event_type() const override;
-    CarInstance &car() const;
+    Car::Instance &car() const;
 
 private:
-    CarInstance &car_;
+    Car::Instance &car_;
 };
 
 class StreetEvent : public Event {
 public:
-    StreetEvent(int time, StreetInstance &street);
+    StreetEvent(int time, Street::Instance &street);
 
     EventType event_type() const override;
-    StreetInstance &street() const;
+    Street::Instance &street() const;
 
 private:
-    StreetInstance &street_;
+    Street::Instance &street_;
 };
 
 #endif

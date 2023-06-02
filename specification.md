@@ -31,15 +31,15 @@
 
 ```cpp
 // static data_ - read once at the beginning, never changed
-class IntersectionShared {
+class Intersection {
     const int id;
-    const std::vector<const StreetShared{*&} const> incoming;
-    const std::vector<const StreetShared{*&} const> outgoing; // redundant
+    const std::vector<const Street{*&} const> incoming;
+    const std::vector<const Street{*&} const> outgoing; // redundant
 };
 
-class IntersectionInstance {
+class Instance {
     // static data_
-    const IntersectionShared{*&} const data_;
+    const Intersection{*&} const data_;
 
     // dynamic data_
     auto schedule;
@@ -47,30 +47,30 @@ class IntersectionInstance {
     void print();
 
     // Returns a street that has a green light at `time`.
-    StreetInstance green(int time);
+    Instance green(int time);
 
     // Is the `street` green at `time`?
-    bool is_green(StreetInstance street, int time);
+    bool is_green(Instance street, int time);
 };
 ```
 
 ```cpp
 // static data_ - read once at the beginning, never changed
-class StreetShared {
+class Street {
     const int id;
-    const IntersectionShared{*&} start;
-    const IntersectionShared{*&} end;
+    const Intersection{*&} start;
+    const Intersection{*&} end;
     const std::string name;
     const int length;
 }
 
-class StreetInstance {
+class Instance {
     // static data_
-    const StreetShared{*&} const data_;
+    const Street{*&} const data_;
 
     // dynamic data_
     bool used;
-    std::queue<CarInstance> queueing_cars;
+    std::queue<Instance> queueing_cars;
     int _last_used_time;
     // interval_type green_interval; // interval of time when the street is green (modulo the cycle of the intersection)
 
@@ -80,21 +80,21 @@ class StreetInstance {
     int next_green(int time);
 
     // Returns a car that goes through the end intersection at time.
-    CarInstance go(int time);
+    Instance go(int time);
 };
 ```
 
 ```cpp
 // static data_ - read once at the beginning, never changed
-class CarShared {
+class Car {
     const int id;
     const int path_length; // number of streets in the car's path (redundant)
-    const std::vector<const StreetShared{*&} const> path;
+    const std::vector<const Street{*&} const> path;
 };
 
-class CarInstance {
+class Instance {
     // static data_
-    const CarShared{*&} const data_;
+    const Car{*&} const data_;
     // dynamic data_
     ?int current_street_index;
     bool finished_;
@@ -104,7 +104,7 @@ class CarInstance {
 
     bool is_final_destination();
 
-    StreetInstance current_street();
+    Instance current_street();
 
     void move_to_next_street();
     void move_to_next_street(?int time);
@@ -113,14 +113,14 @@ class CarInstance {
 
 ```cpp
 // static data_
-class PlanShared {
+class Plan {
 
 };
 
 // API for getting green times for each intersection and each incoming street and the ordering
 class PlanInstance {
     // static data_ - may be redundant
-    const PlanShared{*&} const data_;
+    const Plan{*&} const data_;
 
     // precompute the green intervals once at the initialization of the schedule
     PlanInstance(...);
@@ -137,10 +137,10 @@ class PlanInstance {
 // static data_ - read once at the beginning, never changed
 class SimulationShared {
     const int duration;
-    const std::vector<const IntersectionShared{*&} const> intersections_data;
-    const std::vector<const StreetShared{*&} const> streets_data;
-    const std::vector<const CarShared{*&} const> cars_data;
-    const std::map<std::string, const StreetShared{*&} const> street_mappping;
+    const std::vector<const Intersection{*&} const> intersections_data;
+    const std::vector<const Street{*&} const> streets_data;
+    const std::vector<const Car{*&} const> cars_data;
+    const std::map<std::string, const Street{*&} const> street_mappping;
     const int bonus;
 
     // Initialize simulation data_ from file.
@@ -152,9 +152,9 @@ class SimulationInstance {
     const SimulationShared{*&} const data_;
 
     // dynamic data_
-    std::vector<IntersectionInstance> intersections;
-    std::vector<StreetInstance> streets;
-    std::vector<CarInstance> cars;
+    std::vector<Instance> intersections;
+    std::vector<Instance> streets;
+    std::vector<Instance> cars;
 
     PlanInstance schedule;
 
@@ -183,7 +183,7 @@ class SimulationInstance {
     // Create the output file.
     void create_output(std::string filename);
 
-    StreetInstance get_street_by_name(std::string name);
+    Instance get_street_by_name(std::string name);
 };
 ```
 
@@ -194,11 +194,11 @@ class Event {
 };
 
 class CAR_EVENT_TYPE : public Event {
-    CarInstance *car;
+    Instance *car;
 };
 
 class STREET_EVENT_TYPE : public Event {
-    StreetInstance *street;
+    Instance *street;
 };
 ```
 

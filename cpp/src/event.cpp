@@ -27,22 +27,22 @@ bool Event::operator<(const Event &other) const {
     return time_ < other.time_;
 }
 
-CarEvent::CarEvent(int time, CarInstance &car) : Event(time), car_(car) {}
+CarEvent::CarEvent(int time, Car::Instance &car) : Event(time), car_(car) {}
 
 Event::EventType CarEvent::event_type() const {
     return Event::CAR_EVENT_TYPE;
 }
 
-CarInstance &CarEvent::car() const {
+Car::Instance &CarEvent::car() const {
     return car_;
 }
 
-StreetEvent::StreetEvent(int time, StreetInstance &street) : Event(time), street_(street) {}
+StreetEvent::StreetEvent(int time, Street::Instance &street) : Event(time), street_(street) {}
 
 Event::EventType StreetEvent::event_type() const {
     return Event::CAR_EVENT_TYPE;
 }
 
-StreetInstance &StreetEvent::street() const {
+Street::Instance &StreetEvent::street() const {
     return street_;
 }
