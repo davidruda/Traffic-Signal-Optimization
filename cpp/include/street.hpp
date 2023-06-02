@@ -1,10 +1,13 @@
-#ifndef STREET_SHARED_HPP
-#define STREET_SHARED_HPP
+#ifndef STREET_HPP
+#define STREET_HPP
 
+#include <functional>
+#include <queue>
 #include <string>
 #include <utility>
 
-#include "intersection_shared.hpp"
+#include "car.hpp"
+#include "intersection.hpp"
 
 class IntersectionShared;
 
@@ -34,6 +37,22 @@ private:
     const std::string name_;
     const int length_;
     bool used_;
+};
+
+class CarInstance;
+
+class StreetInstance {
+public:
+    explicit StreetInstance(const StreetShared &data);
+
+    void add_car(CarInstance &car);
+    size_t car_queue_size() const;
+    CarInstance &get_car(int time);
+
+private:
+    const StreetShared &data_;
+    std::queue<std::reference_wrapper<CarInstance>> car_queue_;
+    int last_used_time_;
 };
 
 #endif

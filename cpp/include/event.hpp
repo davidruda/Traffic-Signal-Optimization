@@ -1,8 +1,8 @@
 #ifndef EVENT_HPP
 #define EVENT_HPP
 
-#include "car_instance.hpp"
-#include "street_instance.hpp"
+#include "car.hpp"
+#include "street.hpp"
 
 class Event {
 public:

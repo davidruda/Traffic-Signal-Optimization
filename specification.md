@@ -6,9 +6,11 @@
 - optimization of the simulation using genetic algorithms and local search algorithms, preferably by using Python libraries such as [DEAP](https://deap.readthedocs.io/), [PyGMO](https://esa.github.io/pygmo2/), etc., or by implementing the algorithms manually
 ---
 - optimizing the simulation using surrogate models - this part is uncertain because
-    - it depends on the C++ implementation of the simulation and may not make much sense if the evaluation of the simulation is not the bottleneck of the optimization process
-    - I may not collect enough data to train the surrogate model
-    - the feature vector may be too large, especially for the largest instances of the simulation (tens of thousands of features)
+  - it depends on the C++ implementation of the simulation and may not make much sense if the evaluation of the
+    simulation is not the bottleneck of the optimization process
+  - I may not collect enough data_ to train the surrogate model
+  - the feature vector may be too large, especially for the largest instances of the simulation (tens of thousands of
+    features)
 
 ## Some implementation notes
 - to make the evaluation as fast as possible, the simulation algorithm should be implemented by a priority queue of events sorted by time, so that only the necessary events are processed at the required times
@@ -19,14 +21,16 @@
 - no explicit parallelization of the simulation, only within the libraries
 
 ## Python API for the simulation
+
 - mostly just straightforward wrappers for the C++ classes
-- the only exception is the `ScheduleInstance` class, which needs to be able to get the underlying datastructure of green times and street orderings from Python easily and efficiently
+- the only exception is the `PlanInstance` class, which needs to be able to get the underlying datastructure of green
+  times and street orderings from Python easily and efficiently
 
 ## Rough outline of the classes in the simulation
 - written in Cpp-like pseudocode
 
 ```cpp
-// static data - read once at the beginning, never changed
+// static data_ - read once at the beginning, never changed
 class IntersectionShared {
     const int id;
     const std::vector<const StreetShared{*&} const> incoming;
@@ -34,10 +38,10 @@ class IntersectionShared {
 };
 
 class IntersectionInstance {
-    // static data
-    const IntersectionShared{*&} const data;
+    // static data_
+    const IntersectionShared{*&} const data_;
 
-    // dynamic data
+    // dynamic data_
     auto schedule;
 
     void print();
@@ -51,7 +55,7 @@ class IntersectionInstance {
 ```
 
 ```cpp
-// static data - read once at the beginning, never changed
+// static data_ - read once at the beginning, never changed
 class StreetShared {
     const int id;
     const IntersectionShared{*&} start;
@@ -61,10 +65,10 @@ class StreetShared {
 }
 
 class StreetInstance {
-    // static data
-    const StreetShared{*&} const data;
+    // static data_
+    const StreetShared{*&} const data_;
 
-    // dynamic data
+    // dynamic data_
     bool used;
     std::queue<CarInstance> queueing_cars;
     int _last_used_time;
@@ -81,7 +85,7 @@ class StreetInstance {
 ```
 
 ```cpp
-// static data - read once at the beginning, never changed
+// static data_ - read once at the beginning, never changed
 class CarShared {
     const int id;
     const int path_length; // number of streets in the car's path (redundant)
@@ -89,9 +93,9 @@ class CarShared {
 };
 
 class CarInstance {
-    // static data
-    const CarShared{*&} const data;
-    // dynamic data
+    // static data_
+    const CarShared{*&} const data_;
+    // dynamic data_
     ?int current_street_index;
     bool finished_;
     int finish_time;
@@ -108,29 +112,29 @@ class CarInstance {
 ```
 
 ```cpp
-// static data
-class ScheduleShared {
+// static data_
+class PlanShared {
 
 };
 
 // API for getting green times for each intersection and each incoming street and the ordering
-class ScheduleInstance {
-    // static data - may be redundant
-    const ScheduleShared{*&} const data;
+class PlanInstance {
+    // static data_ - may be redundant
+    const PlanShared{*&} const data_;
 
     // precompute the green intervals once at the initialization of the schedule
-    ScheduleInstance(...);
+    PlanInstance(...);
 
     int get_next_green_time(int time);
 
-    // underlying structure with all raw data
+    // underlying structure with all raw data_
     // green times and permutations for each intersection and each incoming street
-    std::vector<int> data;
+    std::vector<int> data_;
 };
 ```
 
 ```cpp
-// static data - read once at the beginning, never changed
+// static data_ - read once at the beginning, never changed
 class SimulationShared {
     const int duration;
     const std::vector<const IntersectionShared{*&} const> intersections_data;
@@ -139,20 +143,20 @@ class SimulationShared {
     const std::map<std::string, const StreetShared{*&} const> street_mappping;
     const int bonus;
 
-    // Initialize simulation data from file.
+    // Initialize simulation data_ from file.
     SimulationShared(std::string filename);
 };
 
 class SimulationInstance {
-    // static data
-    const SimulationShared{*&} const data;
+    // static data_
+    const SimulationShared{*&} const data_;
 
-    // dynamic data
+    // dynamic data_
     std::vector<IntersectionInstance> intersections;
     std::vector<StreetInstance> streets;
     std::vector<CarInstance> cars;
 
-    ScheduleInstance schedule;
+    PlanInstance schedule;
 
     // functions
     void print();

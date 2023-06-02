@@ -1,7 +1,7 @@
 
 #include <iostream>
 
-#include "intersection_shared.hpp"
+#include "intersection.hpp"
 
 IntersectionShared::IntersectionShared(int id) : id_(id) {}
 
@@ -17,6 +17,10 @@ void IntersectionShared::add_outgoing(const StreetShared &street) {
     outgoing_.emplace_back(std::cref(street));
 }
 
+const std::vector<std::reference_wrapper<const StreetShared>> &IntersectionShared::incoming() const {
+    return incoming_;
+}
+
 std::ostream &operator<<(std::ostream &os, const IntersectionShared &obj) {
     os << obj.id_ << "\n"
        << "Incoming streets:\n";
@@ -28,4 +32,10 @@ std::ostream &operator<<(std::ostream &os, const IntersectionShared &obj) {
         os << s.get() << "\n";
     }
     return os;
+}
+
+IntersectionInstance::IntersectionInstance(const IntersectionShared &data) : data_(data) {}
+
+const IntersectionShared &IntersectionInstance::data() const {
+    return data_;
 }

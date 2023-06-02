@@ -1,5 +1,5 @@
-#ifndef SIMULATION_SHARED_HPP
-#define SIMULATION_SHARED_HPP
+#ifndef SIMULATION_HPP
+#define SIMULATION_HPP
 
 #include <functional>
 #include <string>
@@ -8,9 +8,9 @@
 #include <utility>
 #include <vector>
 
-#include "car_shared.hpp"
-#include "intersection_shared.hpp"
-#include "street_shared.hpp"
+#include "car.hpp"
+#include "intersection.hpp"
+#include "street.hpp"
 
 
 class SimulationShared {
@@ -32,6 +32,25 @@ private:
     std::vector<CarShared> cars_;
     std::unordered_map<std::string_view, std::reference_wrapper<StreetShared>> street_mapping_;
     int bonus_;
+};
+
+class SimulationInstance {
+public:
+    explicit SimulationInstance(const SimulationShared &data);
+
+    void run();
+    int score(bool verbose) const;
+
+    const std::vector<IntersectionInstance> &intersections() const;
+    const std::vector<StreetInstance> &streets() const;
+    const std::vector<CarInstance> &cars() const;
+
+private:
+    const SimulationShared &data_;
+
+    std::vector<IntersectionInstance> intersections_;
+    std::vector<StreetInstance> streets_;
+    std::vector<CarInstance> cars_;
 };
 
 #endif
