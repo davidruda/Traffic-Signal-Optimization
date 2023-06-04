@@ -2,11 +2,13 @@
 #define INTERSECTION_HPP
 
 #include <functional>
+#include <optional>
 #include <vector>
 
-#include "street.hpp"
-
 class Street;
+
+//#include "street.hpp"
+#include "schedule.hpp"
 
 class Intersection {
 public:
@@ -35,11 +37,16 @@ class Intersection::Instance {
 public:
     explicit Instance(const Intersection &data);
 
+    void add_street_to_schedule(int street_id, int green_light_duration);
+    std::optional<int> next_green(int time, const Street::Instance &street);
+
     int id() const;
     const std::vector<std::reference_wrapper<const Street>> &incoming() const;
 
 private:
     const Intersection &data_;
+
+    Schedule schedule_;
 };
 
 #endif

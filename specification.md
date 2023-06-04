@@ -135,7 +135,7 @@ class PlanInstance {
 
 ```cpp
 // static data_ - read once at the beginning, never changed
-class SimulationShared {
+class Simulation {
     const int duration;
     const std::vector<const Intersection{*&} const> intersections_data;
     const std::vector<const Street{*&} const> streets_data;
@@ -144,12 +144,12 @@ class SimulationShared {
     const int bonus;
 
     // Initialize simulation data_ from file.
-    SimulationShared(std::string filename);
+    Simulation(std::string filename);
 };
 
 class SimulationInstance {
     // static data_
-    const SimulationShared{*&} const data_;
+    const Simulation{*&} const data_;
 
     // dynamic data_
     std::vector<Instance> intersections;

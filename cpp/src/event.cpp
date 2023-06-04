@@ -13,7 +13,7 @@ Event::Event(int time) : time_(time) {
         // Doesn't work with Clang in CLion (can't enable exceptions)
         //throw std::overflow_error{"Event counter overflow"};
     }
-    counter_id_ = ++counter_;
+    counter_id_ = counter_++;
 }
 
 int Event::time() const {
@@ -40,7 +40,7 @@ Car::Instance &CarEvent::car() const {
 StreetEvent::StreetEvent(int time, Street::Instance &street) : Event(time), street_(street) {}
 
 Event::EventType StreetEvent::event_type() const {
-    return Event::CAR_EVENT_TYPE;
+    return Event::STREET_EVENT_TYPE;
 }
 
 Street::Instance &StreetEvent::street() const {

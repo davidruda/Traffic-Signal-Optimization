@@ -2,6 +2,7 @@
 #include <iostream>
 
 #include "car.hpp"
+#include "street.hpp"
 
 Car::Car(
         int id,

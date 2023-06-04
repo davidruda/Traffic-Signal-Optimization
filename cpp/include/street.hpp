@@ -7,11 +7,9 @@
 #include <utility>
 
 class Intersection;
-class Car;
 
 #include "car.hpp"
-#include "intersection.hpp"
-
+//#include "intersection_.hpp"
 
 class Street {
 public:
@@ -50,6 +48,15 @@ public:
     size_t car_queue_size() const;
     void add_car(Car::Instance &car);
     Car::Instance &get_car(int time);
+
+    int id() const;
+    Intersection &start() const;
+    Intersection &end() const;
+    const std::string &name() const;
+    int length() const;
+
+    int last_used_time() const;
+    void last_used_time(int time);
 
 private:
     const Street &data_;

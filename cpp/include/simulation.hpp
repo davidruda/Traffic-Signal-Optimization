@@ -12,17 +12,22 @@
 #include "intersection.hpp"
 #include "street.hpp"
 
-class SimulationShared {
+class Simulation {
 public:
-    explicit SimulationShared(const std::string &filename);
+    explicit Simulation(const std::string &filename);
 
     const std::vector<Intersection> &intersections() const;
     const std::vector<Street> &streets() const;
     const std::vector<Car> &cars() const;
     int duration() const;
     int bonus() const;
+    const Street &street_by_name(const std::string &name) const;
 
-    friend std::ostream &operator<<(std::ostream &os, const SimulationShared &obj);
+    friend std::ostream &operator<<(std::ostream &os, const Simulation &obj);
+
+    class Instance;
+
+    Instance create_instance();
 
 private:
     int duration_;
@@ -33,19 +38,23 @@ private:
     int bonus_;
 };
 
-class SimulationInstance {
+class Simulation::Instance {
 public:
-    explicit SimulationInstance(const SimulationShared &data);
+    explicit Instance(const Simulation &data);
 
-    void run();
-    int score(bool verbose) const;
+    void create_plan(const std::string &filename);
+
+    Instance &run();
+    int score(bool verbose = false) const;
 
     const std::vector<Intersection::Instance> &intersections() const;
     const std::vector<Street::Instance> &streets() const;
     const std::vector<Car::Instance> &cars() const;
+    const Street &street_by_name(const std::string &name) const;
+
 
 private:
-    const SimulationShared &data_;
+    const Simulation &data_;
 
     std::vector<Intersection::Instance> intersections_;
     std::vector<Street::Instance> streets_;

@@ -5,7 +5,10 @@
 #include <utility>
 #include <vector>
 
-#include "street.hpp"
+class Street;
+
+//#include "street.hpp"
+
 
 class Car {
 public:

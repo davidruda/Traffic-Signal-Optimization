@@ -2,6 +2,7 @@
 #include <functional>
 #include <iostream>
 
+#include "intersection.hpp"
 #include "street.hpp"
 
 Street::Street(
@@ -60,4 +61,32 @@ Car::Instance &Street::Instance::get_car(int time) {
     car_queue_.pop();
     last_used_time_ = time;
     return car;
+}
+
+int Street::Instance::id() const {
+    return data_.id_;
+}
+
+Intersection &Street::Instance::start() const {
+    return data_.start_;
+}
+
+Intersection &Street::Instance::end() const {
+    return data_.end_;
+}
+
+const std::string &Street::Instance::name() const {
+    return data_.name_;
+}
+
+int Street::Instance::length() const {
+    return data_.length_;
+}
+
+int Street::Instance::last_used_time() const {
+    return last_used_time_;
+}
+
+void Street::Instance::last_used_time(int time) {
+    last_used_time_ = time;
 }

@@ -1,6 +1,7 @@
 #include <fstream>
 #include <functional>
 #include <iomanip>
+#include <ios>
 #include <iostream>
 #include <limits>
 #include <memory>
@@ -12,7 +13,7 @@
 #include "event.hpp"
 #include "simulation.hpp"
 
-SimulationShared::SimulationShared(const std::string &filename) {
+Simulation::Simulation(const std::string &filename) {
     std::ifstream data_file{filename};
     int duration;
     int number_of_intersections;
@@ -25,9 +26,11 @@ SimulationShared::SimulationShared(const std::string &filename) {
     duration_ = duration;
     bonus_ = bonus;
 
+#ifdef DEBUG
     std::cout << duration_ << " " << number_of_intersections << " "
               << number_of_streets << " " << number_of_cars << " "
               << bonus_ << "\n";
+#endif
 
     intersections_.reserve(number_of_intersections);
     for (int i = 0; i < number_of_intersections; ++i) {
@@ -44,7 +47,9 @@ SimulationShared::SimulationShared(const std::string &filename) {
     int length;
     for (int i = 0; i < number_of_streets; ++i) {
         data_file >> start >> end >> name >> length;
+#ifdef DEBUG
         std::cout << start << " " << end << " " << name << " " << length << "\n";
+#endif
         auto &&street = streets_.emplace_back(i, intersections_[start], intersections_[end], name, length);
         street_mapping_.emplace(street.name(), std::ref(street));
         street.start().add_outgoing(street);
@@ -57,11 +62,15 @@ SimulationShared::SimulationShared(const std::string &filename) {
 
     for (int i = 0; i < number_of_cars; ++i) {
         data_file >> path_length;
+#ifdef DEBUG
         std::cout << path_length << " ";
+#endif
         std::vector<std::reference_wrapper<const Street>> path;
         for (int j = 0; j < path_length; ++j) {
             data_file >> street_name;
+#ifdef DEBUG
             std::cout << street_name << " ";
+#endif
             auto &&street = street_mapping_.at(street_name).get();
             path.emplace_back(std::ref(street));
 
@@ -72,23 +81,25 @@ SimulationShared::SimulationShared(const std::string &filename) {
             }
         }
         cars_.emplace_back(i, path_length, path);
+#ifdef DEBUG
         std::cout << "\n";
+#endif
     }
 }
 
-const std::vector<Intersection> &SimulationShared::intersections() const {
+const std::vector<Intersection> &Simulation::intersections() const {
     return intersections_;
 }
 
-const std::vector<Street> &SimulationShared::streets() const {
+const std::vector<Street> &Simulation::streets() const {
     return streets_;
 }
 
-const std::vector<Car> &SimulationShared::cars() const {
+const std::vector<Car> &Simulation::cars() const {
     return cars_;
 }
 
-std::ostream &operator<<(std::ostream &os, const SimulationShared &obj) {
+std::ostream &operator<<(std::ostream &os, const Simulation &obj) {
     os << "Duration: " << obj.duration_ << "\n"
        << "Number of intersections: " << obj.intersections_.size() << "\n"
        << "Bonus: " << obj.bonus_ << "\n"
@@ -103,15 +114,23 @@ std::ostream &operator<<(std::ostream &os, const SimulationShared &obj) {
     return os;
 }
 
-int SimulationShared::duration() const {
+int Simulation::duration() const {
     return duration_;
 }
 
-int SimulationShared::bonus() const {
+int Simulation::bonus() const {
     return bonus_;
 }
 
-SimulationInstance::SimulationInstance(const SimulationShared &data) : data_(data) {
+const Street &Simulation::street_by_name(const std::string &name) const {
+    return street_mapping_.at(name).get();
+}
+
+Simulation::Instance Simulation::create_instance() {
+    return Simulation::Instance{*this};
+}
+
+Simulation::Instance::Instance(const Simulation &data) : data_(data) {
     intersections_.reserve(data.intersections().size());
     streets_.reserve(data.streets().size());
     cars_.reserve(data.cars().size());
@@ -127,16 +146,47 @@ SimulationInstance::SimulationInstance(const SimulationShared &data) : data_(dat
     }
 }
 
-void SimulationInstance::run() {
+void Simulation::Instance::create_plan(const std::string &filename) {
+    std::ifstream data_file{filename};
+    int number_of_intersections;
+    int intersection_id;
+    int number_of_streets;
+    std::string street_name;
+    int green_light_duration;
+
+    data_file >> number_of_intersections;
+    for (int i = 0; i < number_of_intersections; ++i) {
+        data_file >> intersection_id;
+        auto &&intersection = intersections_[intersection_id];
+        data_file >> number_of_streets;
+        for (int j = 0; j < number_of_streets; ++j) {
+            data_file >> street_name >> green_light_duration;
+            auto &&street_id = data_.street_mapping_.at(street_name).get().id();
+            intersection.add_street_to_schedule(street_id, green_light_duration);
+        }
+    }
+}
+
+Simulation::Instance &Simulation::Instance::run() {
     int time = 0;
 
-    std::priority_queue<std::unique_ptr<Event>, std::vector<std::unique_ptr<Event>>, std::greater<>> event_queue;
+    // an earlier event has higher priority
+    auto cmp = [](const std::unique_ptr<Event> &lhs, const std::unique_ptr<Event> &rhs) {
+        auto res = !(*lhs < *rhs);
+        return res;
+        //return lhs.get() >= rhs.get();
+    };
+    std::priority_queue<std::unique_ptr<Event>, std::vector<std::unique_ptr<Event>>, decltype(cmp)> event_queue;
     for (auto &&car: cars_) {
         auto &&street = streets_[car.current_street().id()];
         street.add_car(car);
         if (street.car_queue_size() == 1) {
-            //TODO: not the right time, the right time is street.next_green
-            event_queue.emplace(std::make_unique<StreetEvent>(time, street));
+
+            auto &&intersection = intersections_[street.end().id()];
+            auto &&next_green_time = intersection.next_green(time, street);
+            if (next_green_time.has_value()) {
+                event_queue.emplace(std::make_unique<StreetEvent>(next_green_time.value(), street));
+            }
         }
     }
 
@@ -150,14 +200,22 @@ void SimulationInstance::run() {
         if (event->event_type() == Event::STREET_EVENT_TYPE) {
             auto &&street = static_cast<StreetEvent *>(event.get())->street();
             auto &&car = street.get_car(time);
+            car.move_to_next_street();
 
+            event_queue.pop();
             event_queue.emplace(std::make_unique<CarEvent>(time + car.current_street().length(), car));
+
             if (street.car_queue_size() > 0) {
-                //TODO: not the right time, the right time is street.next_green
-                event_queue.emplace(std::make_unique<StreetEvent>(time, street));
+
+                auto &&intersection = intersections_[street.end().id()];
+                auto &&next_green_time = intersection.next_green(time, street);
+                if (next_green_time.has_value()) {
+                    event_queue.emplace(std::make_unique<StreetEvent>(next_green_time.value(), street));
+                }
             }
         } else if (event->event_type() == Event::CAR_EVENT_TYPE) {
             auto &&car = static_cast<CarEvent *>(event.get())->car();
+            event_queue.pop();
             if (car.at_final_destination()) {
                 car.set_finished(true);
                 car.set_finish_time(time);
@@ -165,15 +223,20 @@ void SimulationInstance::run() {
                 auto &&street = streets_[car.current_street().id()];
                 street.add_car(car);
                 if (street.car_queue_size() == 1) {
-                    //TODO: not the right time, the right time is street.next_green
-                    event_queue.emplace(std::make_unique<StreetEvent>(time, street));
+
+                    auto &&intersection = intersections_[street.end().id()];
+                    auto &&next_green_time = intersection.next_green(time, street);
+                    if (next_green_time.has_value()) {
+                        event_queue.emplace(std::make_unique<StreetEvent>(next_green_time.value(), street));
+                    }
                 }
             }
         }
     }
+    return *this;
 }
 
-int SimulationInstance::score(bool verbose) const {
+int Simulation::Instance::score(bool verbose) const {
     if (!verbose) {
         auto count_score = [this](int total, const Car::Instance &car) {
             if (car.finished()) {
@@ -207,29 +270,49 @@ int SimulationInstance::score(bool verbose) const {
         }
     }
     float average_ride_time = static_cast<float>(total_ride_time) / static_cast<float>(finished_count);
-    std::cout << "The submission scored ** " << total_score << "  points**.\n"
-              << "This is the sum of " << finished_count * data_.bonus() << " bonus points for "
-              << "cars arriving before the deadline (" << data_.bonus() << " points each) and "
-              << total_score - finished_count * data_.bonus() << " points for early arrival times.\n"
-              << finished_count << " of " << cars_.size() << " cars arrived before the deadline "
-              << "(" << static_cast<float>(finished_count) / static_cast<float>(cars_.size()) * 100 << "%).\n"
+
+    auto thousand_sep = [](int i) {
+        std::string s = std::to_string(i);
+        std::string formatted;
+
+        int count = 0;
+        for (int pos = static_cast<int>(s.length()) - 1; pos >= 0; --pos) {
+            formatted.insert(0, 1, s[pos]);
+            ++count;
+            if (count % 3 == 0 && pos > 0) {
+                formatted.insert(0, 1, ',');
+            }
+        }
+        return formatted;
+    };
+
+    std::cout << "The submission scored **" << thousand_sep(total_score) << " points**. "
+              << "This is the sum of " << thousand_sep(finished_count * data_.bonus()) << " bonus points for "
+              << "cars arriving before the deadline (" << thousand_sep(data_.bonus()) << " points each) and "
+              << thousand_sep(total_score - finished_count * data_.bonus()) << " points for early arrival times.\n\n"
+              << thousand_sep(finished_count) << " of " << thousand_sep(static_cast<int>(cars_.size())) << " cars arrived before the deadline "
+              << "(" << static_cast<float>(finished_count) / static_cast<float>(cars_.size()) * 100 << "%). "
               << "The earliest car (ID " << earliest_car->id() << ") arrived at its destination after "
-              << earliest_car->finish_time() << " seconds scoring " << max_score << " points,\n"
+              << thousand_sep(earliest_car->finish_time()) << " seconds scoring " << thousand_sep(max_score) << " points, "
               << "whereas the last car (ID " << latest_car->id() << ") arrived at its destination "
-              << "after " << latest_car->finish_time() << " seconds scoring " << min_score << " points.\n"
-              << "Cars that arrived within the deadline drove for an average of "
-              << std::setprecision(3) << average_ride_time << " seconds to arrive at their destination.\n";
+              << "after " << thousand_sep(latest_car->finish_time()) << " seconds scoring " << thousand_sep(min_score) << " points. "
+              << "Cars that arrived within the deadline drove for an average of " << std::fixed
+              << std::setprecision(2) << average_ride_time << " seconds to arrive at their destination.\n";
     return total_score;
 }
 
-const std::vector<Intersection::Instance> &SimulationInstance::intersections() const {
+const std::vector<Intersection::Instance> &Simulation::Instance::intersections() const {
     return intersections_;
 }
 
-const std::vector<Street::Instance> &SimulationInstance::streets() const {
+const std::vector<Street::Instance> &Simulation::Instance::streets() const {
     return streets_;
 }
 
-const std::vector<Car::Instance> &SimulationInstance::cars() const {
+const std::vector<Car::Instance> &Simulation::Instance::cars() const {
     return cars_;
+}
+
+const Street &Simulation::Instance::street_by_name(const std::string &name) const {
+    return data_.street_mapping_.at(name).get();
 }

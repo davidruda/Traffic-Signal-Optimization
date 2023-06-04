@@ -2,6 +2,7 @@
 #include <iostream>
 
 #include "intersection.hpp"
+#include "street.hpp"
 
 Intersection::Intersection(int id) : id_(id) {}
 
@@ -34,7 +35,16 @@ std::ostream &operator<<(std::ostream &os, const Intersection &obj) {
     return os;
 }
 
-Intersection::Instance::Instance(const Intersection &data) : data_(data) {}
+Intersection::Instance::Instance(const Intersection &data)
+    : data_(data), schedule_(data_.id_) {}
+
+void Intersection::Instance::add_street_to_schedule(int street_id, int green_light_duration) {
+    schedule_.add_street(street_id, green_light_duration);
+}
+
+std::optional<int> Intersection::Instance::next_green(int time, const Street::Instance &street) {
+    return schedule_.next_green(time, street);
+}
 
 int Intersection::Instance::id() const {
     return data_.id_;

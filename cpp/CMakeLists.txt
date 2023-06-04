@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.25)
+cmake_minimum_required(VERSION 3.22)
 project(cpp)
 
 set(CMAKE_CXX_STANDARD 20)
@@ -25,7 +25,7 @@ add_executable(
         src/simulation.cpp
         src/plan.cpp
         src/event.cpp
-)
+        src/schedule.cpp)
 
 target_include_directories(cpp PUBLIC include)
 
