@@ -9,23 +9,30 @@ if (MSVC)
 else ()
     # lots of warnings and all warnings as errors
     add_compile_options(-Wall -Wextra -Wpedantic)# -Werror)
-
-    if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-        # enable exceptions for clang
-        add_compile_options(-fexceptions)# -fcxx-exceptions)
-    endif ()
 endif ()
 
 add_executable(
-        cpp
-        src/main.cpp
+        main
+        main.cpp
         src/intersection.cpp
         src/street.cpp
         src/car.cpp
         src/simulation.cpp
-        src/plan.cpp
         src/event.cpp
-        src/schedule.cpp)
+        src/schedule.cpp
+)
 
-target_include_directories(cpp PUBLIC include)
+target_include_directories(main PUBLIC include)
 
+add_executable(
+        test_time
+        test_time.cpp
+        src/intersection.cpp
+        src/street.cpp
+        src/car.cpp
+        src/simulation.cpp
+        src/event.cpp
+        src/schedule.cpp
+)
+
+target_include_directories(test_time PUBLIC include)

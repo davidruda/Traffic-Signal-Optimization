@@ -2,7 +2,11 @@
 #include "schedule.hpp"
 
 Schedule::Schedule(int intersection_id)
-    : intersection_id_(intersection_id), duration_(0), last_used_time_(-1) {}
+    : intersection_id_(intersection_id), duration_(0) {}
+
+size_t Schedule::length() const {
+    return green_light_ranges_.size();
+}
 
 int Schedule::duration() const {
     return duration_;
@@ -32,4 +36,28 @@ std::optional<int> Schedule::next_green(int time, const Street::Instance &street
         return time;
     }
     return std::nullopt;
+}
+
+Schedule::iterator Schedule::begin() {
+    return green_light_ranges_.begin();
+}
+
+Schedule::iterator Schedule::end() {
+    return green_light_ranges_.end();
+}
+
+Schedule::const_iterator Schedule::begin() const {
+    return green_light_ranges_.begin();
+}
+
+Schedule::const_iterator Schedule::end() const {
+    return green_light_ranges_.end();
+}
+
+Schedule::const_iterator Schedule::cbegin() const {
+    return green_light_ranges_.cbegin();
+}
+
+Schedule::const_iterator Schedule::cend() const {
+    return green_light_ranges_.cend();
 }

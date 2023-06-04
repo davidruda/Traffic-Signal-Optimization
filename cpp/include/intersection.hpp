@@ -37,6 +37,9 @@ class Intersection::Instance {
 public:
     explicit Instance(const Intersection &data);
 
+    bool has_schedule() const;
+    void reset_schedule();
+    std::optional<std::reference_wrapper<const Schedule>> schedule() const;
     void add_street_to_schedule(int street_id, int green_light_duration);
     std::optional<int> next_green(int time, const Street::Instance &street);
 

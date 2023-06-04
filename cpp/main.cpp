@@ -1,3 +1,4 @@
+#include <chrono>
 #include <iostream>
 
 #include "simulation.hpp"
@@ -12,7 +13,11 @@ int main(int argc, char *argv[]) {
 
     Simulation simulation{input_file};
     auto &&simulation_instance = simulation.create_instance();
-    simulation_instance.create_plan(plan_file);
+    simulation_instance.read_plan(plan_file);
+
+    //simulation_instance.write_plan("test_file_plan.txt");
+    //simulation_instance.read_plan("test_file_plan.txt");
+
     auto score = simulation_instance.run().score(true);
     std::cout << score << "\n";
 }

@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <fstream>
 #include <functional>
 #include <iomanip>
@@ -146,23 +147,55 @@ Simulation::Instance::Instance(const Simulation &data) : data_(data) {
     }
 }
 
-void Simulation::Instance::create_plan(const std::string &filename) {
-    std::ifstream data_file{filename};
+void Simulation::Instance::read_plan(const std::string &filename) {
+    std::ifstream file{filename};
     int number_of_intersections;
     int intersection_id;
     int number_of_streets;
     std::string street_name;
     int green_light_duration;
 
-    data_file >> number_of_intersections;
+    file >> number_of_intersections;
     for (int i = 0; i < number_of_intersections; ++i) {
-        data_file >> intersection_id;
+        file >> intersection_id;
         auto &&intersection = intersections_[intersection_id];
-        data_file >> number_of_streets;
+        //TODO: remove the reset
+        intersection.reset_schedule();
+
+        file >> number_of_streets;
         for (int j = 0; j < number_of_streets; ++j) {
-            data_file >> street_name >> green_light_duration;
+            file >> street_name >> green_light_duration;
             auto &&street_id = data_.street_mapping_.at(street_name).get().id();
             intersection.add_street_to_schedule(street_id, green_light_duration);
+        }
+    }
+}
+
+void Simulation::Instance::write_plan(const std::string &filename) {
+    std::ofstream file{filename};
+    std::vector<std::reference_wrapper<Intersection::Instance>> scheduled;
+    for (auto &&s: intersections_) {
+        if (s.has_schedule()) {
+            scheduled.emplace_back(std::ref(s));
+        }
+    }
+    file << scheduled.size() << "\n";
+
+    for (const Intersection::Instance &s: scheduled) {
+        auto &&schedule = s.schedule().value().get();
+        file << s.id() << "\n"
+             << schedule.length() << "\n";
+
+        std::vector<std::pair<int, std::ranges::iota_view<int, int>>> schedule_map{schedule.cbegin(), schedule.cend()};
+        auto cmp = [](const auto &lhs, const auto &rhs) {
+            return *lhs.second.begin() < *rhs.second.begin();
+        };
+        std::sort(schedule_map.begin(), schedule_map.end(), cmp);
+
+        for (auto &&[street_id, range]: schedule_map) {
+            auto &&street_name = streets_[street_id].name();
+            auto green_light_duration = (*range.end() - *range.begin());
+            file << street_name << " " << green_light_duration << "\n";
         }
     }
 }

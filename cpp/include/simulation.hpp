@@ -42,7 +42,8 @@ class Simulation::Instance {
 public:
     explicit Instance(const Simulation &data);
 
-    void create_plan(const std::string &filename);
+    void read_plan(const std::string &filename);
+    void write_plan(const std::string &filename);
 
     Instance &run();
     int score(bool verbose = false) const;

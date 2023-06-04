@@ -38,6 +38,21 @@ std::ostream &operator<<(std::ostream &os, const Intersection &obj) {
 Intersection::Instance::Instance(const Intersection &data)
     : data_(data), schedule_(data_.id_) {}
 
+bool Intersection::Instance::has_schedule() const {
+    return schedule_.length() > 0;
+}
+
+void Intersection::Instance::reset_schedule() {
+    schedule_ = Schedule{data_.id_};
+}
+
+std::optional<std::reference_wrapper<const Schedule>> Intersection::Instance::schedule() const {
+    if (schedule_.length() > 0) {
+        return std::cref(schedule_);
+    }
+    return {};
+}
+
 void Intersection::Instance::add_street_to_schedule(int street_id, int green_light_duration) {
     schedule_.add_street(street_id, green_light_duration);
 }
