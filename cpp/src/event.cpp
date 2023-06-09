@@ -29,7 +29,7 @@ bool Event::operator<(const Event &other) const {
 
 CarEvent::CarEvent(int time, Car::Instance &car) : Event(time), car_(car) {}
 
-Event::EventType CarEvent::event_type() const {
+Event::Type CarEvent::event_type() const {
     return Event::CAR_EVENT_TYPE;
 }
 
@@ -39,7 +39,7 @@ Car::Instance &CarEvent::car() const {
 
 StreetEvent::StreetEvent(int time, Street::Instance &street) : Event(time), street_(street) {}
 
-Event::EventType StreetEvent::event_type() const {
+Event::Type StreetEvent::event_type() const {
     return Event::STREET_EVENT_TYPE;
 }
 

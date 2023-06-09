@@ -13,11 +13,17 @@ int main(int argc, char *argv[]) {
 
     Simulation simulation{input_file};
     auto &&simulation_instance = simulation.create_instance();
-    simulation_instance.read_plan(plan_file);
-
-    //simulation_instance.write_plan("test_file_plan.txt");
-    //simulation_instance.read_plan("test_file_plan.txt");
+    //simulation_instance.read_plan(plan_file);
+    simulation_instance.create_plan_default();
 
     auto score = simulation_instance.run().score(true);
     std::cout << score << "\n";
+
+    //for (int i = 0; i < 5; ++i) {
+    //    auto&& instance = simulation.create_instance();
+    //    instance.read_plan(plan_file);
+    //    std::cout << "\n";
+    //    score = instance.run().score(true);
+    //    std::cout << score << "\n";
+    //}
 }

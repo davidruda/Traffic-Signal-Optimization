@@ -45,6 +45,9 @@ public:
     void read_plan(const std::string &filename);
     void write_plan(const std::string &filename);
 
+    // default means 1 second for every used street in the given order
+    void create_plan_default();
+
     Instance &run();
     int score(bool verbose = false) const;
 

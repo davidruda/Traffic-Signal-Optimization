@@ -159,8 +159,6 @@ void Simulation::Instance::read_plan(const std::string &filename) {
     for (int i = 0; i < number_of_intersections; ++i) {
         file >> intersection_id;
         auto &&intersection = intersections_[intersection_id];
-        //TODO: remove the reset
-        intersection.reset_schedule();
 
         file >> number_of_streets;
         for (int j = 0; j < number_of_streets; ++j) {
@@ -196,6 +194,17 @@ void Simulation::Instance::write_plan(const std::string &filename) {
             auto &&street_name = streets_[street_id].name();
             auto green_light_duration = (*range.end() - *range.begin());
             file << street_name << " " << green_light_duration << "\n";
+        }
+    }
+}
+
+void Simulation::Instance::create_plan_default() {
+    for (auto &&intersection: intersections_) {
+        for (auto &&s: intersection.incoming()) {
+            auto &&street = s.get();
+            if (street.is_used()) {
+                intersection.add_street_to_schedule(street.id(), 1);
+            }
         }
     }
 }

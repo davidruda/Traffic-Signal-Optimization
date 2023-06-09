@@ -12,12 +12,12 @@ public:
 
     bool operator<(const Event &other) const;
 
-    enum EventType {
+    enum Type {
         CAR_EVENT_TYPE,
         STREET_EVENT_TYPE
     };
 
-    virtual EventType event_type() const = 0;
+    virtual Type event_type() const = 0;
 
 protected:
     explicit Event(int time);
@@ -31,7 +31,7 @@ class CarEvent : public Event {
 public:
     CarEvent(int time, Car::Instance &car);
 
-    EventType event_type() const override;
+    Type event_type() const override;
     Car::Instance &car() const;
 
 private:
@@ -42,7 +42,7 @@ class StreetEvent : public Event {
 public:
     StreetEvent(int time, Street::Instance &street);
 
-    EventType event_type() const override;
+    Type event_type() const override;
     Street::Instance &street() const;
 
 private:

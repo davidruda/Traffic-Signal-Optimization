@@ -1,6 +1,11 @@
 .vscode/
+.vs/
 __pycache__/
 output/
 venv/
 *build*/
 .idea/
+
+*.egg-info
+
+CMakeSettings.json

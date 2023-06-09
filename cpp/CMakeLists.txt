@@ -4,11 +4,11 @@ project(cpp)
 set(CMAKE_CXX_STANDARD 20)
 
 if (MSVC)
-    # all warnings and all warnings as errors
+    # all warnings and all warnings as errors, /O2 for optimization
     add_compile_options(/Wall)# /WX)
 else ()
-    # lots of warnings and all warnings as errors
-    add_compile_options(-Wall -Wextra -Wpedantic)# -Werror)
+    # lots of warnings and all warnings as errors, -O3 for optimization
+    add_compile_options(-Wall -Wextra -Wpedantic)# -Werror) 
 endif ()
 
 add_executable(
