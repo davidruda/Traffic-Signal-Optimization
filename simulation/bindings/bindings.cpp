@@ -22,7 +22,8 @@ PYBIND11_MODULE(simulation, m) {
             });
 
     py::class_<Simulation::Instance>(m, "SimulationInstance")
-            .def("read_plan", &Simulation::Instance::read_plan)
+            .def("read_plan", &Simulation::Instance::read_plan, py::arg("filename"))
+            .def("create_plan_default", &Simulation::Instance::create_plan_default)
             .def("run", &Simulation::Instance::run)
             .def("score", &Simulation::Instance::score, py::arg("verbose") = false);
 }

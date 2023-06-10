@@ -22,3 +22,11 @@ instance.run()
 print(f'run: {time.time() - start}s')
 
 print(instance.score())
+
+# start = time.time()
+# N = 100
+# for _ in range(N):
+#    i = sim.create_instance()
+#    i.create_plan_default()
+#    i.run().score()
+# print(f'{N} instances: {time.time() - start}s')
