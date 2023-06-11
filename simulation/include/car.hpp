@@ -13,21 +13,21 @@ class Street;
 class Car {
 public:
     Car(
-            int id,
-            int path_length,
+            size_t id,
+            size_t path_length,
             std::vector<std::reference_wrapper<const Street>> path);
 
-    int id() const;
-    int path_length() const;
-    const std::vector<std::reference_wrapper<const Street>> &path() const;
+    size_t id() const;
+    //size_t path_length() const;
+    //const std::vector<std::reference_wrapper<const Street>> &path() const;
 
     friend std::ostream &operator<<(std::ostream &os, const Car &obj);
 
     class Instance;
 
 private:
-    const int id_;
-    const int path_length_;
+    const size_t id_;
+    const size_t path_length_;
     const std::vector<std::reference_wrapper<const Street>> path_;
 };
 
@@ -39,21 +39,20 @@ public:
     void move_to_next_street();
     bool at_final_destination() const;
 
-    int id() const;
-    int path_length() const;
-    const std::vector<std::reference_wrapper<const Street>> &path() const;
+    size_t id() const;
+    //size_t path_length() const;
+    //const std::vector<std::reference_wrapper<const Street>> &path() const;
 
     void set_finished(bool finished);
-    void set_finish_time(int finishTime);
-    int finish_time() const;
+    void set_finish_time(size_t finishTime);
+    size_t finish_time() const;
     bool finished() const;
 
 private:
     const Car &data_;
 
     size_t street_in_path_index_;
-    //TODO: finished is redundant, finish_time is enough
-    int finish_time_;
+    size_t finish_time_;
     bool finished_;
 };
 

@@ -4,9 +4,9 @@
 #include "intersection.hpp"
 #include "street.hpp"
 
-Intersection::Intersection(int id) : id_(id) {}
+Intersection::Intersection(size_t id) : id_(id) {}
 
-int Intersection::id() const {
+size_t Intersection::id() const {
     return id_;
 }
 
@@ -14,22 +14,14 @@ void Intersection::add_incoming(const Street &street) {
     incoming_.emplace_back(std::cref(street));
 }
 
-void Intersection::add_outgoing(const Street &street) {
-    outgoing_.emplace_back(std::cref(street));
-}
-
-const std::vector<std::reference_wrapper<const Street>> &Intersection::incoming() const {
-    return incoming_;
-}
+//const std::vector<std::reference_wrapper<const Street>> &Intersection::incoming() const {
+//    return incoming_;
+//}
 
 std::ostream &operator<<(std::ostream &os, const Intersection &obj) {
     os << obj.id_ << "\n"
        << "Incoming streets:\n";
     for (auto &&s: obj.incoming_) {
-        os << s.get() << "\n";
-    }
-    os << "Outgoing streets:\n";
-    for (auto &&s: obj.outgoing_) {
         os << s.get() << "\n";
     }
     return os;
@@ -53,15 +45,15 @@ std::optional<std::reference_wrapper<const Schedule>> Intersection::Instance::sc
     return {};
 }
 
-void Intersection::Instance::add_street_to_schedule(int street_id, int green_light_duration) {
+void Intersection::Instance::add_street_to_schedule(size_t street_id, size_t green_light_duration) {
     schedule_.add_street(street_id, green_light_duration);
 }
 
-std::optional<int> Intersection::Instance::next_green(int time, const Street::Instance &street) {
+std::optional<size_t> Intersection::Instance::next_green(size_t time, const Street::Instance &street) {
     return schedule_.next_green(time, street);
 }
 
-int Intersection::Instance::id() const {
+size_t Intersection::Instance::id() const {
     return data_.id_;
 }
 

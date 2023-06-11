@@ -19,8 +19,8 @@ public:
     const std::vector<Intersection> &intersections() const;
     const std::vector<Street> &streets() const;
     const std::vector<Car> &cars() const;
-    int duration() const;
-    int bonus() const;
+    size_t duration() const;
+    size_t bonus() const;
     const Street &street_by_name(const std::string &name) const;
 
     friend std::ostream &operator<<(std::ostream &os, const Simulation &obj);
@@ -30,12 +30,12 @@ public:
     Instance create_instance();
 
 private:
-    int duration_;
+    size_t duration_;
     std::vector<Intersection> intersections_;
     std::vector<Street> streets_;
     std::vector<Car> cars_;
     std::unordered_map<std::string_view, std::reference_wrapper<Street>> street_mapping_;
-    int bonus_;
+    size_t bonus_;
 };
 
 class Simulation::Instance {
@@ -49,7 +49,7 @@ public:
     void create_plan_default();
 
     Instance &run();
-    int score(bool verbose = false) const;
+    size_t score(bool verbose = false) const;
 
     const std::vector<Intersection::Instance> &intersections() const;
     const std::vector<Street::Instance> &streets() const;

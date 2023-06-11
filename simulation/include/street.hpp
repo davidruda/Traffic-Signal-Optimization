@@ -14,17 +14,15 @@ class Intersection;
 class Street {
 public:
     Street(
-            int id,
+            size_t id,
             Intersection &start,
             Intersection &end,
             std::string name,
-            int length);
+            size_t length);
 
-    int id() const;
-    Intersection &start() const;
-    Intersection &end() const;
+    size_t id() const;
     const std::string &name() const;
-    int length() const;
+    size_t length() const;
     bool is_used() const;
     void set_used(bool used);
 
@@ -33,11 +31,11 @@ public:
     class Instance;
 
 private:
-    const int id_;
+    const size_t id_;
     Intersection &start_;
     Intersection &end_;
     const std::string name_;
-    const int length_;
+    const size_t length_;
     bool used_;
 };
 
@@ -47,16 +45,15 @@ public:
 
     size_t car_queue_size() const;
     void add_car(Car::Instance &car);
-    Car::Instance &get_car(int time);
+    Car::Instance &get_car(size_t time);
 
-    int id() const;
-    Intersection &start() const;
+    size_t id() const;
+    //Intersection &start() const;
     Intersection &end() const;
     const std::string &name() const;
-    int length() const;
+    size_t length() const;
 
     int last_used_time() const;
-    void last_used_time(int time);
 
 private:
     const Street &data_;

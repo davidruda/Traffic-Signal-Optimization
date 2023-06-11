@@ -12,25 +12,21 @@ class Street;
 
 class Intersection {
 public:
-    explicit Intersection(int id);
+    explicit Intersection(size_t id);
 
-    int id() const;
+    size_t id() const;
 
     void add_incoming(const Street &street);
 
-    void add_outgoing(const Street &street);
-
-    const std::vector<std::reference_wrapper<const Street>> &incoming() const;
+    //const std::vector<std::reference_wrapper<const Street>> &incoming() const;
 
     friend std::ostream &operator<<(std::ostream &os, const Intersection &obj);
 
     class Instance;
 
 private:
-    const int id_;
+    const size_t id_;
     std::vector<std::reference_wrapper<const Street>> incoming_;
-    //TODO: outgoing is never needed and therefore redundant
-    std::vector<std::reference_wrapper<const Street>> outgoing_;
 };
 
 class Intersection::Instance {
@@ -40,10 +36,10 @@ public:
     bool has_schedule() const;
     void reset_schedule();
     std::optional<std::reference_wrapper<const Schedule>> schedule() const;
-    void add_street_to_schedule(int street_id, int green_light_duration);
-    std::optional<int> next_green(int time, const Street::Instance &street);
+    void add_street_to_schedule(size_t street_id, size_t green_light_duration);
+    std::optional<size_t> next_green(size_t time, const Street::Instance &street);
 
-    int id() const;
+    size_t id() const;
     const std::vector<std::reference_wrapper<const Street>> &incoming() const;
 
 private:

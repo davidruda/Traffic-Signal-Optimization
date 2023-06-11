@@ -10,14 +10,14 @@
 
 class Schedule {
 public:
-    explicit Schedule(int intersection_id);
+    explicit Schedule(size_t intersection_id);
     size_t length() const;
-    int duration() const;
-    void add_street(int street_id, int green_light_duration);
-    std::optional<int> next_green(int time, const Street::Instance &street);
+    size_t duration() const;
+    void add_street(size_t street_id, size_t green_light_duration);
+    std::optional<size_t> next_green(size_t time, const Street::Instance &street);
 
-    using iterator = typename std::unordered_map<int, std::ranges::iota_view<int, int>>::iterator;
-    using const_iterator = typename std::unordered_map<int, std::ranges::iota_view<int, int>>::const_iterator;
+    using iterator = typename std::unordered_map<size_t, std::ranges::iota_view<size_t, size_t>>::iterator;
+    using const_iterator = typename std::unordered_map<size_t, std::ranges::iota_view<size_t, size_t>>::const_iterator;
 
     iterator begin();
     iterator end();
@@ -27,9 +27,9 @@ public:
     const_iterator cend() const;
 
 private:
-    int intersection_id_;
-    int duration_;
-    std::unordered_map<int, std::ranges::iota_view<int, int>> green_light_ranges_;
+    size_t intersection_id_;
+    size_t duration_;
+    std::unordered_map<size_t, std::ranges::iota_view<size_t, size_t>> green_light_ranges_;
 };
 
 

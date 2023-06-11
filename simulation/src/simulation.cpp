@@ -16,11 +16,11 @@
 
 Simulation::Simulation(const std::string &filename) {
     std::ifstream data_file{filename};
-    int duration;
-    int number_of_intersections;
-    int number_of_streets;
-    int number_of_cars;
-    int bonus;
+    size_t duration;
+    size_t number_of_intersections;
+    size_t number_of_streets;
+    size_t number_of_cars;
+    size_t bonus;
 
     data_file >> duration >> number_of_intersections >> number_of_streets >> number_of_cars >> bonus;
 
@@ -34,40 +34,38 @@ Simulation::Simulation(const std::string &filename) {
 #endif
 
     intersections_.reserve(number_of_intersections);
-    for (int i = 0; i < number_of_intersections; ++i) {
+    for (size_t i = 0; i < number_of_intersections; ++i) {
         intersections_.emplace_back(i);
     }
 
     streets_.reserve(number_of_streets);
     cars_.reserve(number_of_cars);
 
-
-    int start;
-    int end;
+    size_t start;
+    size_t end;
     std::string name;
-    int length;
-    for (int i = 0; i < number_of_streets; ++i) {
+    size_t length;
+    for (size_t i = 0; i < number_of_streets; ++i) {
         data_file >> start >> end >> name >> length;
 #ifdef DEBUG
         std::cout << start << " " << end << " " << name << " " << length << "\n";
 #endif
         auto &&street = streets_.emplace_back(i, intersections_[start], intersections_[end], name, length);
         street_mapping_.emplace(street.name(), std::ref(street));
-        street.start().add_outgoing(street);
-        street.end().add_incoming(street);
+        intersections_[end].add_incoming(street);
     }
 
 
-    int path_length;
+    size_t path_length;
     std::string street_name;
 
-    for (int i = 0; i < number_of_cars; ++i) {
+    for (size_t i = 0; i < number_of_cars; ++i) {
         data_file >> path_length;
 #ifdef DEBUG
         std::cout << path_length << " ";
 #endif
         std::vector<std::reference_wrapper<const Street>> path;
-        for (int j = 0; j < path_length; ++j) {
+        for (size_t j = 0; j < path_length; ++j) {
             data_file >> street_name;
 #ifdef DEBUG
             std::cout << street_name << " ";
@@ -115,11 +113,11 @@ std::ostream &operator<<(std::ostream &os, const Simulation &obj) {
     return os;
 }
 
-int Simulation::duration() const {
+size_t Simulation::duration() const {
     return duration_;
 }
 
-int Simulation::bonus() const {
+size_t Simulation::bonus() const {
     return bonus_;
 }
 
@@ -149,19 +147,19 @@ Simulation::Instance::Instance(const Simulation &data) : data_(data) {
 
 void Simulation::Instance::read_plan(const std::string &filename) {
     std::ifstream file{filename};
-    int number_of_intersections;
-    int intersection_id;
-    int number_of_streets;
+    size_t number_of_intersections;
+    size_t intersection_id;
+    size_t number_of_streets;
     std::string street_name;
-    int green_light_duration;
+    size_t green_light_duration;
 
     file >> number_of_intersections;
-    for (int i = 0; i < number_of_intersections; ++i) {
+    for (size_t i = 0; i < number_of_intersections; ++i) {
         file >> intersection_id;
         auto &&intersection = intersections_[intersection_id];
 
         file >> number_of_streets;
-        for (int j = 0; j < number_of_streets; ++j) {
+        for (size_t j = 0; j < number_of_streets; ++j) {
             file >> street_name >> green_light_duration;
             auto &&street_id = data_.street_mapping_.at(street_name).get().id();
             intersection.add_street_to_schedule(street_id, green_light_duration);
@@ -184,7 +182,7 @@ void Simulation::Instance::write_plan(const std::string &filename) {
         file << s.id() << "\n"
              << schedule.length() << "\n";
 
-        std::vector<std::pair<int, std::ranges::iota_view<int, int>>> schedule_map{schedule.cbegin(), schedule.cend()};
+        std::vector<std::pair<size_t, std::ranges::iota_view<size_t, size_t>>> schedule_map{schedule.cbegin(), schedule.cend()};
         auto cmp = [](const auto &lhs, const auto &rhs) {
             return *lhs.second.begin() < *rhs.second.begin();
         };
@@ -210,13 +208,11 @@ void Simulation::Instance::create_plan_default() {
 }
 
 Simulation::Instance &Simulation::Instance::run() {
-    int time = 0;
+    size_t time = 0;
 
     // an earlier event has higher priority
     auto cmp = [](const std::unique_ptr<Event> &lhs, const std::unique_ptr<Event> &rhs) {
-        auto res = !(*lhs < *rhs);
-        return res;
-        //return lhs.get() >= rhs.get();
+        return !(*lhs < *rhs);
     };
     std::priority_queue<std::unique_ptr<Event>, std::vector<std::unique_ptr<Event>>, decltype(cmp)> event_queue;
     for (auto &&car: cars_) {
@@ -278,9 +274,9 @@ Simulation::Instance &Simulation::Instance::run() {
     return *this;
 }
 
-int Simulation::Instance::score(bool verbose) const {
+size_t Simulation::Instance::score(bool verbose) const {
     if (!verbose) {
-        auto count_score = [this](int total, const Car::Instance &car) {
+        auto count_score = [this](size_t total, const Car::Instance &car) {
             if (car.finished()) {
                 total += this->data_.bonus() + this->data_.duration() - car.finish_time();
             }
@@ -288,18 +284,18 @@ int Simulation::Instance::score(bool verbose) const {
         };
         return std::accumulate(cars_.cbegin(), cars_.cend(), 0, count_score);
     }
-    int finished_count = 0;
-    int total_ride_time = 0;
-    int total_score = 0;
-    int max_score = 0;
-    int min_score = std::numeric_limits<int>::max();
+    size_t finished_count = 0;
+    size_t total_ride_time = 0;
+    size_t total_score = 0;
+    size_t max_score = 0;
+    size_t min_score = std::numeric_limits<size_t>::max();
     const Car::Instance *earliest_car = nullptr;
     const Car::Instance *latest_car = nullptr;
     for (auto &&c: cars_) {
         if (c.finished()) {
             ++finished_count;
             total_ride_time += c.finish_time();
-            int score = data_.bonus() + data_.duration() - c.finish_time();
+            auto score = data_.bonus() + data_.duration() - c.finish_time();
             total_score += score;
             if (score > max_score) {
                 max_score = score;
@@ -313,13 +309,14 @@ int Simulation::Instance::score(bool verbose) const {
     }
     float average_ride_time = static_cast<float>(total_ride_time) / static_cast<float>(finished_count);
 
-    auto thousand_sep = [](int i) {
+    // return int as a thousand seperated string
+    auto thousand_sep = [](size_t i) {
         std::string s = std::to_string(i);
         std::string formatted;
 
         int count = 0;
         for (int pos = static_cast<int>(s.length()) - 1; pos >= 0; --pos) {
-            formatted.insert(0, 1, s[pos]);
+            formatted.insert(0, 1, s[static_cast<size_t>(pos)]);
             ++count;
             if (count % 3 == 0 && pos > 0) {
                 formatted.insert(0, 1, ',');
@@ -332,7 +329,7 @@ int Simulation::Instance::score(bool verbose) const {
               << "This is the sum of " << thousand_sep(finished_count * data_.bonus()) << " bonus points for "
               << "cars arriving before the deadline (" << thousand_sep(data_.bonus()) << " points each) and "
               << thousand_sep(total_score - finished_count * data_.bonus()) << " points for early arrival times.\n\n"
-              << thousand_sep(finished_count) << " of " << thousand_sep(static_cast<int>(cars_.size())) << " cars arrived before the deadline "
+              << thousand_sep(finished_count) << " of " << thousand_sep(cars_.size()) << " cars arrived before the deadline "
               << "(" << static_cast<float>(finished_count) / static_cast<float>(cars_.size()) * 100 << "%). "
               << "The earliest car (ID " << earliest_car->id() << ") arrived at its destination after "
               << thousand_sep(earliest_car->finish_time()) << " seconds scoring " << thousand_sep(max_score) << " points, "
