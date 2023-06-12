@@ -8,7 +8,7 @@ size_t Event::counter_ = 0;
 
 Event::~Event() = default;
 
-Event::Event(int time) : time_(time) {
+Event::Event(size_t time) : time_(time) {
     if (counter_ == std::numeric_limits<size_t>::max()) {
         // Doesn't work with Clang in CLion (can't enable exceptions)
         //throw std::overflow_error{"Event counter overflow"};
@@ -16,7 +16,7 @@ Event::Event(int time) : time_(time) {
     counter_id_ = counter_++;
 }
 
-int Event::time() const {
+size_t Event::time() const {
     return time_;
 }
 
@@ -27,7 +27,7 @@ bool Event::operator<(const Event &other) const {
     return time_ < other.time_;
 }
 
-CarEvent::CarEvent(int time, Car::Instance &car) : Event(time), car_(car) {}
+CarEvent::CarEvent(size_t time, Car::Instance &car) : Event(time), car_(car) {}
 
 Event::Type CarEvent::event_type() const {
     return Event::CAR_EVENT_TYPE;
@@ -37,7 +37,7 @@ Car::Instance &CarEvent::car() const {
     return car_;
 }
 
-StreetEvent::StreetEvent(int time, Street::Instance &street) : Event(time), street_(street) {}
+StreetEvent::StreetEvent(size_t time, Street::Instance &street) : Event(time), street_(street) {}
 
 Event::Type StreetEvent::event_type() const {
     return Event::STREET_EVENT_TYPE;

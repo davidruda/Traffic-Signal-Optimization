@@ -8,7 +8,11 @@ __version__ = "0.0.1"
 ext_modules = [
     Pybind11Extension(
         "simulation",
-        sources=sorted(glob("*/*.cpp")),  # Sort source files for reproducibility
+        # Sort source files for reproducibility
+        sources=sorted([
+            *glob("bindings/*.cpp"),
+            *glob("src/*.cpp")
+        ]),
         include_dirs=["include"],
     ),
 ]

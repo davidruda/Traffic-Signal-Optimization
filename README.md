@@ -1,26 +1,36 @@
 # Traffic signaling
 
 ## Links
-### [Problem description](https://storage.googleapis.com/coding-competitions.appspot.com/HC/2021/hashcode_2021_online_qualification_round.pdf)  
+
+### [Problem description](https://storage.googleapis.com/coding-competitions.appspot.com/HC/2021/hashcode_2021_online_qualification_round.pdf)
+
 [Problem submission and interactive page](https://codingcompetitions.withgoogle.com/hashcode/round/00000000004361e2/0000000000c617e4)  
 [Google Hash Code archive](https://codingcompetitions.withgoogle.com/hashcode/archive)  
-[Kaggle competition with additional data](https://www.kaggle.com/competitions/hashcode-2021-oqr-extension/overview)  
+[Kaggle competition with additional data](https://www.kaggle.com/competitions/hashcode-2021-oqr-extension/overview)
+
+---
+
+## How to build the simulation for use in Python
+
+- simply run `pip install ./simulation` (ideally in a virtual environment)
+- verify by running `python test.py`
 
 ---
 
 ## Solutions
--  `7,885,740` - 1 sec green for every incoming street
+
+- `7,885,740` - 1 sec green for every incoming street
 - `8,943,886` - 1 sec green for every used (with at least one car going through) incoming street
 
 ---
 
 ## References
 
-### Algorithms - general  
+### Algorithms - general
 
-[**Essentials of Metaheuristics**](https://cs.gmu.edu/~sean/book/metaheuristics/)  
+[**Essentials of Metaheuristics**](https://cs.gmu.edu/~sean/book/metaheuristics/)
 
-[**Introduction to Evolutionary Computing**](https://link.springer.com/book/10.1007/978-3-662-44874-8)  
+[**Introduction to Evolutionary Computing**](https://link.springer.com/book/10.1007/978-3-662-44874-8)
 
 [**An Introduction to Genetic Algorithms**](https://www.boente.eti.br/fuzzy/ebook-fuzzy-mitchell.pdf)  
 

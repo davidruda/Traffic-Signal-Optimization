@@ -17,12 +17,14 @@ void Schedule::add_street(size_t street_id, size_t green_light_duration) {
     duration_ += green_light_duration;
 }
 
-std::optional<size_t> Schedule::next_green(size_t time, const Street::Instance &street) {
+std::optional<size_t> Schedule::next_green(const Street::Instance &street, size_t time) {
     if (green_light_ranges_.contains(street.id())) {
-        auto &&green_light_range = green_light_ranges_.at(street.id());
+        auto &&green_light_range = green_light_ranges_[street.id()];
         //TODO: finish this and FIX THIS
-        if (time == street.last_used_time()) {
-            ++time;
+        if (street.last_used_time().has_value()) {
+            if (time == street.last_used_time().value()) {
+                ++time;
+            }
         }
         auto time_normalized = time % duration_;
         auto start = *green_light_range.begin();
@@ -35,29 +37,5 @@ std::optional<size_t> Schedule::next_green(size_t time, const Street::Instance &
         }
         return time;
     }
-    return std::nullopt;
-}
-
-Schedule::iterator Schedule::begin() {
-    return green_light_ranges_.begin();
-}
-
-Schedule::iterator Schedule::end() {
-    return green_light_ranges_.end();
-}
-
-Schedule::const_iterator Schedule::begin() const {
-    return green_light_ranges_.begin();
-}
-
-Schedule::const_iterator Schedule::end() const {
-    return green_light_ranges_.end();
-}
-
-Schedule::const_iterator Schedule::cbegin() const {
-    return green_light_ranges_.cbegin();
-}
-
-Schedule::const_iterator Schedule::cend() const {
-    return green_light_ranges_.cend();
+    return {};
 }

@@ -4,10 +4,10 @@ project(simulation)
 set(CMAKE_CXX_STANDARD 20)
 
 if (MSVC)
-    # all warnings and all warnings as errors, /O2 for optimization
-    add_compile_options(/std:c++20 /Wall)# /WX)
+    # lots of warnings and warnings as errors, /O2 for optimization
+    add_compile_options(/std:c++20 /W4)# /WX)
 else ()
-    # lots of warnings and all warnings as errors, -O3 for optimization
+    # lots of warnings and warnings as errors, -O3 for optimization
     add_compile_options(-std=c++20 -Wall -Wextra -Wpedantic)# -Werror)
 endif ()
 

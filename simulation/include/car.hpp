@@ -5,21 +5,12 @@
 #include <utility>
 #include <vector>
 
-class Street;
-
-//#include "street.hpp"
-
-
 class Car {
 public:
     Car(
             size_t id,
             size_t path_length,
-            std::vector<std::reference_wrapper<const Street>> path);
-
-    size_t id() const;
-    //size_t path_length() const;
-    //const std::vector<std::reference_wrapper<const Street>> &path() const;
+            std::vector<size_t> path);
 
     friend std::ostream &operator<<(std::ostream &os, const Car &obj);
 
@@ -28,20 +19,19 @@ public:
 private:
     const size_t id_;
     const size_t path_length_;
-    const std::vector<std::reference_wrapper<const Street>> path_;
+    // path represented with street ids
+    const std::vector<size_t> path_;
 };
 
 class Car::Instance {
 public:
     explicit Instance(const Car &data);
 
-    const Street &current_street() const;
+    size_t current_street() const;
     void move_to_next_street();
     bool at_final_destination() const;
 
     size_t id() const;
-    //size_t path_length() const;
-    //const std::vector<std::reference_wrapper<const Street>> &path() const;
 
     void set_finished(bool finished);
     void set_finish_time(size_t finishTime);
@@ -51,7 +41,7 @@ public:
 private:
     const Car &data_;
 
-    size_t street_in_path_index_;
+    size_t path_index_;
     size_t finish_time_;
     bool finished_;
 };

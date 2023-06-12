@@ -9,7 +9,9 @@
 #include <vector>
 
 #include "car.hpp"
+#include "event.hpp"
 #include "intersection.hpp"
+#include "schedule.hpp"
 #include "street.hpp"
 
 class Simulation {
@@ -21,7 +23,6 @@ public:
     const std::vector<Car> &cars() const;
     size_t duration() const;
     size_t bonus() const;
-    const Street &street_by_name(const std::string &name) const;
 
     friend std::ostream &operator<<(std::ostream &os, const Simulation &obj);
 
@@ -34,7 +35,7 @@ private:
     std::vector<Intersection> intersections_;
     std::vector<Street> streets_;
     std::vector<Car> cars_;
-    std::unordered_map<std::string_view, std::reference_wrapper<Street>> street_mapping_;
+    std::unordered_map<std::string_view, size_t> street_mapping_;
     size_t bonus_;
 };
 
@@ -54,15 +55,18 @@ public:
     const std::vector<Intersection::Instance> &intersections() const;
     const std::vector<Street::Instance> &streets() const;
     const std::vector<Car::Instance> &cars() const;
-    const Street &street_by_name(const std::string &name) const;
-
 
 private:
+    void initialize_event_queue(auto &event_queue);
+    void process_street_event(auto &event_queue, auto &event);
+    void process_car_event(auto &event_queue, auto &event);
+
     const Simulation &data_;
 
     std::vector<Intersection::Instance> intersections_;
     std::vector<Street::Instance> streets_;
     std::vector<Car::Instance> cars_;
+    std::unordered_map<size_t, Schedule> schedules_;
 };
 
 #endif

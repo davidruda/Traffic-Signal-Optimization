@@ -8,7 +8,7 @@ class Event {
 public:
     virtual ~Event();
 
-    int time() const;
+    size_t time() const;
 
     bool operator<(const Event &other) const;
 
@@ -20,16 +20,16 @@ public:
     virtual Type event_type() const = 0;
 
 protected:
-    explicit Event(int time);
+    explicit Event(size_t time);
 
     static size_t counter_;
     size_t counter_id_;
-    int time_;
+    size_t time_;
 };
 
 class CarEvent : public Event {
 public:
-    CarEvent(int time, Car::Instance &car);
+    CarEvent(size_t time, Car::Instance &car);
 
     Type event_type() const override;
     Car::Instance &car() const;
@@ -40,7 +40,7 @@ private:
 
 class StreetEvent : public Event {
 public:
-    StreetEvent(int time, Street::Instance &street);
+    StreetEvent(size_t time, Street::Instance &street);
 
     Type event_type() const override;
     Street::Instance &street() const;
