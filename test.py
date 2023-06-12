@@ -13,9 +13,13 @@ start = time.time()
 instance = sim.create_instance()
 print(f'create_instance: {time.time() - start:.4f}s')
 
+#start = time.time()
+#instance.read_plan(PLAN_FILE)
+#print(f'read_plan: {time.time() - start:.4f}s')
+
 start = time.time()
-instance.read_plan(PLAN_FILE)
-print(f'read_plan: {time.time() - start:.4f}s')
+instance.create_plan_default()
+print(f'create_plan_default: {time.time() - start:.4f}s')
 
 start = time.time()
 instance.run()

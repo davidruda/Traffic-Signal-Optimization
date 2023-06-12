@@ -14,6 +14,7 @@ ext_modules = [
             *glob("src/*.cpp")
         ]),
         include_dirs=["include"],
+        extra_compile_args=["-std=c++20"]
     ),
 ]
 
