@@ -11,9 +11,9 @@
 ---
 
 ## How to build the simulation for use in Python
-
-- simply run `pip install ./simulation` (ideally in a virtual environment)
-- verify by running `python test.py`
+- On Linux you’ll need to install the `python-dev` or `python3-dev` packages eg. `sudo apt install python3-dev`
+- Simply run `pip install ./simulation` (ideally in a virtual environment)
+- Verify by running `python test.py`
 
 ---
 
