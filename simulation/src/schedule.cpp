@@ -1,11 +1,10 @@
 
 #include "schedule.hpp"
 
-Schedule::Schedule(size_t intersection_id)
-    : intersection_id_(intersection_id), duration_(0) {}
+Schedule::Schedule() : duration_(0) {}
 
 size_t Schedule::length() const {
-    return green_light_ranges_.size();
+    return green_lights_.size();
 }
 
 size_t Schedule::duration() const {
@@ -13,13 +12,13 @@ size_t Schedule::duration() const {
 }
 
 void Schedule::add_street(size_t street_id, size_t green_light_duration) {
-    green_light_ranges_.emplace(street_id, std::views::iota(duration_, duration_ + green_light_duration));
+    green_lights_.emplace(street_id, std::views::iota(duration_, duration_ + green_light_duration));
     duration_ += green_light_duration;
 }
 
 std::optional<size_t> Schedule::next_green(const Street::Instance &street, size_t time) {
-    if (green_light_ranges_.contains(street.id())) {
-        auto &&green_light_range = green_light_ranges_[street.id()];
+    if (green_lights_.contains(street.id())) {
+        auto &&green_light_range = green_lights_[street.id()];
         //TODO: finish this and FIX THIS
         if (street.last_used_time().has_value()) {
             if (time == street.last_used_time().value()) {
@@ -38,4 +37,12 @@ std::optional<size_t> Schedule::next_green(const Street::Instance &street, size_
         return time;
     }
     return {};
+}
+const std::unordered_map<size_t, std::ranges::iota_view<size_t, size_t>> &Schedule::green_lights() const {
+    return green_lights_;
+}
+
+void Schedule::reset() {
+    duration_ = 0;
+    green_lights_.clear();
 }

@@ -140,7 +140,26 @@ Simulation::Instance::Instance(const Simulation &data) : data_(data) {
     }
 }
 
+void Simulation::Instance::reset_run() {
+    for (auto &&i: intersections_) {
+        i.reset();
+    }
+    for (auto &&s: streets_) {
+        s.reset();
+    }
+    for (auto &&c: cars_) {
+        c.reset();
+    }
+}
+
+void Simulation::Instance::reset_plan() {
+    for (auto &&s: schedules_) {
+        s.second.reset();
+    }
+}
+
 void Simulation::Instance::read_plan(const std::string &filename) {
+    reset_plan();
     std::ifstream file{filename};
     size_t number_of_intersections;
     size_t intersection_id;
@@ -151,13 +170,12 @@ void Simulation::Instance::read_plan(const std::string &filename) {
     file >> number_of_intersections;
     for (size_t i = 0; i < number_of_intersections; ++i) {
         file >> intersection_id;
-        schedules_.emplace(intersection_id, intersection_id);
 
         file >> number_of_streets;
         for (size_t j = 0; j < number_of_streets; ++j) {
             file >> street_name >> green_light_duration;
             auto &&street_id = data_.street_mapping_.at(street_name);
-            schedules_.at(intersection_id).add_street(street_id, green_light_duration);
+            schedules_[intersection_id].add_street(street_id, green_light_duration);
         }
     }
 }
@@ -166,37 +184,35 @@ void Simulation::Instance::write_plan(const std::string &filename) {
     std::ofstream file{filename};
     file << schedules_.size() << "\n";
 
-    for (auto &&[intersection_id, schedule]: schedules_) {
-        file << intersection_id << "\n"
-             << schedule.length() << "\n";
-        //TODO: finish this
+    for (auto &&intersection: intersections_) {
+        if (schedules_.contains(intersection.id())) {
+            auto &&schedule = schedules_[intersection.id()];
+            file << intersection.id() << "\n"
+                 << schedule.length() << "\n";
+
+            // Sort by the order in which the green light appears in the schedule
+            auto &&green_lights = schedule.green_lights();
+            std::vector<std::pair<size_t, std::ranges::iota_view<size_t, size_t>>> schedule_sorted{green_lights.begin(), green_lights.end()};
+            auto cmp = [](const auto &lhs, const auto &rhs) {
+                return *lhs.second.begin() < *rhs.second.begin();
+            };
+            std::sort(schedule_sorted.begin(), schedule_sorted.end(), cmp);
+
+            for (auto &&[street_id, green_light]: schedule_sorted) {
+                auto green_light_duration = *green_light.end() - *green_light.begin();
+                file << streets_[street_id].name() << " " << green_light_duration << "\n";
+            }
+        }
     }
-    //for (const Intersection::Instance &s: scheduled) {
-    //    auto &&schedule = s.schedule().value().get();
-    //    file << s.id() << "\n"
-    //         << schedule.length() << "\n";
-    //
-    //    std::vector<std::pair<size_t, std::ranges::iota_view<size_t, size_t>>> schedule_map{schedule.cbegin(), schedule.cend()};
-    //    auto cmp = [](const auto &lhs, const auto &rhs) {
-    //        return *lhs.second.begin() < *rhs.second.begin();
-    //    };
-    //    std::sort(schedule_map.begin(), schedule_map.end(), cmp);
-    //
-    //    for (auto &&[street_id, range]: schedule_map) {
-    //        auto &&street_name = streets_[street_id].name();
-    //        auto green_light_duration = (*range.end() - *range.begin());
-    //        file << street_name << " " << green_light_duration << "\n";
-    //    }
-    //}
 }
 
 void Simulation::Instance::create_plan_default() {
+    reset_plan();
     for (auto &&intersection: intersections_) {
-        schedules_.emplace(intersection.id(), intersection.id());
         for (auto &&s: intersection.incoming()) {
             auto &&street = streets_[s];
             if (street.is_used()) {
-                schedules_.at(intersection.id()).add_street(street.id(), 1);
+                schedules_[intersection.id()].add_street(street.id(), 1);
             }
         }
     }
@@ -260,6 +276,7 @@ void Simulation::Instance::process_car_event(auto &event_queue, auto &event) {
 }
 
 Simulation::Instance &Simulation::Instance::run() {
+    reset_run();
     // an earlier event has higher priority
     auto cmp = [](const std::unique_ptr<Event> &lhs, const std::unique_ptr<Event> &rhs) {
         return !(*lhs < *rhs);

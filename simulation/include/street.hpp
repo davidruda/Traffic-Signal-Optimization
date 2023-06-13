@@ -47,6 +47,7 @@ public:
 
     std::optional<size_t> last_used_time() const;
     bool is_used() const;
+    void reset();
 
 private:
     const Street &data_;

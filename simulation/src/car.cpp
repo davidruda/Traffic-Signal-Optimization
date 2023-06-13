@@ -48,3 +48,9 @@ bool Car::Instance::finished() const {
 size_t Car::Instance::id() const {
     return data_.id_;
 }
+
+void Car::Instance::reset() {
+    path_index_ = 0;
+    finish_time_ = std::numeric_limits<size_t>::max();
+    finished_ = false;
+}

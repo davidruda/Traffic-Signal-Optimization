@@ -37,6 +37,7 @@ public:
     void set_finish_time(size_t finishTime);
     size_t finish_time() const;
     bool finished() const;
+    void reset();
 
 private:
     const Car &data_;

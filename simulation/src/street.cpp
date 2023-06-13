@@ -65,3 +65,8 @@ std::optional<size_t> Street::Instance::last_used_time() const {
 bool Street::Instance::is_used() const {
     return data_.used_;
 }
+
+void Street::Instance::reset() {
+    car_queue_ = {};
+    last_used_time_ = std::nullopt;
+}

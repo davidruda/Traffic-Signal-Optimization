@@ -28,11 +28,10 @@ public:
 
     size_t id() const;
     const std::vector<size_t> &incoming() const;
+    void reset();
 
 private:
     const Intersection &data_;
-
-    //Schedule schedule_;
 };
 
 #endif

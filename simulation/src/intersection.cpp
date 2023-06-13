@@ -27,3 +27,5 @@ size_t Intersection::Instance::id() const {
 const std::vector<size_t> &Intersection::Instance::incoming() const {
     return data_.incoming_streets_;
 }
+
+void Intersection::Instance::reset() {}

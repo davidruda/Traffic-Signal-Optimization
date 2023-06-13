@@ -57,6 +57,8 @@ public:
     const std::vector<Car::Instance> &cars() const;
 
 private:
+    void reset_run();
+    void reset_plan();
     void initialize_event_queue(auto &event_queue);
     void process_street_event(auto &event_queue, auto &event);
     void process_car_event(auto &event_queue, auto &event);

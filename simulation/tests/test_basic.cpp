@@ -13,7 +13,6 @@ int main(int argc, char *argv[]) {
 
     Simulation simulation{input_file};
     auto &&simulation_instance = simulation.create_instance();
-    //simulation_instance.read_plan(plan_file);
     simulation_instance.create_plan_default();
 
     auto score = simulation_instance.run().score(true);
