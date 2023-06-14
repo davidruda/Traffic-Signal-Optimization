@@ -27,20 +27,6 @@ class TestScore(unittest.TestCase):
             {'simulation': Simulation(args.input_f), 'score': 819_083}
         ]
 
-    # def test_default_solution(self):
-    #    data = [
-    #        {'input': Simulation(args.input_a), 'output': 1_001},
-    #        {'input': Simulation(args.input_b), 'output': 4_565_642},
-    #        {'input': Simulation(args.input_c), 'output': 1_231_878},
-    #        {'input': Simulation(args.input_d), 'output': 969_685},
-    #        {'input': Simulation(args.input_e), 'output': 661_797},
-    #        {'input': Simulation(args.input_f), 'output': 455_737}
-    #    ]
-    #    for d in data:
-    #        score = d['input'].create_plan_default().run().score(verbose=True)
-    #        self.assertEqual(score, d['output'])
-    #    print(f'TOTAL SUM: {sum(d["output"] for d in data):,}')
-
     def test_score_default(self):
         for d in self.data:
             simulation_instance = d['simulation'].create_instance()

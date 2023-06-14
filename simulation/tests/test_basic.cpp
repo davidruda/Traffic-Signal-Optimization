@@ -1,15 +1,13 @@
 #include <chrono>
 #include <iostream>
+#include <string>
+#include <vector>
 
 #include "simulation.hpp"
 
 int main(int argc, char *argv[]) {
-    auto input_file = argv[1];
-    auto plan_file = argv[2];
-    //auto input_file = "E:/Rocnikovy_projekt/david_ruda/input_data/a_an_example.in.txt";
-    //auto plan_file = "E:/Rocnikovy_projekt/david_ruda/output/a_an_example.out.txt";
-    //auto input_file = "/mnt/e/Rocnikovy_projekt/david_ruda/input_data/a_an_example.in.txt";
-    //auto plan_file = "/mnt/e/Rocnikovy_projekt/david_ruda/output/a_an_example.out.txt";
+    std::vector<std::string> args{argv + 1, argv + argc};
+    auto &&input_file = args[0];
 
     Simulation simulation{input_file};
     auto &&simulation_instance = simulation.create_instance();
@@ -17,12 +15,4 @@ int main(int argc, char *argv[]) {
 
     auto score = simulation_instance.run().score(true);
     std::cout << score << "\n";
-
-    //for (int i = 0; i < 5; ++i) {
-    //    auto&& instance = simulation.create_instance();
-    //    instance.read_plan(plan_file);
-    //    std::cout << "\n";
-    //    score = instance.run().score(true);
-    //    std::cout << score << "\n";
-    //}
 }

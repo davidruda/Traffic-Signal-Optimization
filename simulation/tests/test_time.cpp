@@ -25,10 +25,10 @@ int main(int argc, char *argv[]) {
     end = std::chrono::high_resolution_clock::now();
     std::cout << "create_plan_default: " << std::chrono::duration<double>{end - start}.count() << "s\n";
 
-    //start = std::chrono::high_resolution_clock::now();
-    //simulation_instance.read_plan(plan_file);
-    //end = std::chrono::high_resolution_clock::now();
-    //std::cout << "read_plan: " << std::chrono::duration<double>{end - start}.count() << "s\n";
+    // start = std::chrono::high_resolution_clock::now();
+    // simulation_instance.read_plan(plan_file);
+    // end = std::chrono::high_resolution_clock::now();
+    // std::cout << "read_plan: " << std::chrono::duration<double>{end - start}.count() << "s\n";
 
     start = std::chrono::high_resolution_clock::now();
     simulation_instance.run();

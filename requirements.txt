@@ -1,0 +1,3 @@
+# Build and install the simulation for use in Python
+./simulation
+
