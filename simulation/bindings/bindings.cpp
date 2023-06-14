@@ -1,5 +1,5 @@
-#ifndef TEST_HPP
-#define TEST_HPP
+#ifndef BINDINGS_HPP
+#define BINDINGS_HPP
 
 #include <sstream>
 
