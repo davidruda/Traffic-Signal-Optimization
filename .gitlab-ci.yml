@@ -1,7 +1,7 @@
 default:
     image: ubuntu:latest
     before_script:
-        - apt install -y build-essential cmake python3
+        - apt-get install -y build-essential cmake python3
 
 stages:
     - build
