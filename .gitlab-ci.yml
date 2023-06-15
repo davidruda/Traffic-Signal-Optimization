@@ -1,0 +1,39 @@
+default:
+  image: ubuntu:latest
+  before_script:
+    - apt install -y cmake python3
+
+stages:
+    - build
+    - test
+
+build_cpp:
+    stage: build
+    script:
+        - mkdir build && cd build
+        - cmake ../simulation
+        - cmake --build . --config Release -j 10
+
+run_cpp:
+    stage: test
+    allow_failure: true
+    script:
+        - cd build
+        - ./test_basic ../input_data/b.txt
+        - ./test_time ../input_data/d.txt
+
+build_python:
+    stage: build
+    script:
+        python3 -m venv venv
+        source venv/bin/activate
+        pip install -r requirements.txt
+
+run_python:
+    stage: test
+    allow_failure: true
+    script:
+        - source venv/bin/activate
+        - python3 simulation/tests/test_io.py
+        - python3 simulation/tests/test_score.py
+        - python3 simulation/tests/test_time.py
