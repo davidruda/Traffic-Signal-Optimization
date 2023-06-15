@@ -1,0 +1,119 @@
+#include <fstream>
+#include <iostream>
+#include <string>
+#include <vector>
+
+#include "city_plan.hpp"
+
+CityPlan::CityPlan(const std::string &filename) {
+    std::ifstream data_file{filename};
+    size_t duration;
+    size_t number_of_intersections;
+    size_t number_of_streets;
+    size_t number_of_cars;
+    size_t bonus;
+
+    data_file >> duration >> number_of_intersections >> number_of_streets >> number_of_cars >> bonus;
+
+    duration_ = duration;
+    bonus_ = bonus;
+
+#ifdef DEBUG
+    std::cout << duration_ << " " << number_of_intersections << " "
+              << number_of_streets << " " << number_of_cars << " "
+              << bonus_ << "\n";
+#endif
+
+    intersections_.reserve(number_of_intersections);
+    for (size_t id = 0; id < number_of_intersections; ++id) {
+        intersections_.emplace_back(id);
+    }
+
+    streets_.reserve(number_of_streets);
+    cars_.reserve(number_of_cars);
+
+    size_t start;
+    size_t end;
+    std::string name;
+    size_t length;
+    for (size_t id = 0; id < number_of_streets; ++id) {
+        data_file >> start >> end >> name >> length;
+#ifdef DEBUG
+        std::cout << start << " " << end << " " << name << " " << length << "\n";
+#endif
+        auto &&street = streets_.emplace_back(id, start, end, name, length);
+        street_mapping_.emplace(street.name(), id);
+        intersections_[end].add_incoming(id);
+    }
+
+
+    size_t path_length;
+    std::string street_name;
+
+    for (size_t id = 0; id < number_of_cars; ++id) {
+        data_file >> path_length;
+#ifdef DEBUG
+        std::cout << path_length << " ";
+#endif
+        std::vector<size_t> path;
+        path.reserve(path_length);
+        for (size_t i = 0; i < path_length; ++i) {
+            data_file >> street_name;
+#ifdef DEBUG
+            std::cout << street_name << " ";
+#endif
+            auto &&street_id = street_mapping_[street_name];
+            path.emplace_back(street_id);
+
+            // The last street in path is not marked as used because it doesn't
+            // use the traffic light
+            if (i < path_length - 1) {
+                streets_[street_id].set_used(true);
+            }
+        }
+        cars_.emplace_back(id, path);
+#ifdef DEBUG
+        std::cout << "\n";
+#endif
+    }
+}
+
+
+const std::vector<CityPlanIntersection> &CityPlan::intersections() const {
+    return intersections_;
+}
+
+const std::vector<CityPlanStreet> &CityPlan::streets() const {
+    return streets_;
+}
+
+const std::vector<CityPlanCar> &CityPlan::cars() const {
+    return cars_;
+}
+
+std::ostream &operator<<(std::ostream &os, const CityPlan &obj) {
+    os << "Duration: " << obj.duration_ << "\n"
+       << "Number of intersections: " << obj.intersections_.size() << "\n"
+       << "Bonus: " << obj.bonus_ << "\n"
+       << "Number of streets: " << obj.streets_.size() << "\n";
+    for (auto &&s: obj.streets_) {
+        os << s << "\n";
+    }
+    os << "Number of cars: " << obj.cars_.size() << "\n";
+    for (auto &&c: obj.cars_) {
+        os << c << "\n";
+    }
+    return os;
+}
+
+size_t CityPlan::duration() const {
+    return duration_;
+}
+
+size_t CityPlan::bonus() const {
+    return bonus_;
+}
+
+size_t CityPlan::get_street_id_by_name(const std::string &name) const {
+    return street_mapping_.at(name);
+}

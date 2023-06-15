@@ -24,12 +24,16 @@ endif ()
 add_executable(
         test_basic
         tests/test_basic.cpp
-        src/intersection.cpp
-        src/street.cpp
-        src/car.cpp
-        src/simulation.cpp
         src/event.cpp
         src/schedule.cpp
+        src/city_plan.cpp
+        src/city_plan_intersection.cpp
+        src/city_plan_street.cpp
+        src/city_plan_car.cpp
+        src/simulation.cpp
+        src/simulation_intersection.cpp
+        src/simulation_street.cpp
+        src/simulation_car.cpp
 )
 
 target_include_directories(test_basic PUBLIC include)
@@ -37,12 +41,16 @@ target_include_directories(test_basic PUBLIC include)
 add_executable(
         test_time
         tests/test_time.cpp
-        src/intersection.cpp
-        src/street.cpp
-        src/car.cpp
-        src/simulation.cpp
         src/event.cpp
         src/schedule.cpp
+        src/city_plan.cpp
+        src/city_plan_intersection.cpp
+        src/city_plan_street.cpp
+        src/city_plan_car.cpp
+        src/simulation.cpp
+        src/simulation_intersection.cpp
+        src/simulation_street.cpp
+        src/simulation_car.cpp
 )
 
 target_include_directories(test_time PUBLIC include)

@@ -1,8 +1,7 @@
 #ifndef EVENT_HPP
 #define EVENT_HPP
 
-#include "car.hpp"
-#include "street.hpp"
+#include "simulation.hpp"
 
 class Event {
 public:
@@ -29,24 +28,24 @@ protected:
 
 class CarEvent : public Event {
 public:
-    CarEvent(size_t time, Car::Instance &car);
+    CarEvent(size_t time, SimulationCar &car);
 
     Type event_type() const override;
-    Car::Instance &car() const;
+    SimulationCar &car() const;
 
 private:
-    Car::Instance &car_;
+    SimulationCar &car_;
 };
 
 class StreetEvent : public Event {
 public:
-    StreetEvent(size_t time, Street::Instance &street);
+    StreetEvent(size_t time, SimulationStreet &street);
 
     Type event_type() const override;
-    Street::Instance &street() const;
+    SimulationStreet &street() const;
 
 private:
-    Street::Instance &street_;
+    SimulationStreet &street_;
 };
 
 #endif

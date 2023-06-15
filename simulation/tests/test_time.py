@@ -13,21 +13,21 @@ args = parser.parse_args()
 
 if __name__ == '__main__':
     start = time.time()
-    sim = Simulation(args.input)
-    print(f'Simulation constructor: {time.time() - start:.4f}s')
+    city_plan = CityPlan(args.input)
+    print(f'CityPlan constructor: {time.time() - start:.4f}s')
 
     start = time.time()
-    instance = sim.create_instance()
-    print(f'create_instance: {time.time() - start:.4f}s')
+    simulation = Simulation(city_plan)
+    print(f'Simulation constructor: {time.time() - start:.4f}s')
 
     # start = time.time()
-    # instance.read_plan(args.plan)
+    # simulation.read_plan(args.plan)
     # print(f'read_plan: {time.time() - start:.4f}s')
 
     start = time.time()
-    instance.create_plan_default()
+    simulation.create_plan_default()
     print(f'create_plan_default: {time.time() - start:.4f}s')
 
     start = time.time()
-    instance.run()
+    simulation.run()
     print(f'run: {time.time() - start:.4f}s')

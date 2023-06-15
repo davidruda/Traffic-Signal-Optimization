@@ -6,12 +6,15 @@ from simulation import *
 
 DEFAULT_INPUT_FOLDER = 'input_data'
 parser = argparse.ArgumentParser()
-parser.add_argument('--input-a', default=os.path.join(DEFAULT_INPUT_FOLDER, 'a.txt'), help='Input file a.')
-parser.add_argument('--input-b', default=os.path.join(DEFAULT_INPUT_FOLDER, 'b.txt'), help='Input file b.')
-parser.add_argument('--input-c', default=os.path.join(DEFAULT_INPUT_FOLDER, 'c.txt'), help='Input file c.')
-parser.add_argument('--input-d', default=os.path.join(DEFAULT_INPUT_FOLDER, 'd.txt'), help='Input file d.')
-parser.add_argument('--input-e', default=os.path.join(DEFAULT_INPUT_FOLDER, 'e.txt'), help='Input file e.')
-parser.add_argument('--input-f', default=os.path.join(DEFAULT_INPUT_FOLDER, 'f.txt'), help='Input file f.')
+parser.add_argument(
+    '--input-files',
+    nargs=6,
+    default=list(map(
+        lambda f: os.path.join(DEFAULT_INPUT_FOLDER, f),
+        ['a.txt', 'b.txt', 'c.txt', 'd.txt', 'e.txt', 'f.txt']
+    )),
+    help='Input data files: a, b, c, d, e, f respectively.'
+)
 args = parser.parse_args()
 
 
@@ -19,21 +22,23 @@ class TestScore(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.data = [
-            {'simulation': Simulation(args.input_a), 'score': 1_001},
-            {'simulation': Simulation(args.input_b), 'score': 4_566_576},
-            {'simulation': Simulation(args.input_c), 'score': 1_299_357},
-            {'simulation': Simulation(args.input_d), 'score': 1_573_100},
-            {'simulation': Simulation(args.input_e), 'score': 684_769},
-            {'simulation': Simulation(args.input_f), 'score': 819_083}
+            {'city_plan': CityPlan(args.input_files[0]), 'score': 1_001},
+            {'city_plan': CityPlan(args.input_files[1]), 'score': 4_566_576},
+            {'city_plan': CityPlan(args.input_files[2]), 'score': 1_299_357},
+            {'city_plan': CityPlan(args.input_files[3]), 'score': 1_573_100},
+            {'city_plan': CityPlan(args.input_files[4]), 'score': 684_769},
+            {'city_plan': CityPlan(args.input_files[5]), 'score': 819_083}
         ]
 
     def test_score_default(self):
         for d in self.data:
-            simulation_instance = d['simulation'].create_instance()
-            simulation_instance.create_plan_default()
-            score = simulation_instance.run().score(verbose=True)
+            simulation = Simulation(d['city_plan'])
+            simulation.create_plan_default()
+            score = simulation.run().score()
+            simulation.summary()
+            print('-' * 70)
             self.assertEqual(score, d['score'])
-        print()
+
         print(f'TOTAL SUM: {sum(d["score"] for d in self.data):,}')
 
 

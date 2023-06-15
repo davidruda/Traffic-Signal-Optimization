@@ -6,15 +6,13 @@
 #include <string>
 #include <unordered_map>
 
-#include "street.hpp"
-
 class Schedule {
 public:
     explicit Schedule();
     size_t length() const;
     size_t duration() const;
     void add_street(size_t street_id, size_t green_light_duration);
-    std::optional<size_t> next_green(const Street::Instance &street, size_t time);
+    std::optional<size_t> next_green(size_t street_id, size_t current_time, std::optional<size_t> last_used_time);
     const std::unordered_map<size_t, std::ranges::iota_view<size_t, size_t>> &green_lights() const;
     void reset();
 

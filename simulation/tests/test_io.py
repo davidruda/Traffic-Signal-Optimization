@@ -7,18 +7,24 @@ from simulation import *
 DEFAULT_INPUT_FOLDER = 'input_data'
 DEFAULT_OUTPUT_FOLDER = 'output'
 parser = argparse.ArgumentParser()
-parser.add_argument('--input-a', default=os.path.join(DEFAULT_INPUT_FOLDER, 'a.txt'), help='Input file a.')
-parser.add_argument('--input-b', default=os.path.join(DEFAULT_INPUT_FOLDER, 'b.txt'), help='Input file b.')
-parser.add_argument('--input-c', default=os.path.join(DEFAULT_INPUT_FOLDER, 'c.txt'), help='Input file c.')
-parser.add_argument('--input-d', default=os.path.join(DEFAULT_INPUT_FOLDER, 'd.txt'), help='Input file d.')
-parser.add_argument('--input-e', default=os.path.join(DEFAULT_INPUT_FOLDER, 'e.txt'), help='Input file e.')
-parser.add_argument('--input-f', default=os.path.join(DEFAULT_INPUT_FOLDER, 'f.txt'), help='Input file f.')
-parser.add_argument('--plan-a', default=os.path.join(DEFAULT_OUTPUT_FOLDER, 'a.txt'), help='Plan file a.')
-parser.add_argument('--plan-b', default=os.path.join(DEFAULT_OUTPUT_FOLDER, 'b.txt'), help='Plan file b.')
-parser.add_argument('--plan-c', default=os.path.join(DEFAULT_OUTPUT_FOLDER, 'c.txt'), help='Plan file c.')
-parser.add_argument('--plan-d', default=os.path.join(DEFAULT_OUTPUT_FOLDER, 'd.txt'), help='Plan file d.')
-parser.add_argument('--plan-e', default=os.path.join(DEFAULT_OUTPUT_FOLDER, 'e.txt'), help='Plan file e.')
-parser.add_argument('--plan-f', default=os.path.join(DEFAULT_OUTPUT_FOLDER, 'f.txt'), help='Plan file f.')
+parser.add_argument(
+    '--input-files',
+    nargs=6,
+    default=list(map(
+        lambda f: os.path.join(DEFAULT_INPUT_FOLDER, f),
+        ['a.txt', 'b.txt', 'c.txt', 'd.txt', 'e.txt', 'f.txt']
+    )),
+    help='Input data files: a, b, c, d, e, f respectively.'
+)
+parser.add_argument(
+    '--plan-files',
+    nargs=6,
+    default=list(map(
+        lambda f: os.path.join(DEFAULT_OUTPUT_FOLDER, f),
+        ['a.txt', 'b.txt', 'c.txt', 'd.txt', 'e.txt', 'f.txt']
+    )),
+    help='Files with plan: a, b, c, d, e, f respectively.'
+)
 args = parser.parse_args()
 
 
@@ -26,38 +32,38 @@ class TestIO(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.data = [
-            {'simulation': Simulation(args.input_a), 'plan_file': args.plan_a},
-            {'simulation': Simulation(args.input_b), 'plan_file': args.plan_b},
-            {'simulation': Simulation(args.input_c), 'plan_file': args.plan_c},
-            {'simulation': Simulation(args.input_d), 'plan_file': args.plan_d},
-            {'simulation': Simulation(args.input_e), 'plan_file': args.plan_e},
-            {'simulation': Simulation(args.input_f), 'plan_file': args.plan_f}
+            {'city_plan': CityPlan(args.input_files[0]), 'plan_file': args.plan_files[0]},
+            {'city_plan': CityPlan(args.input_files[1]), 'plan_file': args.plan_files[1]},
+            {'city_plan': CityPlan(args.input_files[2]), 'plan_file': args.plan_files[2]},
+            {'city_plan': CityPlan(args.input_files[3]), 'plan_file': args.plan_files[3]},
+            {'city_plan': CityPlan(args.input_files[4]), 'plan_file': args.plan_files[4]},
+            {'city_plan': CityPlan(args.input_files[5]), 'plan_file': args.plan_files[5]}
         ]
 
     def test_io(self):
         os.makedirs(DEFAULT_OUTPUT_FOLDER, exist_ok=True)
         for d in self.data:
-            instance_0 = d['simulation'].create_instance()
-            instance_0.create_plan_default()
-            instance_0.write_plan(d['plan_file'])
-            score_0 = instance_0.run().score()
+            simulation_0 = Simulation(d['city_plan'])
+            simulation_0.create_plan_default()
+            simulation_0.write_plan(d['plan_file'])
+            score_0 = simulation_0.run().score()
 
-            instance_1 = d['simulation'].create_instance()
-            instance_1.read_plan(d['plan_file'])
-            score_1 = instance_1.run().score()
+            simulation_1 = Simulation(d['city_plan'])
+            simulation_1.read_plan(d['plan_file'])
+            score_1 = simulation_1.run().score()
 
             self.assertEqual(score_0, score_1)
 
     def test_io_same_instance(self):
         os.makedirs(DEFAULT_OUTPUT_FOLDER, exist_ok=True)
         for d in self.data:
-            instance = d['simulation'].create_instance()
-            instance.create_plan_default()
-            instance.write_plan(d['plan_file'])
-            score_0 = instance.run().score()
+            simulation = Simulation(d['city_plan'])
+            simulation.create_plan_default()
+            simulation.write_plan(d['plan_file'])
+            score_0 = simulation.run().score()
 
-            instance.read_plan(d['plan_file'])
-            score_1 = instance.run().score()
+            simulation.read_plan(d['plan_file'])
+            score_1 = simulation.run().score()
 
             self.assertEqual(score_0, score_1)
 

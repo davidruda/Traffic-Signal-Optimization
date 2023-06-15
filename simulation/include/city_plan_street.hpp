@@ -1,0 +1,29 @@
+#ifndef CITY_PLAN_STREET_HPP
+#define CITY_PLAN_STREET_HPP
+
+#include <string>
+
+class CityPlanStreet {
+public:
+    CityPlanStreet(size_t id, size_t start_id, size_t end_id, std::string name, size_t length);
+
+    size_t id() const;
+    size_t end() const;
+    const std::string &name() const;
+    void set_used(bool used);
+    bool is_used() const;
+    size_t length() const;
+
+    friend std::ostream &operator<<(std::ostream &os, const CityPlanStreet &obj);
+
+private:
+    const size_t id_;
+    const size_t start_id_;
+    const size_t end_id_;
+    const std::string name_;
+    const size_t length_;
+    bool used_;
+};
+
+
+#endif

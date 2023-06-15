@@ -3,6 +3,7 @@
 
 #include <sstream>
 
+#include <pybind11/iostream.h>
 #include <pybind11/pybind11.h>
 
 #include "simulation.hpp"
@@ -12,21 +13,22 @@ namespace py = pybind11;
 PYBIND11_MODULE(simulation, m) {
     m.doc() = "pybind11 simulation plugin";// optional module docstring
 
-    py::class_<Simulation>(m, "Simulation")
+    py::class_<CityPlan>(m, "CityPlan")
             .def(py::init<const std::string &>(), py::arg("filename"))
-            .def("create_instance", &Simulation::create_instance)
-            .def("__str__", [](const Simulation &obj) {
+            .def("__str__", [](const CityPlan &obj) {
                 std::ostringstream oss;
                 oss << obj;// Calls operator<<
                 return oss.str();
             });
 
-    py::class_<Simulation::Instance>(m, "SimulationInstance")
-            .def("read_plan", &Simulation::Instance::read_plan, py::arg("filename"))
-            .def("write_plan", &Simulation::Instance::write_plan, py::arg("filename"))
-            .def("create_plan_default", &Simulation::Instance::create_plan_default)
-            .def("run", &Simulation::Instance::run)
-            .def("score", &Simulation::Instance::score, py::arg("verbose") = false);
+    py::class_<Simulation>(m, "Simulation")
+            .def(py::init<const CityPlan &>(), py::arg("city_plan"))
+            .def("read_plan", &Simulation::read_plan, py::arg("filename"))
+            .def("write_plan", &Simulation::write_plan, py::arg("filename"))
+            .def("create_plan_default", &Simulation::create_plan_default)
+            .def("run", &Simulation::run)
+            .def("score", &Simulation::score)
+            .def("summary", &Simulation::summary, py::call_guard<py::scoped_ostream_redirect>());
 }
 
 #endif
