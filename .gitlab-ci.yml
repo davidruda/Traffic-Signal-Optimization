@@ -1,15 +1,9 @@
 default:
     image: ubuntu:latest
 
-stages:
-    - build
-    - test
 
-build_cpp:
-    stage: build
+build_test_cpp:
     allow_failure: true
-    cache:
-        paths: [ build/ ]
     before_script:
         - apt-get update -y && apt-get upgrade -y
         - apt-get install -y cmake
@@ -18,37 +12,21 @@ build_cpp:
         - cmake ../simulation
         - cmake --build . --config Release -j 10
 
-run_cpp:
-    stage: test
-    allow_failure: true
-    needs: [ build_cpp ]
-    script:
-        - cd build
         - ./test_basic ../input_data/b.txt
         - ./test_time ../input_data/d.txt
 
-build_python:
-    stage: build
+
+build_test_python:
     allow_failure: true
-    cache:
-        paths: [ venv/ ]
     before_script:
         - apt-get update -y && apt-get upgrade -y
         - apt-get install -y python3-venv
     script:
         - python3 -m venv venv
         - source venv/bin/activate
+        - pip install --upgrade pip
         - pip install -r requirements.txt
 
-run_python:
-    stage: test
-    allow_failure: true
-    needs: [ build_python ]
-    before_script:
-        - apt-get update -y && apt-get upgrade -y
-        - apt-get install -y python3-venv
-    script:
-        - source venv/bin/activate
         - python3 simulation/tests/test_io.py
         - python3 simulation/tests/test_score.py
         - python3 simulation/tests/test_time.py
