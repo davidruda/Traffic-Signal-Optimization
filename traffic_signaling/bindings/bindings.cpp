@@ -8,14 +8,14 @@
 namespace py = pybind11;
 
 PYBIND11_MODULE(traffic_signaling, m) {
-    m.doc() = "pybind11 traffic signaling plugin";// optional module docstring
+    m.doc() = "pybind11 traffic signaling plugin"; // optional module docstring
 
     auto city_plan_submodule = m.def_submodule("city_plan", "city_plan submodule");
     py::class_<city_plan::CityPlan>(city_plan_submodule, "CityPlan")
             .def(py::init<const std::string &>(), py::arg("filename"))
             .def("__str__", [](const city_plan::CityPlan &obj) {
                 std::ostringstream oss;
-                oss << obj;// Calls operator<<
+                oss << obj; // Calls operator<<
                 return oss.str();
             });
 
