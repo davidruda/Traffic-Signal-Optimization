@@ -19,6 +19,6 @@ namespace simulation {
         const city_plan::Intersection &data_;
     };
 
-}// namespace simulation
+}
 
 #endif

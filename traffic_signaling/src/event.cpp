@@ -48,4 +48,4 @@ namespace simulation {
         return street_;
     }
 
-}// namespace simulation
+}

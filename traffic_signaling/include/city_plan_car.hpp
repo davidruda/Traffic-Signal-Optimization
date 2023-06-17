@@ -20,6 +20,6 @@ namespace city_plan {
         const std::vector<size_t> path_;
     };
 
-}// namespace city_plan
+}
 
 #endif

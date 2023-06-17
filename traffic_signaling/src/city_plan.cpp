@@ -120,4 +120,4 @@ namespace city_plan {
         return street_mapping_.at(name);
     }
 
-}// namespace city_plan
+}

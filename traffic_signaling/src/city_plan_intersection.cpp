@@ -28,4 +28,4 @@ namespace city_plan {
         return os;
     }
 
-}// namespace city_plan
+}

@@ -36,6 +36,6 @@ namespace city_plan {
         size_t bonus_;
     };
 
-}// namespace city_plan
+}
 
 #endif

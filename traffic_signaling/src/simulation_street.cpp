@@ -48,4 +48,4 @@ namespace simulation {
         last_used_time_ = std::nullopt;
     }
 
-}// namespace simulation
+}

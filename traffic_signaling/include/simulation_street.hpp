@@ -34,6 +34,6 @@ namespace simulation {
         std::optional<size_t> last_used_time_;
     };
 
-}// namespace simulation
+}
 
 #endif

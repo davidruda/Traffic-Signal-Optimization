@@ -23,6 +23,6 @@ namespace simulation {
         std::unordered_map<size_t, std::ranges::iota_view<size_t, size_t>> green_lights_;
     };
 
-}// namespace simulation
+}
 
 #endif

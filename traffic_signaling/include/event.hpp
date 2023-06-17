@@ -50,6 +50,6 @@ namespace simulation {
         Street &street_;
     };
 
-}// namespace simulation
+}
 
 #endif

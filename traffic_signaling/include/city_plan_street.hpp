@@ -27,6 +27,6 @@ namespace city_plan {
         bool used_;
     };
 
-}// namespace city_plan
+}
 
 #endif

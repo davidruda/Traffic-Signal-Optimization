@@ -21,6 +21,6 @@ namespace city_plan {
         std::vector<size_t> incoming_streets_;
     };
 
-}// namespace city_plan
+}
 
 #endif

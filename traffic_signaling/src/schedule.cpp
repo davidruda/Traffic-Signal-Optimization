@@ -47,4 +47,4 @@ namespace simulation {
         green_lights_.clear();
     }
 
-}// namespace simulation
+}

@@ -15,4 +15,4 @@ namespace simulation {
 
     void Intersection::reset() {}
 
-}// namespace simulation
+}

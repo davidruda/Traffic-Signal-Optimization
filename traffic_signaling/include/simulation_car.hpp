@@ -33,6 +33,6 @@ namespace simulation {
         bool finished_;
     };
 
-}// namespace simulation
+}
 
 #endif

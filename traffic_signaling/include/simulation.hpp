@@ -47,6 +47,6 @@ namespace simulation {
         std::unordered_map<size_t, Schedule> schedules_;
     };
 
-}// namespace simulation
+}
 
 #endif

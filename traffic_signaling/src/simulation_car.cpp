@@ -45,4 +45,4 @@ namespace simulation {
         finished_ = false;
     }
 
-}// namespace simulation
+}
