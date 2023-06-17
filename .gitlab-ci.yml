@@ -9,7 +9,7 @@ build_test_cpp:
     allow_failure: true
     script:
         - mkdir build && cd build
-        - cmake ../simulation
+        - cmake ../traffic_signaling
         - cmake --build . --config Release -j 10
 
         - ./test_basic ../input_data/b.txt
@@ -23,6 +23,6 @@ build_test_python:
         - source venv/bin/activate
         - pip install -r requirements.txt
 
-        - python3 simulation/tests/test_io.py
-        - python3 simulation/tests/test_score.py
-        - python3 simulation/tests/test_time.py
+        - python3 traffic_signaling/tests/test_io.py
+        - python3 traffic_signaling/tests/test_score.py
+        - python3 traffic_signaling/tests/test_time.py
