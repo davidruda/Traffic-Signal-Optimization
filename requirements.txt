@@ -1,2 +1,4 @@
 # Build and install the simulation for use in Python
 ./traffic_signaling
+
+numpy
