@@ -38,6 +38,7 @@ namespace simulation {
         }
         return {};
     }
+
     const std::unordered_map<size_t, std::ranges::iota_view<size_t, size_t>> &Schedule::green_lights() const {
         return green_lights_;
     }

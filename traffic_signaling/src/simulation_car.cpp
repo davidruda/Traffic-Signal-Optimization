@@ -1,11 +1,9 @@
-#include <limits>
-
 #include "simulation_car.hpp"
 
 namespace simulation {
 
     Car::Car(const city_plan::Car &data)
-        : data_(data), path_index_(0), finish_time_(std::numeric_limits<size_t>::max()), finished_(false) {}
+        : data_(data), path_index_(START), finish_time_(UNFINISHED) {}
 
     size_t Car::current_street() const {
         return data_.path()[path_index_];
@@ -15,16 +13,12 @@ namespace simulation {
         ++path_index_;
     }
 
-    bool Car::at_final_destination() const {
+    bool Car::final_destination() const {
         return data_.path().size() - 1 == path_index_;
     }
 
-    void Car::set_finished(bool finished) {
-        finished_ = finished;
-    }
-
-    void Car::set_finish_time(size_t finishTime) {
-        finish_time_ = finishTime;
+    void Car::set_finish_time(size_t finish_time) {
+        finish_time_ = finish_time;
     }
 
     size_t Car::finish_time() const {
@@ -32,7 +26,7 @@ namespace simulation {
     }
 
     bool Car::finished() const {
-        return finished_;
+        return finish_time_ != UNFINISHED;
     }
 
     size_t Car::id() const {
@@ -40,9 +34,8 @@ namespace simulation {
     }
 
     void Car::reset() {
-        path_index_ = 0;
-        finish_time_ = std::numeric_limits<size_t>::max();
-        finished_ = false;
+        path_index_ = START;
+        finish_time_ = UNFINISHED;
     }
 
 }

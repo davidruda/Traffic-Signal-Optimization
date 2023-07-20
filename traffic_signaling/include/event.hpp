@@ -1,7 +1,8 @@
 #ifndef EVENT_HPP
 #define EVENT_HPP
 
-#include "simulation.hpp"
+#include "simulation_car.hpp"
+#include "simulation_street.hpp"
 
 namespace simulation {
 

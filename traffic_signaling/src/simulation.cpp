@@ -4,13 +4,10 @@
 #include <ios>
 #include <iostream>
 #include <limits>
-#include <memory>
 #include <numeric>
-#include <queue>
 #include <string>
 #include <vector>
 
-#include "event.hpp"
 #include "simulation.hpp"
 
 namespace simulation {
@@ -32,6 +29,7 @@ namespace simulation {
     }
 
     void Simulation::reset_run() {
+        event_queue_ = {};
         for (auto &&i: intersections_) {
             i.reset();
         }
@@ -109,7 +107,7 @@ namespace simulation {
         }
     }
 
-    void Simulation::initialize_event_queue(auto &event_queue) {
+    void Simulation::initialize_event_queue() {
         for (auto &&car: cars_) {
             auto &&street = streets_[car.current_street()];
             street.add_car(car.id());
@@ -118,39 +116,38 @@ namespace simulation {
                 auto &&intersection = intersections_[street.end()];
                 auto &&next_green_time = schedules_.at(intersection.id()).next_green(street.id(), 0, street.last_used_time());
                 if (next_green_time.has_value()) {
-                    event_queue.emplace(std::make_unique<StreetEvent>(next_green_time.value(), street));
+                    event_queue_.emplace(std::make_unique<StreetEvent>(next_green_time.value(), street));
                 }
             }
         }
     }
 
-    void Simulation::process_street_event(auto &event_queue, auto &event) {
+    void Simulation::process_street_event(const std::unique_ptr<Event> &event) {
         auto &&street_event = static_cast<StreetEvent *>(event.get());
         auto time = street_event->time();
         auto &&street = street_event->street();
         auto &&car = cars_[street.get_car(time)];
         car.move_to_next_street();
 
-        event_queue.pop();
-        event_queue.emplace(std::make_unique<CarEvent>(time + streets_[car.current_street()].length(), car));
+        event_queue_.pop();
+        event_queue_.emplace(std::make_unique<CarEvent>(time + streets_[car.current_street()].length(), car));
 
         if (street.car_queue_size() > 0) {
 
             auto &&intersection = intersections_[street.end()];
             auto &&next_green_time = schedules_.at(intersection.id()).next_green(street.id(), time, street.last_used_time());
             if (next_green_time.has_value()) {
-                event_queue.emplace(std::make_unique<StreetEvent>(next_green_time.value(), street));
+                event_queue_.emplace(std::make_unique<StreetEvent>(next_green_time.value(), street));
             }
         }
     }
 
-    void Simulation::process_car_event(auto &event_queue, auto &event) {
+    void Simulation::process_car_event(const std::unique_ptr<Event> &event) {
         auto &&car_event = static_cast<CarEvent *>(event.get());
         auto time = car_event->time();
         auto &&car = static_cast<CarEvent *>(event.get())->car();
-        event_queue.pop();
-        if (car.at_final_destination()) {
-            car.set_finished(true);
+        event_queue_.pop();
+        if (car.final_destination()) {
             car.set_finish_time(time);
         } else {
             auto &&street = streets_[car.current_street()];
@@ -160,7 +157,7 @@ namespace simulation {
                 auto &&intersection = intersections_[street.end()];
                 auto &&next_green_time = schedules_.at(intersection.id()).next_green(street.id(), time, street.last_used_time());
                 if (next_green_time.has_value()) {
-                    event_queue.emplace(std::make_unique<StreetEvent>(next_green_time.value(), street));
+                    event_queue_.emplace(std::make_unique<StreetEvent>(next_green_time.value(), street));
                 }
             }
         }
@@ -168,24 +165,19 @@ namespace simulation {
 
     Simulation &Simulation::run() {
         reset_run();
-        // an earlier event has higher priority
-        auto cmp = [](const std::unique_ptr<Event> &lhs, const std::unique_ptr<Event> &rhs) {
-            return !(*lhs < *rhs);
-        };
-        std::priority_queue<std::unique_ptr<Event>, std::vector<std::unique_ptr<Event>>, decltype(cmp)> event_queue;
         //TODO: finish refactoring the methods below
-        initialize_event_queue(event_queue);
+        initialize_event_queue();
 
-        while (!event_queue.empty()) {
-            auto &&event = event_queue.top();
+        while (!event_queue_.empty()) {
+            auto &&event = event_queue_.top();
             if (event->time() > city_plan_.duration()) {
                 break;
             }
 
             if (event->event_type() == Event::STREET_EVENT_TYPE) {
-                process_street_event(event_queue, event);
+                process_street_event(event);
             } else if (event->event_type() == Event::CAR_EVENT_TYPE) {
-                process_car_event(event_queue, event);
+                process_car_event(event);
             }
         }
         return *this;
@@ -198,7 +190,7 @@ namespace simulation {
             }
             return total;
         };
-        return std::accumulate(cars_.cbegin(), cars_.cend(), 0, count_score);
+        return std::accumulate(cars_.cbegin(), cars_.cend(), size_t{0}, count_score);
     }
 
     void Simulation::summary() const {
@@ -268,5 +260,4 @@ namespace simulation {
     const std::vector<Car> &Simulation::cars() const {
         return cars_;
     }
-
 }

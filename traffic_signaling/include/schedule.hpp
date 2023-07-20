@@ -10,7 +10,7 @@ namespace simulation {
 
     class Schedule {
     public:
-        explicit Schedule();
+        Schedule();
         size_t length() const;
         size_t duration() const;
         void add_street(size_t street_id, size_t green_light_duration);

@@ -2,3 +2,4 @@
 ./traffic_signaling
 
 numpy
+ipykernel

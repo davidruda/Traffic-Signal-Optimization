@@ -1,12 +1,15 @@
 #ifndef SIMULATION_HPP
 #define SIMULATION_HPP
 
+#include <memory>
+#include <queue>
 #include <string>
 #include <string_view>
 #include <unordered_map>
 #include <vector>
 
 #include "city_plan.hpp"
+#include "event.hpp"
 #include "schedule.hpp"
 #include "simulation_car.hpp"
 #include "simulation_intersection.hpp"
@@ -17,6 +20,8 @@ namespace simulation {
     class Simulation {
     public:
         explicit Simulation(const city_plan::CityPlan &city_plan);
+        Simulation(const Simulation &other) = delete;
+        Simulation &operator=(const Simulation &other) = delete;
 
         void read_plan(const std::string &filename);
         void write_plan(const std::string &filename);
@@ -35,9 +40,9 @@ namespace simulation {
     private:
         void reset_run();
         void reset_plan();
-        void initialize_event_queue(auto &event_queue);
-        void process_street_event(auto &event_queue, auto &event);
-        void process_car_event(auto &event_queue, auto &event);
+        void initialize_event_queue();
+        void process_street_event(const std::unique_ptr<Event> &event);
+        void process_car_event(const std::unique_ptr<Event> &event);
 
         const city_plan::CityPlan &city_plan_;
 
@@ -45,8 +50,16 @@ namespace simulation {
         std::vector<Street> streets_;
         std::vector<Car> cars_;
         std::unordered_map<size_t, Schedule> schedules_;
-    };
 
+        struct EventComparator {
+            // an earlier event has higher priority
+            bool operator()(const std::unique_ptr<Event> &lhs, const std::unique_ptr<Event> &rhs) {
+                return !(*lhs < *rhs);
+            };
+        };
+
+        std::priority_queue<std::unique_ptr<Event>, std::vector<std::unique_ptr<Event>>, EventComparator> event_queue_;
+    };
 }
 
 #endif

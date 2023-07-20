@@ -2,7 +2,7 @@
 .vs/
 __pycache__/
 output/
-venv/
+*venv*/
 *build*/
 .idea/
 
