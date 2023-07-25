@@ -1,29 +1,21 @@
 cmake_minimum_required(VERSION 3.22)
-project(traffic_signaling)
+project(traffic_signaling VERSION 1.0)
 
-set(CMAKE_CXX_STANDARD 20)
+# specify the C++ standard
+add_library(compiler_flags INTERFACE)
+target_compile_features(compiler_flags INTERFACE cxx_std_20)
 
-if (MSVC)
-    # lots of warnings and warnings as errors, /O2 for optimization
-    set(CMAKE_CXX_FLAGS_RELEASE_INIT "/O2")
-    set(CMAKE_CXX_FLAGS_RELWITHDEBINFO_INIT "/O2")
-    add_compile_options(/std:c++20 /W4)# /WX)
-else ()
-    # lots of warnings and warnings as errors, -O3 for optimization
-    set(CMAKE_CXX_FLAGS_RELEASE_INIT "-03")
-    set(CMAKE_CXX_FLAGS_RELWITHDEBINFO_INIT "-03")
-    add_compile_options(-std=c++20 -Wall -Wextra -Wpedantic)# -Werror)
-endif ()
+# Create helper variables to determine which compiler is used
+set(gcc_like_cxx "$<COMPILE_LANG_AND_ID:CXX,GNU,Clang,ARMClang,AppleClang>")
+set(msvc_cxx "$<COMPILE_LANG_AND_ID:CXX,MSVC>")
 
-#TODO: add paths to pybind
-#include_directories(
-#        ../venv/Lib/site-packages/pybind11/include/
-#        C:/Users/DAVID_/AppData/Local/Programs/Python/Python310/include
-#)
+# Add compile options to the interface library compiler_flags.
+target_compile_options(compiler_flags INTERFACE
+        "$<${gcc_like_cxx}:$<BUILD_INTERFACE:$<IF:$<CONFIG:Debug>,,-O3>;-Wall;-Wextra;-Wpedantic>>"
+        "$<${msvc_cxx}:$<BUILD_INTERFACE:$<IF:$<CONFIG:Debug>,,/O2>;/W4>>"
+        )
 
-add_executable(
-        test_basic
-        tests/test_basic.cpp
+set(source_files
         src/event.cpp
         src/schedule.cpp
         src/city_plan.cpp
@@ -34,23 +26,33 @@ add_executable(
         src/simulation_intersection.cpp
         src/simulation_street.cpp
         src/simulation_car.cpp
-)
+        )
 
+add_executable(test_basic tests/test_basic.cpp ${source_files})
+target_link_libraries(test_basic PUBLIC compiler_flags)
 target_include_directories(test_basic PUBLIC include)
 
-add_executable(
-        test_time
-        tests/test_time.cpp
-        src/event.cpp
-        src/schedule.cpp
-        src/city_plan.cpp
-        src/city_plan_intersection.cpp
-        src/city_plan_street.cpp
-        src/city_plan_car.cpp
-        src/simulation.cpp
-        src/simulation_intersection.cpp
-        src/simulation_street.cpp
-        src/simulation_car.cpp
-)
-
+add_executable(test_time tests/test_time.cpp ${source_files})
+target_link_libraries(test_time PUBLIC compiler_flags)
 target_include_directories(test_time PUBLIC include)
+
+include(CTest)
+
+function(do_test target arg result)
+    add_test(NAME "${target} ${arg}" COMMAND "${target}" "${CMAKE_SOURCE_DIR}/input_data/${arg}")
+    set_tests_properties("${target} ${arg}" PROPERTIES PASS_REGULAR_EXPRESSION ${result})
+endfunction()
+
+do_test(test_basic a.txt "1,001 points")
+do_test(test_basic b.txt "4,566,576 points")
+do_test(test_basic c.txt "1,299,357 points")
+do_test(test_basic d.txt "1,573,100 points")
+do_test(test_basic e.txt "684,769 points")
+do_test(test_basic f.txt "819,083 points")
+
+do_test(test_time a.txt ".*")
+do_test(test_time b.txt ".*")
+do_test(test_time c.txt ".*")
+do_test(test_time d.txt ".*")
+do_test(test_time e.txt ".*")
+do_test(test_time f.txt ".*")

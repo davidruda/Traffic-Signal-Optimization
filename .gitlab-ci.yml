@@ -11,9 +11,7 @@ build_test_cpp:
         - mkdir build && cd build
         - cmake ../traffic_signaling
         - cmake --build . --config Release -j 10
-
-        - ./test_basic ../input_data/b.txt
-        - ./test_time ../input_data/d.txt
+        - ctest -C Release -V --output-on-failure
 
 
 build_test_python:

@@ -8,7 +8,7 @@
 int main(int argc, char *argv[]) {
     std::vector<std::string> args{argv + 1, argv + argc};
     auto &&input_file = args[0];
-    auto &&plan_file = args[1];
+    //auto &&plan_file = args[1];
 
     auto start = std::chrono::high_resolution_clock::now();
     city_plan::CityPlan city_plan{input_file};
