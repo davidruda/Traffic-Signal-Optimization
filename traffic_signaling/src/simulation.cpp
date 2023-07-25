@@ -81,15 +81,14 @@ namespace simulation {
 
                 // Sort by the order in which the green light appears in the schedule
                 auto &&green_lights = schedule.green_lights();
-                std::vector<std::pair<size_t, std::ranges::iota_view<size_t, size_t>>> schedule_sorted{green_lights.begin(), green_lights.end()};
+                std::vector<std::pair<size_t, TimeInterval>> schedule_sorted{green_lights.begin(), green_lights.end()};
                 auto cmp = [](const auto &lhs, const auto &rhs) {
-                    return *lhs.second.begin() < *rhs.second.begin();
+                    return lhs.second.begin() < rhs.second.begin();
                 };
                 std::sort(schedule_sorted.begin(), schedule_sorted.end(), cmp);
 
                 for (auto &&[street_id, green_light]: schedule_sorted) {
-                    auto green_light_duration = *green_light.end() - *green_light.begin();
-                    file << streets_[street_id].name() << " " << green_light_duration << "\n";
+                    file << streets_[street_id].name() << " " << green_light.duration() << "\n";
                 }
             }
         }

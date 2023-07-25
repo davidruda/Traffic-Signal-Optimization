@@ -2,25 +2,55 @@
 #define SCHEDULE_HPP
 
 #include <optional>
-#include <ranges>
 #include <string>
 #include <unordered_map>
 
 namespace simulation {
 
+    struct TimeInterval {
+    public:
+        TimeInterval(size_t begin, size_t end) : begin_(begin), end_(end) {}
+
+        size_t begin() const {
+            return begin_;
+        }
+
+        size_t end() const {
+            return end_;
+        }
+
+        size_t duration() const {
+            return end_ - begin_;
+        }
+
+    private:
+        size_t begin_;
+        size_t end_;
+    };
+
     class Schedule {
     public:
-        Schedule();
-        size_t length() const;
-        size_t duration() const;
+        Schedule() : duration_(0) {}
+
+        size_t length() const {
+            return green_lights_.size();
+        }
+
+        size_t duration() const {
+            return duration_;
+        }
+
+        const std::unordered_map<size_t, TimeInterval> &green_lights() const {
+            return green_lights_;
+        }
+
         void add_street(size_t street_id, size_t green_light_duration);
         std::optional<size_t> next_green(size_t street_id, size_t current_time, std::optional<size_t> last_used_time);
-        const std::unordered_map<size_t, std::ranges::iota_view<size_t, size_t>> &green_lights() const;
         void reset();
 
     private:
         size_t duration_;
-        std::unordered_map<size_t, std::ranges::iota_view<size_t, size_t>> green_lights_;
+        std::unordered_map<size_t, TimeInterval> green_lights_;
     };
 
 }
