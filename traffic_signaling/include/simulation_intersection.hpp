@@ -9,11 +9,19 @@ namespace simulation {
 
     class Intersection {
     public:
-        explicit Intersection(const city_plan::Intersection &data);
+        explicit Intersection(const city_plan::Intersection &data)
+            : data_(data) {}
 
-        size_t id() const;
-        const std::vector<size_t> &incoming() const;
-        void reset();
+        size_t id() const {
+            return data_.id();
+        }
+
+        const std::vector<size_t> &incoming() const {
+            return data_.incoming();
+        }
+
+        // Does nothing - Keep this method for consistency
+        void reset() {}
 
     private:
         const city_plan::Intersection &data_;

@@ -8,9 +8,11 @@ namespace simulation {
 
     class Event {
     public:
-        virtual ~Event();
+        virtual ~Event() = default;
 
-        size_t time() const;
+        size_t time() const {
+            return time_;
+        }
 
         bool operator<(const Event &other) const;
 
@@ -31,10 +33,16 @@ namespace simulation {
 
     class CarEvent : public Event {
     public:
-        CarEvent(size_t time, Car &car);
+        CarEvent(size_t time, Car &car)
+            : Event(time), car_(car) {}
 
-        Type event_type() const override;
-        Car &car() const;
+        Type event_type() const override {
+            return Event::CAR_EVENT_TYPE;
+        }
+
+        Car &car() const {
+            return car_;
+        }
 
     private:
         Car &car_;
@@ -42,15 +50,22 @@ namespace simulation {
 
     class StreetEvent : public Event {
     public:
-        StreetEvent(size_t time, Street &street);
+        StreetEvent(size_t time, Street &street)
+            : Event(time), street_(street) {}
 
-        Type event_type() const override;
-        Street &street() const;
+        Type event_type() const override {
+            return Event::STREET_EVENT_TYPE;
+        }
+
+        Street &street() const {
+            return street_;
+        }
 
     private:
         Street &street_;
     };
 
 }
+
 
 #endif

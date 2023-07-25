@@ -33,9 +33,17 @@ namespace simulation {
         size_t score() const;
         void summary() const;
 
-        const std::vector<Intersection> &intersections() const;
-        const std::vector<Street> &streets() const;
-        const std::vector<Car> &cars() const;
+        const std::vector<Intersection> &intersections() const {
+            return intersections_;
+        }
+
+        const std::vector<Street> &streets() const {
+            return streets_;
+        }
+
+        const std::vector<Car> &cars() const {
+            return cars_;
+        }
 
     private:
         void reset_run();

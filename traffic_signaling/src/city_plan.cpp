@@ -80,19 +80,6 @@ namespace city_plan {
         }
     }
 
-
-    const std::vector<Intersection> &CityPlan::intersections() const {
-        return intersections_;
-    }
-
-    const std::vector<Street> &CityPlan::streets() const {
-        return streets_;
-    }
-
-    const std::vector<Car> &CityPlan::cars() const {
-        return cars_;
-    }
-
     std::ostream &operator<<(std::ostream &os, const CityPlan &obj) {
         os << "Duration: " << obj.duration_ << "\n"
            << "Number of intersections: " << obj.intersections_.size() << "\n"
@@ -106,18 +93,6 @@ namespace city_plan {
             os << c << "\n";
         }
         return os;
-    }
-
-    size_t CityPlan::duration() const {
-        return duration_;
-    }
-
-    size_t CityPlan::bonus() const {
-        return bonus_;
-    }
-
-    size_t CityPlan::get_street_id_by_name(const std::string &name) const {
-        return street_mapping_.at(name);
     }
 
 }

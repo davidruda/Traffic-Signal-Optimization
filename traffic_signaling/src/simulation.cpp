@@ -248,15 +248,4 @@ namespace simulation {
                   << std::setprecision(2) << average_ride_time << " seconds to arrive at their destination.\n";
     }
 
-    const std::vector<Intersection> &Simulation::intersections() const {
-        return intersections_;
-    }
-
-    const std::vector<Street> &Simulation::streets() const {
-        return streets_;
-    }
-
-    const std::vector<Car> &Simulation::cars() const {
-        return cars_;
-    }
 }

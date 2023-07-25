@@ -16,14 +16,29 @@ namespace city_plan {
     public:
         explicit CityPlan(const std::string &filename);
 
-        const std::vector<Intersection> &intersections() const;
-        const std::vector<Street> &streets() const;
-        const std::vector<Car> &cars() const;
+        const std::vector<Intersection> &intersections() const {
+            return intersections_;
+        }
 
-        size_t duration() const;
-        size_t bonus() const;
+        const std::vector<Street> &streets() const {
+            return streets_;
+        }
 
-        size_t get_street_id_by_name(const std::string &name) const;
+        const std::vector<Car> &cars() const {
+            return cars_;
+        }
+
+        size_t duration() const {
+            return duration_;
+        }
+
+        size_t bonus() const {
+            return bonus_;
+        }
+
+        size_t get_street_id_by_name(const std::string &name) const {
+            return street_mapping_.at(name);
+        }
 
         friend std::ostream &operator<<(std::ostream &os, const CityPlan &obj);
 
