@@ -1,6 +1,8 @@
 #ifndef EVENT_HPP
 #define EVENT_HPP
 
+#include <functional>
+
 #include "simulation_car.hpp"
 #include "simulation_street.hpp"
 
@@ -15,6 +17,7 @@ namespace simulation {
         }
 
         bool operator<(const Event &other) const;
+        bool operator>(const Event &other) const;
 
         enum Type {
             CAR_EVENT_TYPE,
@@ -45,7 +48,7 @@ namespace simulation {
         }
 
     private:
-        Car &car_;
+        std::reference_wrapper<Car> car_;
     };
 
     class StreetEvent : public Event {
@@ -62,7 +65,7 @@ namespace simulation {
         }
 
     private:
-        Street &street_;
+        std::reference_wrapper<Street> street_;
     };
 
 }

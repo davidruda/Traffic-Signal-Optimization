@@ -22,4 +22,11 @@ namespace simulation {
         return time_ < other.time_;
     }
 
+    bool Event::operator>(const Event &other) const {
+        if (time_ == other.time_) {
+            return counter_id_ > other.counter_id_;
+        }
+        return time_ > other.time_;
+    }
+
 }

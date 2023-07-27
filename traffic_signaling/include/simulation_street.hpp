@@ -1,7 +1,6 @@
 #ifndef SIMULATION_STREET_HPP
 #define SIMULATION_STREET_HPP
 
-#include <optional>
 #include <queue>
 #include <string>
 
@@ -38,23 +37,21 @@ namespace simulation {
             return data_.length();
         }
 
-        std::optional<size_t> last_used_time() const {
-            return last_used_time_;
-        }
-
         bool is_used() const {
             return data_.is_used();
         }
 
-        size_t get_car(size_t time);
-        void reset();
+        void reset() {
+            car_queue_ = {};
+        }
+
+        size_t get_car();
 
     private:
         const city_plan::Street &data_;
 
         // car queue represented by car ids
         std::queue<size_t> car_queue_;
-        std::optional<size_t> last_used_time_;
     };
 
 }

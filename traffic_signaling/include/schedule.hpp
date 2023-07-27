@@ -45,7 +45,7 @@ namespace simulation {
         }
 
         void add_street(size_t street_id, size_t green_light_duration);
-        std::optional<size_t> next_green(size_t street_id, size_t current_time, std::optional<size_t> last_used_time);
+        std::optional<size_t> next_green(size_t street_id, size_t current_time);
         void reset();
 
     private:

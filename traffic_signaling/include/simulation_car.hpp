@@ -51,8 +51,8 @@ namespace simulation {
         size_t path_index_;
         size_t finish_time_;
 
-        const static size_t START{0};
-        const static size_t UNFINISHED{std::numeric_limits<size_t>::max()};
+        static constexpr size_t START{0};
+        static constexpr size_t UNFINISHED{std::numeric_limits<size_t>::max()};
     };
 
 }

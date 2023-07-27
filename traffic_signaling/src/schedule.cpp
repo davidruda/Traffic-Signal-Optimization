@@ -7,14 +7,9 @@ namespace simulation {
         duration_ += green_light_duration;
     }
 
-    std::optional<size_t> Schedule::next_green(size_t street_id, size_t current_time, std::optional<size_t> last_used_time) {
+    std::optional<size_t> Schedule::next_green(size_t street_id, size_t current_time) {
         if (green_lights_.contains(street_id)) {
             auto &&green_light_range = green_lights_.at(street_id);
-            if (last_used_time.has_value()) {
-                if (current_time == *last_used_time) {
-                    ++current_time;
-                }
-            }
             auto time_normalized = current_time % duration_;
             auto start = green_light_range.begin();
             if (time_normalized < start) {

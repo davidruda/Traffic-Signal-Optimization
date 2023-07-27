@@ -1,7 +1,7 @@
 #ifndef SIMULATION_HPP
 #define SIMULATION_HPP
 
-#include <memory>
+#include <functional>
 #include <queue>
 #include <string>
 #include <string_view>
@@ -48,9 +48,11 @@ namespace simulation {
     private:
         void reset_run();
         void reset_plan();
-        void initialize_event_queue();
-        void process_street_event(const std::unique_ptr<Event> &event);
-        void process_car_event(const std::unique_ptr<Event> &event);
+        void add_car_event(Car &car, size_t time);
+        void add_street_event(Street &street, size_t time);
+        void initialize_run();
+        void process_car_events();
+        void process_street_events();
 
         const city_plan::CityPlan &city_plan_;
 
@@ -59,14 +61,8 @@ namespace simulation {
         std::vector<Car> cars_;
         std::unordered_map<size_t, Schedule> schedules_;
 
-        struct EventComparator {
-            // an earlier event has higher priority
-            bool operator()(const std::unique_ptr<Event> &lhs, const std::unique_ptr<Event> &rhs) {
-                return !(*lhs < *rhs);
-            };
-        };
-
-        std::priority_queue<std::unique_ptr<Event>, std::vector<std::unique_ptr<Event>>, EventComparator> event_queue_;
+        std::priority_queue<CarEvent, std::vector<CarEvent>, std::greater<>> car_events_;
+        std::priority_queue<StreetEvent, std::vector<StreetEvent>, std::greater<>> street_events_;
     };
 }
 
