@@ -48,7 +48,6 @@ namespace city_plan {
             intersections_[end].add_incoming(id);
         }
 
-
         size_t path_length;
         std::string street_name;
 
@@ -71,12 +70,28 @@ namespace city_plan {
                 // use the traffic light
                 if (i < path_length - 1) {
                     streets_[street_id].set_used(true);
+                    intersections_[streets_[street_id].end()].set_used(true);
                 }
             }
             cars_.emplace_back(id, path);
 #ifdef DEBUG
             std::cout << "\n";
 #endif
+        }
+
+        for (auto &&intersection: intersections_) {
+            if (intersection.is_used()) {
+                size_t used_streets = 0;
+                for (auto &&street_id: intersection.incoming()) {
+                    if (streets_[street_id].is_used()) {
+                        ++used_streets;
+                        if (used_streets >= 2) {
+                            intersection.set_non_trivial(true);
+                            break;
+                        }
+                    }
+                }
+            }
         }
     }
 
