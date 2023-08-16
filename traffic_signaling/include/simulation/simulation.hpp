@@ -1,5 +1,5 @@
-#ifndef SIMULATION_HPP
-#define SIMULATION_HPP
+#ifndef SIMULATION_SIMULATION_HPP
+#define SIMULATION_SIMULATION_HPP
 
 #include <functional>
 #include <queue>
@@ -8,12 +8,12 @@
 #include <unordered_map>
 #include <vector>
 
-#include "city_plan.hpp"
+#include "car.hpp"
+#include "city_plan/city_plan.hpp"
 #include "event.hpp"
+#include "intersection.hpp"
 #include "schedule.hpp"
-#include "simulation_car.hpp"
-#include "simulation_intersection.hpp"
-#include "simulation_street.hpp"
+#include "street.hpp"
 
 namespace simulation {
 

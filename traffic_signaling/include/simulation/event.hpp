@@ -1,10 +1,10 @@
-#ifndef EVENT_HPP
-#define EVENT_HPP
+#ifndef SIMULATION_EVENT_HPP
+#define SIMULATION_EVENT_HPP
 
 #include <functional>
 
-#include "simulation_car.hpp"
-#include "simulation_street.hpp"
+#include "simulation/car.hpp"
+#include "simulation/street.hpp"
 
 namespace simulation {
 

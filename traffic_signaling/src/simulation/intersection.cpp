@@ -1,4 +1,4 @@
-#include "simulation_intersection.hpp"
+#include "simulation/intersection.hpp"
 
 // Keep this file for consistency
 

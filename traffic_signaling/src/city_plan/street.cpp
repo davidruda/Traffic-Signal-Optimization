@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "city_plan_street.hpp"
+#include "city_plan/street.hpp"
 
 namespace city_plan {
 

@@ -1,14 +1,14 @@
-#ifndef CITY_PLAN_HPP
-#define CITY_PLAN_HPP
+#ifndef CITY_PLAN_CITY_PLAN_HPP
+#define CITY_PLAN_CITY_PLAN_HPP
 
 #include <string>
 #include <string_view>
 #include <unordered_map>
 #include <vector>
 
-#include "city_plan_car.hpp"
-#include "city_plan_intersection.hpp"
-#include "city_plan_street.hpp"
+#include "car.hpp"
+#include "intersection.hpp"
+#include "street.hpp"
 
 namespace city_plan {
 

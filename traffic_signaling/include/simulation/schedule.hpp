@@ -1,5 +1,5 @@
-#ifndef SCHEDULE_HPP
-#define SCHEDULE_HPP
+#ifndef SIMULATION_SCHEDULE_HPP
+#define SIMULATION_SCHEDULE_HPP
 
 #include <cassert>
 #include <optional>

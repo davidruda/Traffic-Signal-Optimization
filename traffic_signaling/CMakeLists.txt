@@ -16,16 +16,16 @@ target_compile_options(compiler_flags INTERFACE
         )
 
 set(source_files
-        src/event.cpp
-        src/schedule.cpp
-        src/city_plan.cpp
-        src/city_plan_intersection.cpp
-        src/city_plan_street.cpp
-        src/city_plan_car.cpp
-        src/simulation.cpp
-        src/simulation_intersection.cpp
-        src/simulation_street.cpp
-        src/simulation_car.cpp
+        src/city_plan/city_plan.cpp
+        src/city_plan/intersection.cpp
+        src/city_plan/street.cpp
+        src/city_plan/car.cpp
+        src/simulation/event.cpp
+        src/simulation/schedule.cpp
+        src/simulation/simulation.cpp
+        src/simulation/intersection.cpp
+        src/simulation/street.cpp
+        src/simulation/car.cpp
         )
 
 add_executable(test_basic tests/test_basic.cpp ${source_files})
@@ -39,7 +39,7 @@ target_include_directories(test_time PUBLIC include)
 include(CTest)
 
 function(do_test target arg result)
-    add_test(NAME "${target} ${arg}" COMMAND "${target}" "${CMAKE_SOURCE_DIR}/input_data/${arg}")
+    add_test(NAME "${target} ${arg}" COMMAND "${target}" "${CMAKE_SOURCE_DIR}/data/${arg}")
     set_tests_properties("${target} ${arg}" PROPERTIES PASS_REGULAR_EXPRESSION ${result})
 endfunction()
 

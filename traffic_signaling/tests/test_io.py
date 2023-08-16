@@ -5,7 +5,7 @@ import unittest
 from traffic_signaling.city_plan import CityPlan
 from traffic_signaling.simulation import Simulation
 
-DEFAULT_INPUT_FOLDER = 'traffic_signaling/input_data'
+DEFAULT_INPUT_FOLDER = 'traffic_signaling/data'
 DEFAULT_OUTPUT_FOLDER = 'output'
 parser = argparse.ArgumentParser()
 parser.add_argument(

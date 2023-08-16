@@ -7,7 +7,7 @@
 #include <numeric>
 #include <string>
 
-#include "simulation.hpp"
+#include "simulation/simulation.hpp"
 
 namespace simulation {
 

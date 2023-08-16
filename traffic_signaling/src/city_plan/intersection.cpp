@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "city_plan_intersection.hpp"
+#include "city_plan/intersection.hpp"
 
 namespace city_plan {
 

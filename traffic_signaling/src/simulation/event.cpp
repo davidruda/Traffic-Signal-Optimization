@@ -1,7 +1,7 @@
 #include <cassert>
 #include <limits>
 
-#include "event.hpp"
+#include "simulation/event.hpp"
 
 namespace simulation {
 

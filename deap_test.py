@@ -86,7 +86,7 @@ def eaSimple(population, toolbox, cxpb, mutpb, ngen, stats=None,
     return population, logbook
 
 start_sim = time.time()
-city_plan = CityPlan("traffic_signaling/input_data/d.txt")
+city_plan = CityPlan("traffic_signaling/data/d.txt")
 simulation = Simulation(city_plan)
 simulation.create_plan_default()
 print(f'Simulation prepared: {time.time() - start_sim:.4f}s')

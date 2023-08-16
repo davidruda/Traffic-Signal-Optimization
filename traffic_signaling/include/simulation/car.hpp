@@ -6,7 +6,7 @@
 #include <utility>
 #include <vector>
 
-#include "city_plan.hpp"
+#include "city_plan/city_plan.hpp"
 
 namespace simulation {
 

@@ -4,7 +4,7 @@
 #include <queue>
 #include <string>
 
-#include "city_plan.hpp"
+#include "city_plan/city_plan.hpp"
 
 namespace simulation {
 
