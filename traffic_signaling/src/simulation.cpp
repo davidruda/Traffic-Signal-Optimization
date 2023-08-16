@@ -6,7 +6,6 @@
 #include <limits>
 #include <numeric>
 #include <string>
-#include <vector>
 
 #include "simulation.hpp"
 
@@ -80,15 +79,7 @@ namespace simulation {
                 file << intersection.id() << "\n"
                      << schedule.length() << "\n";
 
-                // Sort by the order in which the green light appears in the schedule
-                auto &&green_lights = schedule.green_lights();
-                std::vector<std::pair<size_t, TimeInterval>> schedule_sorted{green_lights.begin(), green_lights.end()};
-                auto cmp = [](const auto &lhs, const auto &rhs) {
-                    return lhs.second.begin() < rhs.second.begin();
-                };
-                std::sort(schedule_sorted.begin(), schedule_sorted.end(), cmp);
-
-                for (auto &&[street_id, green_light]: schedule_sorted) {
+                for (auto &&[street_id, green_light]: schedule.green_light_schedule()) {
                     file << streets_[street_id].name() << " " << green_light.duration() << "\n";
                 }
             }

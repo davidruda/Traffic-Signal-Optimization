@@ -45,6 +45,10 @@ namespace simulation {
             return cars_;
         }
 
+        std::unordered_map<size_t, Schedule> &schedules() {
+            return schedules_;
+        }
+
     private:
         void reset_run();
         void reset_plan();

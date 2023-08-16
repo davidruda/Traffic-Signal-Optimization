@@ -32,7 +32,9 @@ PYBIND11_MODULE(traffic_signaling, m) {
 
     py::class_<city_plan::Intersection>(city_plan_submodule, "Intersection")
             .def_property_readonly("id", &city_plan::Intersection::id)
-            .def_property_readonly("incoming", &city_plan::Intersection::incoming);
+            .def_property_readonly("incoming", &city_plan::Intersection::incoming)
+            .def_property_readonly("used", &city_plan::Intersection::is_used)
+            .def_property_readonly("non_trivial", &city_plan::Intersection::is_non_trivial);
 
     py::class_<city_plan::Street>(city_plan_submodule, "Street")
             .def_property_readonly("id", &city_plan::Street::id)
@@ -48,5 +50,11 @@ PYBIND11_MODULE(traffic_signaling, m) {
             .def("create_plan_default", &simulation::Simulation::create_plan_default)
             .def("run", &simulation::Simulation::run)
             .def("score", &simulation::Simulation::score)
-            .def("summary", &simulation::Simulation::summary, py::call_guard<py::scoped_ostream_redirect>());
+            .def("summary", &simulation::Simulation::summary, py::call_guard<py::scoped_ostream_redirect>())
+            .def_property("schedules", &simulation::Simulation::schedules, nullptr);
+
+    py::class_<simulation::Schedule>(simulation_submodule, "Schedule")
+            .def("set_schedule", &simulation::Schedule::set_schedule, py::arg("times"), py::arg("order"))
+            .def_property_readonly("length", &simulation::Schedule::length)
+            .def_property_readonly("duration", &simulation::Schedule::duration);
 }

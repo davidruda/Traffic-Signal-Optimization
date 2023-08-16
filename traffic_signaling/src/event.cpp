@@ -1,5 +1,5 @@
+#include <cassert>
 #include <limits>
-#include <stdexcept>
 
 #include "event.hpp"
 
@@ -8,10 +8,8 @@ namespace simulation {
     size_t Event::counter_ = 0;
 
     Event::Event(size_t time) : time_(time) {
-        if (counter_ == std::numeric_limits<size_t>::max()) {
-            // Doesn't work with Clang-cl in CLion (can't enable exceptions)
-            //throw std::overflow_error{"Event counter overflow"};
-        }
+        assert(counter_ < std::numeric_limits<size_t>::max());
+
         counter_id_ = counter_++;
     }
 
