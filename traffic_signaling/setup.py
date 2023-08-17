@@ -23,5 +23,14 @@ setup(
     author='David Ruda',
     ext_modules=ext_modules,
     cmdclass={'build_ext': build_ext},
+    packages=['traffic_signaling'],
+    package_data={
+        'traffic_signaling': [
+            '__init__.pyi',
+            'py.typed',
+            'city_plan/__init__.pyi',
+            'simulation/__init__.pyi'
+        ],
+    },
     python_requires='>=3.7'
 )
