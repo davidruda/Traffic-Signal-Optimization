@@ -1,4 +1,4 @@
-from city_plan import CityPlan
+from ..city_plan import CityPlan
 
 class Schedule:
     def set_schedule(self, times:list[int], order:list[int]) -> None: ...
