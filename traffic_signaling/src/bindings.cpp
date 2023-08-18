@@ -31,27 +31,29 @@ PYBIND11_MODULE(traffic_signaling, m) {
         .def_property_readonly("path", &city_plan::Car::path);
 
     py::class_<city_plan::Intersection>(city_plan_submodule, "Intersection")
-        .def_property_readonly("id", &city_plan::Intersection::id)
-        .def_property_readonly("incoming", &city_plan::Intersection::incoming)
-        .def_property_readonly("used", &city_plan::Intersection::is_used)
-        .def_property_readonly("non_trivial", &city_plan::Intersection::is_non_trivial);
+            .def_property_readonly("id", &city_plan::Intersection::id)
+            .def_property_readonly("incoming", &city_plan::Intersection::incoming)
+            .def_property_readonly("used", &city_plan::Intersection::is_used)
+            .def_property_readonly("non_trivial", &city_plan::Intersection::is_non_trivial);
 
     py::class_<city_plan::Street>(city_plan_submodule, "Street")
-        .def_property_readonly("id", &city_plan::Street::id)
-        .def_property_readonly("name", &city_plan::Street::name)
-        .def_property_readonly("used", &city_plan::Street::is_used)
-        .def_property_readonly("length", &city_plan::Street::length);
+            .def_property_readonly("id", &city_plan::Street::id)
+            .def_property_readonly("name", &city_plan::Street::name)
+            .def_property_readonly("used", &city_plan::Street::is_used)
+            .def_property_readonly("length", &city_plan::Street::length)
+            .def_property_readonly("start", &city_plan::Street::start)
+            .def_property_readonly("end", &city_plan::Street::end);
 
     auto simulation_submodule = m.def_submodule("simulation", "simulation submodule");
     py::class_<simulation::Simulation>(simulation_submodule, "Simulation")
-        .def(py::init<const city_plan::CityPlan &>(), py::arg("city_plan"))
-        .def("read_plan", &simulation::Simulation::read_plan, py::arg("filename"))
-        .def("write_plan", &simulation::Simulation::write_plan, py::arg("filename"))
-        .def("create_plan_default", &simulation::Simulation::create_plan_default)
-        .def("run", &simulation::Simulation::run)
-        .def("score", &simulation::Simulation::score)
-        .def("summary", &simulation::Simulation::summary, py::call_guard<py::scoped_ostream_redirect>())
-        .def_property("schedules", &simulation::Simulation::schedules, nullptr);
+            .def(py::init<const city_plan::CityPlan &>(), py::arg("city_plan"))
+            .def("read_plan", &simulation::Simulation::read_plan, py::arg("filename"))
+            .def("write_plan", &simulation::Simulation::write_plan, py::arg("filename"))
+            .def("create_plan_default", &simulation::Simulation::create_plan_default)
+            .def("run", &simulation::Simulation::run)
+            .def("score", &simulation::Simulation::score)
+            .def("summary", &simulation::Simulation::summary, py::call_guard<py::scoped_ostream_redirect>())
+            .def_property("schedules", &simulation::Simulation::schedules, nullptr);
 
     py::class_<simulation::Schedule>(simulation_submodule, "Schedule")
         .def("set_schedule", &simulation::Schedule::set_schedule, py::arg("times"), py::arg("order"))

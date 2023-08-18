@@ -20,8 +20,6 @@ namespace simulation {
     class Simulation {
     public:
         explicit Simulation(const city_plan::CityPlan &city_plan);
-        Simulation(const Simulation &other) = delete;
-        Simulation &operator=(const Simulation &other) = delete;
 
         void read_plan(const std::string &filename);
         void write_plan(const std::string &filename);

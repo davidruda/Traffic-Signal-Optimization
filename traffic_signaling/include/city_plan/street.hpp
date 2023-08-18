@@ -14,6 +14,10 @@ namespace city_plan {
             return id_;
         }
 
+        size_t start() const {
+            return start_id_;
+        }
+
         size_t end() const {
             return end_id_;
         }
