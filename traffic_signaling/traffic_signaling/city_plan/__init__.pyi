@@ -1,6 +1,7 @@
 class Car:
     @property
     def id(self) -> int: ...
+    
     @property
     def path(self) -> list[int]: ...
 
@@ -17,19 +18,14 @@ class Intersection:
 class Street:
     @property
     def id(self) -> int: ...
-
     @property
     def name(self) -> str: ...
-
     @property
     def used(self) -> bool: ...
-
     @property
     def length(self) -> int: ...
-
     @property
     def start(self) -> int: ...
-
     @property
     def end(self) -> int: ...
 

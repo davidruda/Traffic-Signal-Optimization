@@ -1,5 +1,3 @@
-#include <sstream>
-
 #include <pybind11/iostream.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
@@ -19,12 +17,7 @@ PYBIND11_MODULE(traffic_signaling, m) {
         .def_property_readonly("streets", &city_plan::CityPlan::streets)
         .def_property_readonly("cars", &city_plan::CityPlan::cars)
         .def_property_readonly("duration", &city_plan::CityPlan::duration)
-        .def_property_readonly("bonus", &city_plan::CityPlan::bonus)
-        .def("__str__", [](const city_plan::CityPlan &obj) {
-            std::ostringstream oss;
-            oss << obj; // Calls operator<<
-            return oss.str();
-        });
+        .def_property_readonly("bonus", &city_plan::CityPlan::bonus);
 
     py::class_<city_plan::Car>(city_plan_submodule, "Car")
         .def_property_readonly("id", &city_plan::Car::id)
