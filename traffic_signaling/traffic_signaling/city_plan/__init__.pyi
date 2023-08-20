@@ -1,7 +1,6 @@
 class Car:
     @property
     def id(self) -> int: ...
-    
     @property
     def path(self) -> list[int]: ...
 
