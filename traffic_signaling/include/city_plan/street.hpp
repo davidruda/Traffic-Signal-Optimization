@@ -7,8 +7,10 @@ namespace city_plan {
 
     class Street {
     public:
-        Street(size_t id, size_t start_id, size_t end_id, std::string name, size_t length)
-            : id_(id), start_id_(start_id), end_id_(end_id), name_(std::move(name)), length_(length), used_(false) {}
+        Street(size_t id, size_t start_id, size_t end_id,
+               std::string name, size_t length)
+            : id_(id), start_id_(start_id), end_id_(end_id),
+              name_(std::move(name)), length_(length) {}
 
         size_t id() const {
             return id_;
@@ -46,7 +48,7 @@ namespace city_plan {
         const size_t end_id_;
         const std::string name_;
         const size_t length_;
-        bool used_;
+        bool used_{};
     };
 
 }

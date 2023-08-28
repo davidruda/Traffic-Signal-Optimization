@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.22)
+cmake_minimum_required(VERSION 3.24)
 project(traffic_signaling VERSION 1.0)
 
 # specify the C++ standard
@@ -28,18 +28,45 @@ set(source_files
         src/simulation/car.cpp
         )
 
-add_executable(test_basic tests/test_basic.cpp ${source_files})
+add_executable(test_basic tests/test_basic.cpp "${source_files}")
 target_link_libraries(test_basic PUBLIC compiler_flags)
 target_include_directories(test_basic PUBLIC include)
 
-add_executable(test_time tests/test_time.cpp ${source_files})
+add_executable(test_time tests/test_time.cpp "${source_files}")
 target_link_libraries(test_time PUBLIC compiler_flags)
 target_include_directories(test_time PUBLIC include)
+
+#find_package(Python COMPONENTS Interpreter Development REQUIRED)
+#message("Python executable: ${Python_EXECUTABLE}")
+#execute_process(COMMAND
+#        "${Python_EXECUTABLE}" -m pybind11 --cmakedir
+#        OUTPUT_VARIABLE PYBIND11_CMAKE_DIR
+#        OUTPUT_STRIP_TRAILING_WHITESPACE
+#        )
+#message("PYBIND11_CMAKE_DIR: ${PYBIND11_CMAKE_DIR}")
+#set(CMAKE_PREFIX_PATH "${PYBIND11_CMAKE_DIR}")
+#message("CMAKE_PREFIX_PATH: ${CMAKE_PREFIX_PATH}")
+#message("CMAKE_MODULE_PATH: ${CMAKE_MODULE_PATH}")
+#find_package(pybind11 REQUIRED)
+
+include(FetchContent)
+
+FetchContent_Declare(
+        pybind11
+        GIT_REPOSITORY https://github.com/pybind/pybind11.git
+        FIND_PACKAGE_ARGS
+)
+FetchContent_MakeAvailable(pybind11)
+
+pybind11_add_module(traffic_signaling src/bindings.cpp "${source_files}")
+target_link_libraries(traffic_signaling PUBLIC compiler_flags)
+target_include_directories(traffic_signaling PUBLIC include)
 
 include(CTest)
 
 function(do_test target arg result)
-    add_test(NAME "${target} ${arg}" COMMAND "${target}" "${CMAKE_SOURCE_DIR}/data/${arg}")
+    file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/output/")
+    add_test(NAME "${target} ${arg}" COMMAND "${target}" "${CMAKE_SOURCE_DIR}/data/${arg}" "${CMAKE_BINARY_DIR}/output/${arg}")
     set_tests_properties("${target} ${arg}" PROPERTIES PASS_REGULAR_EXPRESSION ${result})
 endfunction()
 
@@ -56,3 +83,7 @@ do_test(test_time c.txt ".*")
 do_test(test_time d.txt ".*")
 do_test(test_time e.txt ".*")
 do_test(test_time f.txt ".*")
+
+function(test_python)
+
+endfunction()

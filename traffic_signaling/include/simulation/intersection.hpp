@@ -9,8 +9,7 @@ namespace simulation {
 
     class Intersection {
     public:
-        explicit Intersection(const city_plan::Intersection &data)
-            : data_(data) {}
+        explicit Intersection(const city_plan::Intersection &data) : data_(data) {}
 
         size_t id() const {
             return data_.id();

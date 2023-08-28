@@ -1,10 +1,8 @@
-#include <algorithm>
 #include <fstream>
 #include <iomanip>
 #include <ios>
 #include <iostream>
 #include <limits>
-#include <numeric>
 #include <string>
 
 #include "simulation/simulation.hpp"
@@ -130,6 +128,7 @@ namespace simulation {
 
             if (car.final_destination()) {
                 car.set_finish_time(current_time);
+                stats_.update(city_plan_, car);
                 continue;
             }
 
@@ -157,15 +156,17 @@ namespace simulation {
         }
     }
 
-    Simulation &Simulation::run() {
+    void Simulation::run() {
         reset_run();
         //TODO: finish refactoring the methods below
         initialize_run();
 
         while (!car_events_.empty() || !street_events_.empty()) {
-            auto car_event_time = car_events_.empty() ? std::numeric_limits<size_t>::max() : car_events_.top().time();
+            auto car_event_time =
+                    car_events_.empty() ? std::numeric_limits<size_t>::max() : car_events_.top().time();
 
-            auto street_event_time = street_events_.empty() ? std::numeric_limits<size_t>::max() : street_events_.top().time();
+            auto street_event_time =
+                    street_events_.empty() ? std::numeric_limits<size_t>::max() : street_events_.top().time();
 
             if (car_event_time > city_plan_.duration() &&
                 street_event_time > city_plan_.duration()) {
@@ -179,46 +180,46 @@ namespace simulation {
                 process_street_events();
             }
         }
-        return *this;
     }
 
-    size_t Simulation::score() const {
-        auto count_score = [this](size_t total, const auto &car) {
-            if (car.finished()) {
-                total += this->city_plan_.bonus() + this->city_plan_.duration() - car.finish_time();
-            }
-            return total;
-        };
-        return std::accumulate(cars_.cbegin(), cars_.cend(), size_t{0}, count_score);
-    }
-
-    void Simulation::summary() const {
-        size_t finished_count = 0;
-        size_t total_ride_time = 0;
-        size_t total_score = 0;
-        size_t max_score = 0;
-        size_t min_score = std::numeric_limits<size_t>::max();
-        const Car *earliest_car = nullptr;
-        const Car *latest_car = nullptr;
-        for (auto &&c: cars_) {
-            if (c.finished()) {
-                ++finished_count;
-                total_ride_time += c.finish_time();
-                auto score = city_plan_.bonus() + city_plan_.duration() - c.finish_time();
-                total_score += score;
-                if (score > max_score) {
-                    max_score = score;
-                    earliest_car = &c;
-                }
-                if (score < min_score) {
-                    min_score = score;
-                    latest_car = &c;
-                }
-            }
+    size_t Simulation::score(bool verbose) {
+        Statistics::reset(*this, verbose);
+        run();
+        if (verbose) {
+            stats_.summary(city_plan_);
         }
-        float average_ride_time = static_cast<float>(total_ride_time) / static_cast<float>(finished_count);
+        return stats_.total_score_;
+    }
 
-        // return int as a thousand seperated string
+    void Simulation::Statistics::reset(Simulation &simulation, bool verbose) {
+        if (!verbose) {
+            simulation.stats_.total_score_ = {};
+            simulation.stats_.verbose_ = verbose;
+            return;
+        }
+        simulation.stats_ = Statistics{verbose};
+    }
+
+    void Simulation::Statistics::update(const city_plan::CityPlan &city_plan, const Car &car) {
+        auto car_score = city_plan.bonus() + city_plan.duration() - car.finish_time();
+        total_score_ += car_score;
+        if (!verbose_) {
+            return;
+        }
+        ++cars_finished_;
+        total_driving_time_ += car.finish_time();
+        if (car_score > max_car_score_) {
+            max_car_score_ = car_score;
+            earliest_car_ = car;
+        }
+        if (car_score < min_car_score_) {
+            min_car_score_ = car_score;
+            latest_car_ = car;
+        }
+    }
+
+    void Simulation::Statistics::summary(const city_plan::CityPlan &city_plan) {
+        // return a number as a thousand seperated string
         auto thousand_sep = [](size_t i) {
             std::string s = std::to_string(i);
             std::string formatted;
@@ -234,18 +235,24 @@ namespace simulation {
             return formatted;
         };
 
-        std::cout << "The submission scored **" << thousand_sep(total_score) << " points**. "
-                  << "This is the sum of " << thousand_sep(finished_count * city_plan_.bonus()) << " bonus points for "
-                  << "cars arriving before the deadline (" << thousand_sep(city_plan_.bonus()) << " points each) and "
-                  << thousand_sep(total_score - finished_count * city_plan_.bonus()) << " points for early arrival times.\n\n"
-                  << thousand_sep(finished_count) << " of " << thousand_sep(cars_.size()) << " cars arrived before the deadline "
-                  << "(" << static_cast<float>(finished_count) / static_cast<float>(cars_.size()) * 100 << "%). "
-                  << "The earliest car (ID " << earliest_car->id() << ") arrived at its destination after "
-                  << thousand_sep(earliest_car->finish_time()) << " seconds scoring " << thousand_sep(max_score) << " points, "
-                  << "whereas the last car (ID " << latest_car->id() << ") arrived at its destination "
-                  << "after " << thousand_sep(latest_car->finish_time()) << " seconds scoring " << thousand_sep(min_score) << " points. "
-                  << "Cars that arrived within the deadline drove for an average of " << std::fixed
-                  << std::setprecision(2) << average_ride_time << " seconds to arrive at their destination.\n";
-    }
+        std::cout << "The submission scored **" << thousand_sep(total_score_) << " points**. "
+                  << "This is the sum of " << thousand_sep(cars_finished_ * city_plan.bonus()) << " bonus points for "
+                  << "cars arriving before the deadline (" << thousand_sep(city_plan.bonus()) << " points each) and "
+                  << thousand_sep(total_score_ - cars_finished_ * city_plan.bonus()) << " points for early arrival times.\n\n"
+                  << thousand_sep(cars_finished_) << " of " << thousand_sep(city_plan.cars().size()) << " cars arrived before the deadline "
+                  << "(" << static_cast<float>(cars_finished_) / static_cast<float>(city_plan.cars().size()) * 100 << "%). ";
+        if (earliest_car_ && latest_car_) {
+            average_drive_time_ = static_cast<float>(total_driving_time_) / static_cast<float>(cars_finished_);
 
+            std::cout << "The earliest car (ID " << earliest_car_->get().id() << ") arrived at its destination after "
+                      << thousand_sep(earliest_car_->get().finish_time()) << " seconds scoring " << thousand_sep(max_car_score_)
+                      << " points, whereas the last car (ID " << latest_car_->get().id() << ") arrived at its destination "
+                      << "after " << thousand_sep(latest_car_->get().finish_time()) << " seconds scoring "
+                      << thousand_sep(min_car_score_) << " points. Cars that arrived within the deadline drove for an average of "
+                      << std::fixed << std::setprecision(2) << average_drive_time_ << " seconds to arrive at their destination.\n";
+        }
+        else {
+            std::cout << "\n";
+        }
+    }
 }

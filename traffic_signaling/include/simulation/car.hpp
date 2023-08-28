@@ -12,8 +12,7 @@ namespace simulation {
 
     class Car {
     public:
-        explicit Car(const city_plan::Car &data)
-            : data_(data), path_index_(START), finish_time_(UNFINISHED) {}
+        explicit Car(const city_plan::Car &data) : data_(data) {}
 
         size_t current_street() const {
             return data_.path()[path_index_];
@@ -48,11 +47,11 @@ namespace simulation {
     private:
         const city_plan::Car &data_;
 
-        size_t path_index_;
-        size_t finish_time_;
-
-        static constexpr size_t START{0};
+        static constexpr size_t START{};
         static constexpr size_t UNFINISHED{std::numeric_limits<size_t>::max()};
+
+        size_t path_index_{START};
+        size_t finish_time_{UNFINISHED};
     };
 
 }

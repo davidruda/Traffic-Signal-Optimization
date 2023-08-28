@@ -8,7 +8,7 @@
 int main(int argc, char *argv[]) {
     std::vector<std::string> args{argv + 1, argv + argc};
     auto &&input_file = args[0];
-    //auto &&plan_file = args[1];
+    auto &&plan_file = args[1];
 
     auto start = std::chrono::high_resolution_clock::now();
     city_plan::CityPlan city_plan{input_file};
@@ -25,13 +25,19 @@ int main(int argc, char *argv[]) {
     end = std::chrono::high_resolution_clock::now();
     std::cout << "create_plan_default: " << std::chrono::duration<double>{end - start}.count() << "s\n";
 
-    // start = std::chrono::high_resolution_clock::now();
-    // simulation.read_plan(plan_file);
-    // end = std::chrono::high_resolution_clock::now();
-    // std::cout << "read_plan: " << std::chrono::duration<double>{end - start}.count() << "s\n";
+    start = std::chrono::high_resolution_clock::now();
+    simulation.write_plan(plan_file);
+    end = std::chrono::high_resolution_clock::now();
+    std::cout << "write_plan: " << std::chrono::duration<double>{end - start}.count() << "s\n";
 
     start = std::chrono::high_resolution_clock::now();
-    simulation.run();
+    simulation.read_plan(plan_file);
     end = std::chrono::high_resolution_clock::now();
-    std::cout << "run: " << std::chrono::duration<double>{end - start}.count() << "s\n";
+    std::cout << "read_plan: " << std::chrono::duration<double>{end - start}.count() << "s\n";
+
+    start = std::chrono::high_resolution_clock::now();
+    auto score = simulation.score();
+    end = std::chrono::high_resolution_clock::now();
+    std::cout << "score: " << std::chrono::duration<double>{end - start}.count() << "s\n"
+              << score << "\n";
 }

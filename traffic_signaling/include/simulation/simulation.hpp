@@ -2,6 +2,7 @@
 #define SIMULATION_SIMULATION_HPP
 
 #include <functional>
+#include <optional>
 #include <queue>
 #include <string>
 #include <string_view>
@@ -27,9 +28,7 @@ namespace simulation {
         // default means 1 second for every used street in the given order
         void create_plan_default();
 
-        Simulation &run();
-        size_t score() const;
-        void summary() const;
+        size_t score(bool verbose = false);
 
         const std::vector<Intersection> &intersections() const {
             return intersections_;
@@ -48,6 +47,26 @@ namespace simulation {
         }
 
     private:
+        struct Statistics {
+            Statistics() = default;
+            explicit Statistics(bool verbose) : verbose_(verbose) {}
+
+            static void reset(Simulation &simulation, bool verbose);
+            void update(const city_plan::CityPlan &city_plan, const Car &car);
+            void summary(const city_plan::CityPlan &city_plan);
+
+            bool verbose_{};
+            size_t total_score_{};
+            size_t cars_finished_{};
+            size_t total_driving_time_{};
+            size_t max_car_score_{};
+            size_t min_car_score_{std::numeric_limits<size_t>::max()};
+            float average_drive_time_{};
+            std::optional<std::reference_wrapper<const Car>> earliest_car_;
+            std::optional<std::reference_wrapper<const Car>> latest_car_;
+        };
+
+        void run();
         void reset_run();
         void reset_plan();
         void add_car_event(Car &car, size_t time);
@@ -65,6 +84,8 @@ namespace simulation {
 
         std::priority_queue<CarEvent, std::vector<CarEvent>, std::greater<>> car_events_;
         std::priority_queue<StreetEvent, std::vector<StreetEvent>, std::greater<>> street_events_;
+
+        Statistics stats_;
     };
 }
 

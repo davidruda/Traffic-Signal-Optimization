@@ -5,7 +5,7 @@
 
 namespace simulation {
 
-    size_t Event::counter_ = 0;
+    size_t Event::counter_{};
 
     Event::Event(size_t time) : time_(time) {
         assert(counter_ < std::numeric_limits<size_t>::max());

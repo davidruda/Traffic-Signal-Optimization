@@ -1,14 +1,14 @@
 #ifndef CITY_PLAN_INTERSECTION_HPP
 #define CITY_PLAN_INTERSECTION_HPP
 
+#include <utility>
 #include <vector>
 
 namespace city_plan {
 
     class Intersection {
     public:
-        explicit Intersection(size_t id)
-            : id_(id), used_(false), non_trivial_(false) {}
+        explicit Intersection(size_t id) : id_(id) {}
 
         void set_used(bool used) {
             used_ = used;
@@ -38,14 +38,18 @@ namespace city_plan {
             incoming_streets_.emplace_back(street_id);
         }
 
+        void set_incoming(std::vector<size_t> incoming) {
+            incoming_streets_ = std::move(incoming);
+        }
+
         friend std::ostream &operator<<(std::ostream &os, const Intersection &obj);
 
     private:
-        const size_t id_;
+        const size_t id_{};
         // incoming streets represented by street ids
         std::vector<size_t> incoming_streets_;
-        bool used_;
-        bool non_trivial_;
+        bool used_{};
+        bool non_trivial_{};
     };
 
 }

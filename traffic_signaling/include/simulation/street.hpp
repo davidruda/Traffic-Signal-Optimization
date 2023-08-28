@@ -10,8 +10,7 @@ namespace simulation {
 
     class Street {
     public:
-        explicit Street(const city_plan::Street &data)
-            : data_(data) {}
+        explicit Street(const city_plan::Street &data) : data_(data) {}
 
         size_t car_queue_size() const {
             return car_queue_.size();

@@ -13,6 +13,6 @@ int main(int argc, char *argv[]) {
     simulation::Simulation simulation{city_plan};
     simulation.create_plan_default();
 
-    simulation.run().summary();
-    std::cout << simulation.score() << "\n";
+    auto score = simulation.score(true);
+    std::cout << score << "\n";
 }

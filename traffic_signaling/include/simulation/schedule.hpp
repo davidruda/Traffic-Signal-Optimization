@@ -36,7 +36,7 @@ namespace simulation {
 
     class Schedule {
     public:
-        Schedule() : total_duration_(0) {}
+        Schedule() = default;
 
         size_t length() const {
             return green_lights_.size();
@@ -53,7 +53,7 @@ namespace simulation {
         void reset();
 
     private:
-        size_t total_duration_;
+        size_t total_duration_{};
         std::unordered_map<size_t, size_t> street_index_;
         std::vector<TimeInterval> green_lights_;
     };
