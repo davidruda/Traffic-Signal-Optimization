@@ -47,11 +47,11 @@ class TestIO(unittest.TestCase):
             simulation_0 = Simulation(d['city_plan'])
             simulation_0.create_plan_default()
             simulation_0.write_plan(d['plan_file'])
-            score_0 = simulation_0.run().score()
+            score_0 = simulation_0.score()
 
             simulation_1 = Simulation(d['city_plan'])
             simulation_1.read_plan(d['plan_file'])
-            score_1 = simulation_1.run().score()
+            score_1 = simulation_1.score()
 
             self.assertEqual(score_0, score_1)
 
@@ -61,10 +61,10 @@ class TestIO(unittest.TestCase):
             simulation = Simulation(d['city_plan'])
             simulation.create_plan_default()
             simulation.write_plan(d['plan_file'])
-            score_0 = simulation.run().score()
+            score_0 = simulation.score()
 
             simulation.read_plan(d['plan_file'])
-            score_1 = simulation.run().score()
+            score_1 = simulation.score()
 
             self.assertEqual(score_0, score_1)
 

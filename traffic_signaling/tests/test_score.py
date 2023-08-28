@@ -35,8 +35,7 @@ class TestScore(unittest.TestCase):
         for d in self.data:
             simulation = Simulation(d['city_plan'])
             simulation.create_plan_default()
-            score = simulation.run().score()
-            simulation.summary()
+            score = simulation.score(verbose=True)
             print('-' * 70)
             self.assertEqual(score, d['score'])
 

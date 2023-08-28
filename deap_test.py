@@ -1,4 +1,5 @@
 import argparse
+import array
 from collections import namedtuple, defaultdict
 import datetime
 from functools import partial
@@ -94,12 +95,6 @@ def simulation_factory(city_plan):
     s.create_plan_default()
     return s
 
-#def evaluate_traffic_schedules(individual):
-#    for i, (times, order) in enumerate(individual):
-#        schedules[i].set_schedule(times, order)
-#    fitness = simulation.run().score()
-#    return fitness,
-
 Pair = namedtuple('Pair', ['times', 'order'])
 
 def evaluate_traffic_schedules(individual, city_plan, simulations, schedule_ids):
@@ -122,22 +117,23 @@ def main(args):
     args.logdir = os.path.join('logs', '{}-{}-{}'.format(
         os.path.basename(globals().get('__file__', 'notebook')),
         datetime.datetime.now().strftime('%Y-%m-%d_%H%M%S'),
-        ",".join(("{}={}".format(re.sub('(.)[^_]*_?', r'\1', k), v) for k, v in sorted(vars(args).items())))
+        ','.join(('{}={}'.format(re.sub('(.)[^_]*_?', r'\1', k), v) for k, v in sorted(vars(args).items())))
     ))
 
     creator.create('FitnessMax', base.Fitness, weights=(1.0,))
     creator.create('Individual', list, fitness=creator.FitnessMax)
 
-
     def get_random_times(num_streets):
         #return [np.random.choice([0, 1], p=[0.05, 0.95]) for _ in range(num_streets)]
         #return [random.randint(0, max_green_time) for _ in range(num_streets)]
         #return np.random.choice([1], size=num_streets)
-        return [random.randint(1, 1) for _ in range(num_streets)]
+        return array.array('I', [random.randint(1, 1) for _ in range(num_streets)])
+        #return np.array([random.randint(1, 1) for _ in range(num_streets)])
     
     def get_random_order(num_streets):
         #return np.random.permutation(num_streets)
-        return list(np.random.permutation(num_streets))
+        return array.array('I', np.random.permutation(num_streets))
+        #return np.random.permutation(num_streets)
 
     def create_individual(schedules):
         return [Pair(get_random_times(s.length), get_random_order(s.length)) for s in schedules]
@@ -211,6 +207,7 @@ def main(args):
 
     def plot_optimization(logbook, show=False):
         import matplotlib.pyplot as plt
+        import matplotlib.ticker as ticker
         gen, max, min, avg = logbook.select('gen', 'max', 'min', 'avg')
         to_int = lambda x: int(x.replace(',', ''))
 
@@ -222,8 +219,15 @@ def main(args):
         plt.ylabel('Score')
         plt.legend()
         plt.title(f'Best score: {np.max(max):,}')
+
+        yticks = plt.gca().get_yticks()
+        plt.gca().yaxis.set_major_locator(ticker.FixedLocator(yticks))
+        plt.gca().set_yticklabels([f'{x:,.0f}' for x in yticks])#, rotation=45)
+        plt.tight_layout()
+
         os.makedirs(args.logdir, exist_ok=True)
         plt.savefig(os.path.join(args.logdir, f'{args.data}.pdf'), format='pdf')
+        
         if show:
             plt.show()
 
