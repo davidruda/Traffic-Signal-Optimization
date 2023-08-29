@@ -6,27 +6,35 @@ add_library(compiler_flags INTERFACE)
 target_compile_features(compiler_flags INTERFACE cxx_std_20)
 
 # Create helper variables to determine which compiler is used
-set(gcc_like_cxx "$<COMPILE_LANG_AND_ID:CXX,GNU,Clang,ARMClang,AppleClang>")
-set(msvc_cxx "$<COMPILE_LANG_AND_ID:CXX,MSVC>")
+set(IS_GCC "$<COMPILE_LANG_AND_ID:CXX,GNU>")
+set(IS_MSVC "$<COMPILE_LANG_AND_ID:CXX,MSVC>")
 
-# Add compile options to the interface library compiler_flags.
+# Distinction between Clang and Clang-cl due to inconsistent compiler flags
+set(IS_CLANG_LIKE "$<COMPILE_LANG_AND_ID:CXX,Clang>")
+set(IS_GNU_DRIVER "$<STREQUAL:${CMAKE_CXX_COMPILER_FRONTEND_VARIANT},GNU>")
+set(IS_MSVC_DRIVER "$<STREQUAL:${CMAKE_CXX_COMPILER_FRONTEND_VARIANT},MSVC>")
+set(IS_CLANG "$<AND:${IS_CLANG_LIKE},${IS_GNU_DRIVER}>")
+set(IS_CLANG_CL "$<AND:${IS_CLANG_LIKE},${IS_MSVC_DRIVER}>")
+
+# Add compile options to the interface library compiler_flags
 target_compile_options(compiler_flags INTERFACE
-        "$<${gcc_like_cxx}:$<BUILD_INTERFACE:$<IF:$<CONFIG:Debug>,,-O3>;-Wall;-Wextra;-Wpedantic>>"
-        "$<${msvc_cxx}:$<BUILD_INTERFACE:$<IF:$<CONFIG:Debug>,,/O2>;/W4>>"
-        )
+    "$<$<OR:${IS_GCC},${IS_CLANG}>:$<BUILD_INTERFACE:$<IF:$<CONFIG:Debug>,,-O3>;-Wall;-Wextra;-Wpedantic>>"
+    "$<${IS_CLANG_CL}:$<BUILD_INTERFACE:$<IF:$<CONFIG:Debug>,,/O2>;/W4;-Wpedantic>>"
+    "$<${IS_MSVC}:$<BUILD_INTERFACE:$<IF:$<CONFIG:Debug>,,/O2>;/W4>>"
+)
 
 set(source_files
-        src/city_plan/city_plan.cpp
-        src/city_plan/intersection.cpp
-        src/city_plan/street.cpp
-        src/city_plan/car.cpp
-        src/simulation/event.cpp
-        src/simulation/schedule.cpp
-        src/simulation/simulation.cpp
-        src/simulation/intersection.cpp
-        src/simulation/street.cpp
-        src/simulation/car.cpp
-        )
+    src/city_plan/city_plan.cpp
+    src/city_plan/intersection.cpp
+    src/city_plan/street.cpp
+    src/city_plan/car.cpp
+    src/simulation/event.cpp
+    src/simulation/schedule.cpp
+    src/simulation/simulation.cpp
+    src/simulation/intersection.cpp
+    src/simulation/street.cpp
+    src/simulation/car.cpp
+)
 
 add_executable(test_basic tests/test_basic.cpp "${source_files}")
 target_link_libraries(test_basic PUBLIC compiler_flags)
@@ -52,9 +60,9 @@ target_include_directories(test_time PUBLIC include)
 include(FetchContent)
 
 FetchContent_Declare(
-        pybind11
-        GIT_REPOSITORY https://github.com/pybind/pybind11.git
-        FIND_PACKAGE_ARGS
+    pybind11
+    GIT_REPOSITORY https://github.com/pybind/pybind11.git
+    FIND_PACKAGE_ARGS
 )
 FetchContent_MakeAvailable(pybind11)
 
