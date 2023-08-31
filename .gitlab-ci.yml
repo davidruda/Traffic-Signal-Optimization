@@ -5,6 +5,7 @@ default:
         - apt-get install -y build-essential git python3-venv python3-dev python3-pip
         - python3 -m venv venv
         - source venv/bin/activate
+        - pip install -r traffic_signaling/tests/requirements.txt
 
 
 build_test_cpp:
@@ -12,8 +13,8 @@ build_test_cpp:
     script:
         - pip install cmake
         - mkdir build && cd build
-        - cmake ../traffic_signaling
-        - cmake --build . --config Release -j 10
+        - cmake ../traffic_signaling -DBUILD_PYBIND_MODULES=ON
+        - cmake --build . --config Release -j 12
         - ctest -C Release -V --output-on-failure
 
 
@@ -21,7 +22,4 @@ build_test_python:
     allow_failure: true
     script:
         - pip install -r requirements.txt
-
-        - python3 traffic_signaling/tests/test_io.py
-        - python3 traffic_signaling/tests/test_score.py
-        - python3 traffic_signaling/tests/test_time.py
+        - python3 -m unittest discover -s traffic_signaling/tests

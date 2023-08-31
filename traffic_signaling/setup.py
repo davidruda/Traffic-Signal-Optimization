@@ -5,32 +5,41 @@ from setuptools import setup
 
 __version__ = '0.0.1'
 
+PACKAGE_NAME = 'traffic_signaling'
+CITY_PLAN_MODULE_NAME = 'city_plan'
+SIMULATION_MODULE_NAME = 'simulation'
+
 ext_modules = [
     Pybind11Extension(
-        'traffic_signaling',
-        sources=[
-            *glob('src/*.cpp'),
-            *glob('src/*/*.cpp')
-        ],
+        f'{PACKAGE_NAME}.{CITY_PLAN_MODULE_NAME}',
+        sources=sorted([
+            *glob(f'src/{CITY_PLAN_MODULE_NAME}/*.cpp'),
+            f'src/bindings/{CITY_PLAN_MODULE_NAME}.cpp'
+        ]),
         include_dirs=['include'],
         cxx_std=20
     ),
+    Pybind11Extension(
+        f'{PACKAGE_NAME}.{SIMULATION_MODULE_NAME}',
+        sources=sorted([
+            *glob(f'src/{CITY_PLAN_MODULE_NAME}/*.cpp'),
+            *glob(f'src/{SIMULATION_MODULE_NAME}/*.cpp'),
+            f'src/bindings/{SIMULATION_MODULE_NAME}.cpp'
+        ]),
+        include_dirs=['include'],
+        cxx_std=20
+    )
 ]
 
 setup(
-    name='traffic_signaling',
+    name=PACKAGE_NAME,
     version=__version__,
     author='David Ruda',
     ext_modules=ext_modules,
     cmdclass={'build_ext': build_ext},
-    packages=['traffic_signaling'],
+    packages=[PACKAGE_NAME],
     package_data={
-        'traffic_signaling': [
-            '__init__.pyi',
-            'py.typed',
-            'city_plan/__init__.pyi',
-            'simulation/__init__.pyi'
-        ],
+        PACKAGE_NAME: ['*.pyi', 'py.typed', 'data/*.txt']
     },
     python_requires='>=3.7'
 )

@@ -19,7 +19,7 @@ set(IS_CLANG_CL "$<AND:${IS_CLANG_LIKE},${IS_MSVC_DRIVER}>")
 # Add compile options to the interface library compiler_flags
 target_compile_options(compiler_flags INTERFACE
     "$<$<OR:${IS_GCC},${IS_CLANG}>:$<BUILD_INTERFACE:$<IF:$<CONFIG:Debug>,,-O3>;-Wall;-Wextra;-Wpedantic>>"
-    "$<${IS_CLANG_CL}:$<BUILD_INTERFACE:$<IF:$<CONFIG:Debug>,,/O2>;/W4;-Wpedantic>>"
+    "$<${IS_CLANG_CL}:$<BUILD_INTERFACE:$<IF:$<CONFIG:Debug>,,/O2>;/W4;-Wpedantic;/EHsc>>"
     "$<${IS_MSVC}:$<BUILD_INTERFACE:$<IF:$<CONFIG:Debug>,,/O2>;/W4>>"
 )
 
@@ -36,62 +36,84 @@ set(source_files
     src/simulation/car.cpp
 )
 
-add_executable(test_basic tests/test_basic.cpp "${source_files}")
-target_link_libraries(test_basic PUBLIC compiler_flags)
-target_include_directories(test_basic PUBLIC include)
+add_executable(test_score tests/test_score.cpp "${source_files}")
+target_link_libraries(test_score PUBLIC compiler_flags)
+target_include_directories(test_score PUBLIC include)
 
 add_executable(test_time tests/test_time.cpp "${source_files}")
 target_link_libraries(test_time PUBLIC compiler_flags)
 target_include_directories(test_time PUBLIC include)
 
-#find_package(Python COMPONENTS Interpreter Development REQUIRED)
-#message("Python executable: ${Python_EXECUTABLE}")
-#execute_process(COMMAND
-#        "${Python_EXECUTABLE}" -m pybind11 --cmakedir
-#        OUTPUT_VARIABLE PYBIND11_CMAKE_DIR
-#        OUTPUT_STRIP_TRAILING_WHITESPACE
-#        )
-#message("PYBIND11_CMAKE_DIR: ${PYBIND11_CMAKE_DIR}")
-#set(CMAKE_PREFIX_PATH "${PYBIND11_CMAKE_DIR}")
-#message("CMAKE_PREFIX_PATH: ${CMAKE_PREFIX_PATH}")
-#message("CMAKE_MODULE_PATH: ${CMAKE_MODULE_PATH}")
-#find_package(pybind11 REQUIRED)
+# Note that the pybind modules have to be built with the same (or compatible)
+# compiler as Python. Otherwise, the Python interpreter will crash when
+# importing the module with the following error:
+# ImportError: DLL load failed while importing <module>: The specified module could not be found.
+option(BUILD_PYBIND_MODULES "Build pybind modules via cmake" OFF)
+if(BUILD_PYBIND_MODULES)
+    include(FetchContent)
 
-include(FetchContent)
+    FetchContent_Declare(
+        pybind11
+        GIT_REPOSITORY https://github.com/pybind/pybind11.git
+        FIND_PACKAGE_ARGS
+    )
+    FetchContent_MakeAvailable(pybind11)
 
-FetchContent_Declare(
-    pybind11
-    GIT_REPOSITORY https://github.com/pybind/pybind11.git
-    FIND_PACKAGE_ARGS
-)
-FetchContent_MakeAvailable(pybind11)
+    pybind11_add_module(city_plan src/bindings/city_plan.cpp "${source_files}")
+    target_link_libraries(city_plan PUBLIC compiler_flags)
+    target_include_directories(city_plan PUBLIC include)
 
-pybind11_add_module(traffic_signaling src/bindings.cpp "${source_files}")
-target_link_libraries(traffic_signaling PUBLIC compiler_flags)
-target_include_directories(traffic_signaling PUBLIC include)
+    pybind11_add_module(simulation src/bindings/simulation.cpp "${source_files}")
+    target_link_libraries(simulation PUBLIC compiler_flags)
+    target_include_directories(simulation PUBLIC include)
+endif()
 
 include(CTest)
+set(PYTHON_PACKAGE_SOURCE_DIR "${CMAKE_SOURCE_DIR}/traffic_signaling")
+set(DATA_DIR "${PYTHON_PACKAGE_SOURCE_DIR}/data")
+set(OUT_DIR "${CMAKE_BINARY_DIR}/out")
 
-function(do_test target arg result)
-    file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/output/")
-    add_test(NAME "${target} ${arg}" COMMAND "${target}" "${CMAKE_SOURCE_DIR}/data/${arg}" "${CMAKE_BINARY_DIR}/output/${arg}")
+function(test_cpp target arg result)
+    file(MAKE_DIRECTORY "${OUT_DIR}")
+    add_test(NAME "${target} ${arg}" COMMAND "${target}" "${DATA_DIR}/${arg}.txt" "${OUT_DIR}/${arg}.txt")
     set_tests_properties("${target} ${arg}" PROPERTIES PASS_REGULAR_EXPRESSION ${result})
 endfunction()
 
-do_test(test_basic a.txt "1,001 points")
-do_test(test_basic b.txt "4,566,576 points")
-do_test(test_basic c.txt "1,299,357 points")
-do_test(test_basic d.txt "1,573,100 points")
-do_test(test_basic e.txt "684,769 points")
-do_test(test_basic f.txt "819,083 points")
+test_cpp(test_score a "1,001 points")
+test_cpp(test_score b "4,566,576 points")
+test_cpp(test_score c "1,299,357 points")
+test_cpp(test_score d "1,573,100 points")
+test_cpp(test_score e "684,769 points")
+test_cpp(test_score f "819,083 points")
 
-do_test(test_time a.txt ".*")
-do_test(test_time b.txt ".*")
-do_test(test_time c.txt ".*")
-do_test(test_time d.txt ".*")
-do_test(test_time e.txt ".*")
-do_test(test_time f.txt ".*")
+test_cpp(test_time a ".*")
+test_cpp(test_time b ".*")
+test_cpp(test_time c ".*")
+test_cpp(test_time d ".*")
+test_cpp(test_time e ".*")
+test_cpp(test_time f ".*")
 
-function(test_python)
+if(BUILD_PYBIND_MODULES)
+    find_package(Python COMPONENTS Interpreter REQUIRED)
+    set(PYTHON_TEST_DIR "${CMAKE_SOURCE_DIR}/tests")
 
-endfunction()
+    set(PYTHONPATH
+        "$<TARGET_FILE_DIR:city_plan>"
+        "$<TARGET_FILE_DIR:simulation>"
+        "${PYTHON_PACKAGE_SOURCE_DIR}"
+    )
+
+    # Convert PYTHONPATH to a string and replace the list separator with the
+    # platform specific separator
+    if(WIN32)
+        string(REPLACE ";" "\\;" PYTHONPATH "${PYTHONPATH}")
+    else()
+        string(REPLACE ";" ":" PYTHONPATH "${PYTHONPATH}")
+    endif()
+    message("PYTHONPATH: ${PYTHONPATH}")
+
+    add_test(NAME test_python_unittest
+        COMMAND "${CMAKE_COMMAND}" -E env PYTHONPATH=${PYTHONPATH}
+        "${Python_EXECUTABLE}" -m unittest discover -s "${PYTHON_TEST_DIR}"
+    )
+endif()
