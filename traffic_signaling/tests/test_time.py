@@ -1,41 +1,58 @@
-import argparse
 import os
+import shutil
 import time
+import unittest
 
-from traffic_signaling.city_plan import CityPlan
-from traffic_signaling.simulation import Simulation
+from parameterized import parameterized
 
-DEFAULT_INPUT_FOLDER = 'traffic_signaling/data'
-DEFAULT_OUTPUT_FOLDER = 'output'
-parser = argparse.ArgumentParser()
-parser.add_argument('--input', default=os.path.join(DEFAULT_INPUT_FOLDER, 'd.txt'), help='Input file.')
-parser.add_argument('--plan', default=os.path.join(DEFAULT_OUTPUT_FOLDER, 'd.txt'), help='Plan file.')
+from _resolve_imports import *
 
-def main(args):
-    start = time.time()
-    city_plan = CityPlan(args.input)
-    print(f'CityPlan constructor: {time.time() - start:.4f}s')
+class TestTime(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.output_dir = f'{os.path.dirname(__file__)}/out'
+        os.makedirs(cls.output_dir, exist_ok=True)
 
-    start = time.time()
-    simulation = Simulation(city_plan)
-    print(f'Simulation constructor: {time.time() - start:.4f}s')
+    @classmethod
+    def tearDownClass(cls):
+        shutil.rmtree(cls.output_dir)
 
-    start = time.time()
-    simulation.create_plan_default()
-    print(f'create_plan_default: {time.time() - start:.4f}s')
+    @parameterized.expand([
+        ('a'),
+        ('b'),
+        ('c'),
+        ('d'),
+        ('e'),
+        ('f')
+    ])
+    def test_time(self, data):
+        input = get_data_filename(data)
+        output = f'{self.output_dir}/{data}.txt'
 
-    start = time.time()
-    simulation.write_plan(args.plan)
-    print(f'write_plan: {time.time() - start:.4f}s')
+        print(f'\n{"-" * 31} DATA {data} {"-" * 31}')
+        start = time.time()
+        city_plan = CityPlan(input)
+        print(f'CityPlan constructor: {time.time() - start:.4f}s')
 
-    start = time.time()
-    simulation.read_plan(args.plan)
-    print(f'read_plan: {time.time() - start:.4f}s')
+        start = time.time()
+        simulation = Simulation(city_plan)
+        print(f'Simulation constructor: {time.time() - start:.4f}s')
 
-    start = time.time()
-    simulation.score()
-    print(f'score: {time.time() - start:.4f}s')
+        start = time.time()
+        simulation.create_plan_default()
+        print(f'create_plan_default: {time.time() - start:.4f}s')
+
+        start = time.time()
+        simulation.write_plan(output)
+        print(f'write_plan: {time.time() - start:.4f}s')
+
+        start = time.time()
+        simulation.read_plan(output)
+        print(f'read_plan: {time.time() - start:.4f}s')
+
+        start = time.time()
+        simulation.score()
+        print(f'score: {time.time() - start:.4f}s')
 
 if __name__ == '__main__':
-    args = parser.parse_args()
-    main(args)
+    unittest.main()

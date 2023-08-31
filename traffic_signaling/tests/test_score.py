@@ -1,46 +1,44 @@
-import argparse
-import os
 import unittest
 
-from traffic_signaling.city_plan import CityPlan
-from traffic_signaling.simulation import Simulation
+from parameterized import parameterized
 
-DEFAULT_INPUT_FOLDER = 'traffic_signaling/data'
-parser = argparse.ArgumentParser()
-parser.add_argument(
-    '--input-files',
-    nargs=6,
-    default=list(map(
-        lambda f: os.path.join(DEFAULT_INPUT_FOLDER, f),
-        ['a.txt', 'b.txt', 'c.txt', 'd.txt', 'e.txt', 'f.txt']
-    )),
-    help='Input data files: a, b, c, d, e, f respectively.'
-)
-args = parser.parse_args()
-
+from _resolve_imports import *
 
 class TestScore(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.data = [
-            {'city_plan': CityPlan(args.input_files[0]), 'score': 1_001},
-            {'city_plan': CityPlan(args.input_files[1]), 'score': 4_566_576},
-            {'city_plan': CityPlan(args.input_files[2]), 'score': 1_299_357},
-            {'city_plan': CityPlan(args.input_files[3]), 'score': 1_573_100},
-            {'city_plan': CityPlan(args.input_files[4]), 'score': 684_769},
-            {'city_plan': CityPlan(args.input_files[5]), 'score': 819_083}
-        ]
+        cls.scores = {
+            'a': 1_001,
+            'b': 4_566_576,
+            'c': 1_299_357,
+            'd': 1_573_100,
+            'e': 684_769,
+            'f': 819_083
+        }
+        cls.calculated_scores = {}
 
-    def test_score_default(self):
-        for d in self.data:
-            simulation = Simulation(d['city_plan'])
-            simulation.create_plan_default()
-            score = simulation.score(verbose=True)
-            print('-' * 70)
-            self.assertEqual(score, d['score'])
+    @classmethod
+    def tearDownClass(cls):
+        total_score = sum(score for score in cls.calculated_scores.values())
+        print(f'\n{"-" * 70}')
+        print(f'TOTAL SCORE: {total_score:,}')
 
-        print(f'TOTAL SUM: {sum(d["score"] for d in self.data):,}')
-
+    @parameterized.expand([
+        ('a'),
+        ('b'),
+        ('c'),
+        ('d'),
+        ('e'),
+        ('f')
+    ])
+    def test_score_default(self, data):
+        city_plan = CityPlan(get_data_filename(data))
+        simulation = Simulation(city_plan)
+        simulation.create_plan_default()
+        print(f'\n{"-" * 31} DATA {data} {"-" * 31}')
+        score = simulation.score(verbose=True)
+        self.assertEqual(score, self.scores[data])
+        self.calculated_scores[data] = score
 
 if __name__ == '__main__':
     unittest.main()

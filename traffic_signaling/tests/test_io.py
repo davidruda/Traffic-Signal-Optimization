@@ -1,73 +1,63 @@
-import argparse
 import os
+import shutil
 import unittest
 
-from traffic_signaling.city_plan import CityPlan
-from traffic_signaling.simulation import Simulation
+from parameterized import parameterized
 
-DEFAULT_INPUT_FOLDER = 'traffic_signaling/data'
-DEFAULT_OUTPUT_FOLDER = 'output'
-parser = argparse.ArgumentParser()
-parser.add_argument(
-    '--input-files',
-    nargs=6,
-    default=list(map(
-        lambda f: os.path.join(DEFAULT_INPUT_FOLDER, f),
-        ['a.txt', 'b.txt', 'c.txt', 'd.txt', 'e.txt', 'f.txt']
-    )),
-    help='Input data files: a, b, c, d, e, f respectively.'
-)
-parser.add_argument(
-    '--plan-files',
-    nargs=6,
-    default=list(map(
-        lambda f: os.path.join(DEFAULT_OUTPUT_FOLDER, f),
-        ['a.txt', 'b.txt', 'c.txt', 'd.txt', 'e.txt', 'f.txt']
-    )),
-    help='Files with plan: a, b, c, d, e, f respectively.'
-)
-args = parser.parse_args()
-
+from _resolve_imports import *
 
 class TestIO(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.data = [
-            {'city_plan': CityPlan(args.input_files[0]), 'plan_file': args.plan_files[0]},
-            {'city_plan': CityPlan(args.input_files[1]), 'plan_file': args.plan_files[1]},
-            {'city_plan': CityPlan(args.input_files[2]), 'plan_file': args.plan_files[2]},
-            {'city_plan': CityPlan(args.input_files[3]), 'plan_file': args.plan_files[3]},
-            {'city_plan': CityPlan(args.input_files[4]), 'plan_file': args.plan_files[4]},
-            {'city_plan': CityPlan(args.input_files[5]), 'plan_file': args.plan_files[5]}
-        ]
+        cls.output_dir = f'{os.path.dirname(__file__)}/out'
+        os.makedirs(cls.output_dir, exist_ok=True)
 
-    def test_io(self):
-        os.makedirs(DEFAULT_OUTPUT_FOLDER, exist_ok=True)
-        for d in self.data:
-            simulation_0 = Simulation(d['city_plan'])
-            simulation_0.create_plan_default()
-            simulation_0.write_plan(d['plan_file'])
-            score_0 = simulation_0.score()
+    @classmethod
+    def tearDownClass(cls):
+        shutil.rmtree(cls.output_dir)
+    
+    @parameterized.expand([
+        ('a'),
+        ('b'),
+        ('c'),
+        ('d'),
+        ('e'),
+        ('f')
+    ])
+    def test_io(self, data):
+        input = get_data_filename(data)
+        output = f'{self.output_dir}/{data}.txt'
 
-            simulation_1 = Simulation(d['city_plan'])
-            simulation_1.read_plan(d['plan_file'])
-            score_1 = simulation_1.score()
+        city_plan = CityPlan(input)
+        simulation = Simulation(city_plan)
+        simulation.create_plan_default()
+        simulation.write_plan(output)
+        score = simulation.score()
 
-            self.assertEqual(score_0, score_1)
+        simulation = Simulation(city_plan)
+        simulation.read_plan(output)
+        self.assertEqual(score, simulation.score())
 
-    def test_io_same_instance(self):
-        os.makedirs(DEFAULT_OUTPUT_FOLDER, exist_ok=True)
-        for d in self.data:
-            simulation = Simulation(d['city_plan'])
-            simulation.create_plan_default()
-            simulation.write_plan(d['plan_file'])
-            score_0 = simulation.score()
+    @parameterized.expand([
+        ('a'),
+        ('b'),
+        ('c'),
+        ('d'),
+        ('e'),
+        ('f')
+    ])
+    def test_io_same_instance(self, data):
+        input = get_data_filename(data)
+        output = f'{self.output_dir}/{data}.txt'
 
-            simulation.read_plan(d['plan_file'])
-            score_1 = simulation.score()
+        city_plan = CityPlan(input)
+        simulation = Simulation(city_plan)
+        simulation.create_plan_default()
+        simulation.write_plan(output)
+        score = simulation.score()
 
-            self.assertEqual(score_0, score_1)
-
+        simulation.read_plan(output)
+        self.assertEqual(score, simulation.score())
 
 if __name__ == '__main__':
     unittest.main()
