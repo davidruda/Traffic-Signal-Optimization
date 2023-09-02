@@ -1,5 +1,3 @@
-#include <iostream>
-
 #include "city_plan/car.hpp"
 
 namespace city_plan {

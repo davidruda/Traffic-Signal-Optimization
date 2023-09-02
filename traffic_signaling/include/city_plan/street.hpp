@@ -1,6 +1,7 @@
 #ifndef CITY_PLAN_STREET_HPP
 #define CITY_PLAN_STREET_HPP
 
+#include <iostream>
 #include <string>
 
 namespace city_plan {

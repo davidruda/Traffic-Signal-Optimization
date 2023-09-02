@@ -1,5 +1,3 @@
-#include <iostream>
-
 #include "city_plan/intersection.hpp"
 
 namespace city_plan {

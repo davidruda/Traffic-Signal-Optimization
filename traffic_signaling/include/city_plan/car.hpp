@@ -1,6 +1,7 @@
 #ifndef CITY_PLAN_CAR_HPP
 #define CITY_PLAN_CAR_HPP
 
+#include <iostream>
 #include <vector>
 
 namespace city_plan {

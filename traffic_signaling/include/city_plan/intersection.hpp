@@ -1,6 +1,7 @@
 #ifndef CITY_PLAN_INTERSECTION_HPP
 #define CITY_PLAN_INTERSECTION_HPP
 
+#include <iostream>
 #include <utility>
 #include <vector>
 
