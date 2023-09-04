@@ -36,6 +36,10 @@ set(source_files
     src/simulation/car.cpp
 )
 
+add_executable(test_io tests/test_io.cpp "${source_files}")
+target_link_libraries(test_io PUBLIC compiler_flags)
+target_include_directories(test_io PUBLIC include)
+
 add_executable(test_score tests/test_score.cpp "${source_files}")
 target_link_libraries(test_score PUBLIC compiler_flags)
 target_include_directories(test_score PUBLIC include)
@@ -78,6 +82,13 @@ function(test_cpp target arg result)
     add_test(NAME "${target} ${arg}" COMMAND "${target}" "${DATA_DIR}/${arg}.txt" "${OUT_DIR}/${arg}.txt")
     set_tests_properties("${target} ${arg}" PROPERTIES PASS_REGULAR_EXPRESSION ${result})
 endfunction()
+
+test_cpp(test_io a ".*")
+test_cpp(test_io b ".*")
+test_cpp(test_io c ".*")
+test_cpp(test_io d ".*")
+test_cpp(test_io e ".*")
+test_cpp(test_io f ".*")
 
 test_cpp(test_score a "1,001 points")
 test_cpp(test_score b "4,566,576 points")

@@ -2,6 +2,7 @@
 #define SIMULATION_SIMULATION_HPP
 
 #include <functional>
+#include <locale>
 #include <optional>
 #include <queue>
 #include <string>
@@ -64,6 +65,19 @@ namespace simulation {
             float average_drive_time_{};
             std::optional<std::reference_wrapper<const Car>> earliest_car_;
             std::optional<std::reference_wrapper<const Car>> latest_car_;
+        };
+
+        class ThousandSeparator : public std::numpunct<char> {
+        protected:
+            // Use a comma as the thousand separator
+            char do_thousands_sep() const override {
+                return ',';
+            }
+
+            // Use groups of 3 digits for the thousand separator
+            std::string do_grouping() const override {
+                return "\03";
+            }
         };
 
         void run();

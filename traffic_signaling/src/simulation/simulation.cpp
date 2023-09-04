@@ -219,37 +219,28 @@ namespace simulation {
     }
 
     void Simulation::Statistics::summary(const city_plan::CityPlan &city_plan) {
-        // return a number as a thousand seperated string
-        auto thousand_sep = [](size_t i) {
-            std::string s = std::to_string(i);
-            std::string formatted;
+        // Ensure that the thousand separator is used for printing numbers
+        // without relying on other locales, which may not be available.
+        std::locale custom_locale{std::locale{}, new ThousandSeparator};
+        std::cout.imbue(custom_locale);
 
-            int count = 0;
-            for (int pos = static_cast<int>(s.length()) - 1; pos >= 0; --pos) {
-                formatted.insert(0, 1, s[static_cast<size_t>(pos)]);
-                ++count;
-                if (count % 3 == 0 && pos > 0) {
-                    formatted.insert(0, 1, ',');
-                }
-            }
-            return formatted;
-        };
+        std::cout << "The submission scored **" << total_score_ << " points**. "
+                  << "This is the sum of " << cars_finished_ * city_plan.bonus() << " bonus points for "
+                  << "cars arriving before the deadline (" << city_plan.bonus() << " points each) and "
+                  << total_score_ - cars_finished_ * city_plan.bonus() << " points for early arrival times.\n\n"
+                  << cars_finished_ << " of " << city_plan.cars().size() << " cars arrived before the deadline (";
+        auto finished_percentage = static_cast<float>(cars_finished_) / static_cast<float>(city_plan.cars().size()) * 100;
+        std::cout << std::fixed << std::setprecision(2) << finished_percentage << "%). ";
 
-        std::cout << "The submission scored **" << thousand_sep(total_score_) << " points**. "
-                  << "This is the sum of " << thousand_sep(cars_finished_ * city_plan.bonus()) << " bonus points for "
-                  << "cars arriving before the deadline (" << thousand_sep(city_plan.bonus()) << " points each) and "
-                  << thousand_sep(total_score_ - cars_finished_ * city_plan.bonus()) << " points for early arrival times.\n\n"
-                  << thousand_sep(cars_finished_) << " of " << thousand_sep(city_plan.cars().size()) << " cars arrived before the deadline "
-                  << "(" << static_cast<float>(cars_finished_) / static_cast<float>(city_plan.cars().size()) * 100 << "%). ";
         if (earliest_car_ && latest_car_) {
             average_drive_time_ = static_cast<float>(total_driving_time_) / static_cast<float>(cars_finished_);
 
             std::cout << "The earliest car (ID " << earliest_car_->get().id() << ") arrived at its destination after "
-                      << thousand_sep(earliest_car_->get().finish_time()) << " seconds scoring " << thousand_sep(max_car_score_)
+                      << earliest_car_->get().finish_time() << " seconds scoring " << max_car_score_
                       << " points, whereas the last car (ID " << latest_car_->get().id() << ") arrived at its destination "
-                      << "after " << thousand_sep(latest_car_->get().finish_time()) << " seconds scoring "
-                      << thousand_sep(min_car_score_) << " points. Cars that arrived within the deadline drove for an average of "
-                      << std::fixed << std::setprecision(2) << average_drive_time_ << " seconds to arrive at their destination.\n";
+                      << "after " << latest_car_->get().finish_time() << " seconds scoring "
+                      << min_car_score_ << " points. Cars that arrived within the deadline drove for an average of "
+                      << average_drive_time_ << " seconds to arrive at their destination.\n";
         }
         else {
             std::cout << "\n";
