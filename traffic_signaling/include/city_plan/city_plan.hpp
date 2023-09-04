@@ -1,6 +1,7 @@
 #ifndef CITY_PLAN_CITY_PLAN_HPP
 #define CITY_PLAN_CITY_PLAN_HPP
 
+#include <fstream>
 #include <string>
 #include <string_view>
 #include <unordered_map>
@@ -16,6 +17,7 @@ namespace city_plan {
     class CityPlan {
     public:
         explicit CityPlan(const std::string &filename);
+        explicit CityPlan(std::ifstream &file);
 
         CityPlan(std::vector<Car> cars,
                  std::vector<Intersection> intersections,
