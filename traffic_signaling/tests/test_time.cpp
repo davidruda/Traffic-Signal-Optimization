@@ -21,7 +21,7 @@ int main(int argc, char *argv[]) {
               << input_file.substr(input_file.find(".txt") - 1, 1)
               << " -------------------------------\n";
 
-    std::chrono::time_point<std::chrono::steady_clock> start, end;
+    std::chrono::high_resolution_clock::time_point start, end;
 
     TIME(city_plan::CityPlan city_plan{input_file}, "CityPlan constructor")
     TIME(simulation::Simulation simulation{city_plan}, "Simulation constructor")
