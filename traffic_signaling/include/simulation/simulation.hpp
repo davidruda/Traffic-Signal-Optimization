@@ -2,6 +2,7 @@
 #define SIMULATION_SIMULATION_HPP
 
 #include <functional>
+#include <locale>
 #include <optional>
 #include <queue>
 #include <string>
