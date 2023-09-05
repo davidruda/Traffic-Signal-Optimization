@@ -1,14 +1,13 @@
 #include <fstream>
 #include <iostream>
 #include <stdexcept>
-#include <string>
 #include <vector>
 
 #include "city_plan/city_plan.hpp"
 
 namespace city_plan {
 
-    CityPlan::CityPlan(const std::string &filename) {
+    CityPlan::CityPlan(const std::string &filename) { // NOLINT(*-pro-type-member-init)
         std::ifstream file{filename};
         if (!file.is_open()) {
             throw std::runtime_error("Could not open file " + filename);
@@ -117,5 +116,4 @@ namespace city_plan {
         }
         return os;
     }
-
 }

@@ -2,7 +2,6 @@
 #include <iomanip>
 #include <ios>
 #include <iostream>
-#include <limits>
 #include <string>
 
 #include "simulation/simulation.hpp"
@@ -26,8 +25,7 @@ namespace simulation {
     }
 
     void Simulation::reset_run() {
-        car_events_ = {};
-        street_events_ = {};
+        event_queue_ = {};
         for (auto &&i: intersections_) {
             i.reset();
         }
@@ -96,89 +94,56 @@ namespace simulation {
         }
     }
 
-    void Simulation::add_car_event(Car &car, size_t time) {
-        car.move_to_next_street();
-        auto street_length = streets_[car.current_street()].length();
-        car_events_.emplace(time + street_length, car);
-    }
-
-    void Simulation::add_street_event(Street &street, size_t time) {
-        auto &&intersection = intersections_[street.end()];
-        auto &&next_green_time = schedules_.at(intersection.id()).next_green(street.id(), time);
-        if (next_green_time.has_value()) {
-            street_events_.emplace(next_green_time.value(), street);
-        }
-    }
-
     void Simulation::initialize_run() {
         for (auto &&car: cars_) {
-            auto &&street = streets_[car.current_street()];
-            street.add_car(car.id());
-            if (street.car_queue_size() == 1) {
-                add_street_event(street, 0);
-            }
+            add_event(car, 0);
         }
     }
 
-    void Simulation::process_car_events() {
-        auto current_time = car_events_.top().time();
-        while (!car_events_.empty() && current_time == car_events_.top().time()) {
-            auto &&car = car_events_.top().car();
-            car_events_.pop();
+    void Simulation::add_event(Car &car, size_t time) {
+        auto &&street = streets_[car.current_street()];
+        auto &&intersection = intersections_[street.end()];
 
-            if (car.final_destination()) {
-                car.set_finish_time(current_time);
+        auto latest_used_time = street.latest_used_time();
+        if (latest_used_time.has_value()) {
+            time = (*latest_used_time >= time) ? *latest_used_time + 1 : time;
+        }
+
+        auto next_green_time = schedules_.at(intersection.id()).next_green(street.id(), time);
+        if (next_green_time.has_value()) {
+            street.add_car(car.id(), *next_green_time);
+            event_queue_.emplace(*next_green_time, street);
+        }
+    }
+
+    void Simulation::process_event() {
+        auto current_time = event_queue_.top().time();
+        auto &&car = cars_[event_queue_.top().street().get_car()];
+        event_queue_.pop();
+
+        car.move_to_next_street();
+        auto &&next_street = streets_[car.current_street()];
+
+        if (car.final_destination()) {
+            auto finish_time = current_time + next_street.length();
+            if (finish_time <= city_plan_.duration()) {
+                car.set_finish_time(finish_time);
                 stats_.update(city_plan_, car);
-                continue;
             }
-
-            auto &&street = streets_[car.current_street()];
-            street.add_car(car.id());
-            if (street.car_queue_size() == 1) {
-                add_street_event(street, current_time);
-            }
+            return;
         }
-    }
-
-    void Simulation::process_street_events() {
-        auto current_time = street_events_.top().time();
-        while (!street_events_.empty() && current_time == street_events_.top().time()) {
-            auto &&street = street_events_.top().street();
-            auto &&car = cars_[street.get_car()];
-            street_events_.pop();
-
-            add_car_event(car, current_time);
-
-            if (street.car_queue_size() > 0) {
-                // The next green is at (current time + 1) or later
-                add_street_event(street, current_time + 1);
-            }
-        }
+        add_event(car, current_time + next_street.length());
     }
 
     void Simulation::run() {
         reset_run();
-        //TODO: finish refactoring the methods below
         initialize_run();
 
-        while (!car_events_.empty() || !street_events_.empty()) {
-            auto car_event_time =
-                    car_events_.empty() ? std::numeric_limits<size_t>::max() : car_events_.top().time();
-
-            auto street_event_time =
-                    street_events_.empty() ? std::numeric_limits<size_t>::max() : street_events_.top().time();
-
-            if (car_event_time > city_plan_.duration() &&
-                street_event_time > city_plan_.duration()) {
+        while (!event_queue_.empty()) {
+            if (event_queue_.top().time() > city_plan_.duration()) {
                 break;
             }
-
-            if (car_event_time <= street_event_time) {
-                process_car_events();
-            }
-            if (car_event_time >= street_event_time) {
-                process_street_events();
-            }
+            process_event();
         }
     }
 
@@ -240,10 +205,8 @@ namespace simulation {
                       << " points, whereas the last car (ID " << latest_car_->get().id() << ") arrived at its destination "
                       << "after " << latest_car_->get().finish_time() << " seconds scoring "
                       << min_car_score_ << " points. Cars that arrived within the deadline drove for an average of "
-                      << average_drive_time_ << " seconds to arrive at their destination.\n";
+                      << average_drive_time_ << " seconds to arrive at their destination.";
         }
-        else {
-            std::cout << "\n";
-        }
+        std::cout << "\n";
     }
 }
