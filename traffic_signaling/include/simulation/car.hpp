@@ -9,51 +9,50 @@
 #include "city_plan/city_plan.hpp"
 
 namespace simulation {
+class Car {
+public:
+    explicit Car(const city_plan::Car &data)
+        : data_(data) {}
 
-    class Car {
-    public:
-        explicit Car(const city_plan::Car &data) : data_(data) {}
+    size_t current_street() const {
+        return data_.path()[path_index_];
+    }
 
-        size_t current_street() const {
-            return data_.path()[path_index_];
-        }
+    void move_to_next_street() {
+        ++path_index_;
+    }
 
-        void move_to_next_street() {
-            ++path_index_;
-        }
+    bool final_destination() const {
+        return data_.path().size() - 1 == path_index_;
+    }
 
-        bool final_destination() const {
-            return data_.path().size() - 1 == path_index_;
-        }
+    size_t id() const {
+        return data_.id();
+    }
 
-        size_t id() const {
-            return data_.id();
-        }
+    void set_finish_time(size_t finish_time) {
+        finish_time_ = finish_time;
+    }
 
-        void set_finish_time(size_t finish_time) {
-            finish_time_ = finish_time;
-        }
+    size_t finish_time() const {
+        return finish_time_;
+    }
 
-        size_t finish_time() const {
-            return finish_time_;
-        }
+    bool finished() const {
+        return finish_time_ != UNFINISHED;
+    }
 
-        bool finished() const {
-            return finish_time_ != UNFINISHED;
-        }
+    void reset();
 
-        void reset();
+private:
+    const city_plan::Car &data_;
 
-    private:
-        const city_plan::Car &data_;
+    static constexpr size_t START{};
+    static constexpr size_t UNFINISHED{std::numeric_limits<size_t>::max()};
 
-        static constexpr size_t START{};
-        static constexpr size_t UNFINISHED{std::numeric_limits<size_t>::max()};
-
-        size_t path_index_{START};
-        size_t finish_time_{UNFINISHED};
-    };
-
+    size_t path_index_{START};
+    size_t finish_time_{UNFINISHED};
+};
 }
 
 #endif
