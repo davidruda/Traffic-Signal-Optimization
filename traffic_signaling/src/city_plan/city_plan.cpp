@@ -1,21 +1,28 @@
 #include <fstream>
 #include <iostream>
-#include <string>
+#include <stdexcept>
 #include <vector>
 
 #include "city_plan/city_plan.hpp"
 
 namespace city_plan {
 
-    CityPlan::CityPlan(const std::string &filename) {
-        std::ifstream data_file{filename};
+    CityPlan::CityPlan(const std::string &filename) { // NOLINT(*-pro-type-member-init)
+        std::ifstream file{filename};
+        if (!file.is_open()) {
+            throw std::runtime_error("Could not open file " + filename);
+        }
+        *this = CityPlan(file);
+    }
+
+    CityPlan::CityPlan(std::ifstream &file) {
         size_t duration;
         size_t number_of_intersections;
         size_t number_of_streets;
         size_t number_of_cars;
         size_t bonus;
 
-        data_file >> duration >> number_of_intersections >> number_of_streets >> number_of_cars >> bonus;
+        file >> duration >> number_of_intersections >> number_of_streets >> number_of_cars >> bonus;
 
         duration_ = duration;
         bonus_ = bonus;
@@ -39,7 +46,7 @@ namespace city_plan {
         std::string name;
         size_t length;
         for (size_t id = 0; id < number_of_streets; ++id) {
-            data_file >> start >> end >> name >> length;
+            file >> start >> end >> name >> length;
 #ifdef DEBUG
             std::cout << start << " " << end << " " << name << " " << length << "\n";
 #endif
@@ -52,14 +59,14 @@ namespace city_plan {
         std::string street_name;
 
         for (size_t id = 0; id < number_of_cars; ++id) {
-            data_file >> path_length;
+            file >> path_length;
 #ifdef DEBUG
             std::cout << path_length << " ";
 #endif
             std::vector<size_t> path;
             path.reserve(path_length);
             for (size_t i = 0; i < path_length; ++i) {
-                data_file >> street_name;
+                file >> street_name;
 #ifdef DEBUG
                 std::cout << street_name << " ";
 #endif
@@ -109,5 +116,4 @@ namespace city_plan {
         }
         return os;
     }
-
 }

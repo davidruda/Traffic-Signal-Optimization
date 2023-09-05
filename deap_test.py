@@ -1,17 +1,18 @@
 import argparse
 import array
-from collections import namedtuple, defaultdict
 import datetime
-from functools import partial
-import os
 import random
 import re
 import time
+from collections import namedtuple, defaultdict
+from functools import partial
 
 import numpy as np
-from deap import base, creator, tools, algorithms
+from deap import base, creator, tools
 from traffic_signaling.city_plan import *
+from traffic_signaling.data import *
 from traffic_signaling.simulation import *
+
 
 def varAnd(population, toolbox, cxpb, mutpb):
     offspring = [toolbox.clone(ind) for ind in population]
@@ -102,7 +103,7 @@ def evaluate_traffic_schedules(individual, city_plan, simulations, schedule_ids)
     schedules = simulation.schedules
     for i, (times, order) in enumerate(individual):
         schedules[schedule_ids[i]].set_schedule(times, order)
-    fitness = simulation.run().score()
+    fitness = simulation.score()
     return fitness,
 
 def main(args):
@@ -268,8 +269,7 @@ if __name__ == '__main__':
     max_green_time = 1
 
     start_sim = time.time()
-    DATA_FOLDER = 'traffic_signaling/data'
-    city_plan = CityPlan(os.path.join(DATA_FOLDER, f'{args.data}.txt'))
+    city_plan = CityPlan(get_data_filename(args.data))
     simulation = Simulation(city_plan)
     simulation.create_plan_default()
     print(f'Simulation prepared: {time.time() - start_sim:.4f}s')

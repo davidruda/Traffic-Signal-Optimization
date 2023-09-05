@@ -49,6 +49,19 @@ namespace simulation {
 
     private:
         struct Statistics {
+            class ThousandSeparator : public std::numpunct<char> {
+            protected:
+                // Use a comma as the thousand separator
+                char do_thousands_sep() const override {
+                    return ',';
+                }
+
+                // Use groups of 3 digits for the thousand separator
+                std::string do_grouping() const override {
+                    return "\03";
+                }
+            };
+
             Statistics() = default;
             explicit Statistics(bool verbose) : verbose_(verbose) {}
 
@@ -67,27 +80,12 @@ namespace simulation {
             std::optional<std::reference_wrapper<const Car>> latest_car_;
         };
 
-        class ThousandSeparator : public std::numpunct<char> {
-        protected:
-            // Use a comma as the thousand separator
-            char do_thousands_sep() const override {
-                return ',';
-            }
-
-            // Use groups of 3 digits for the thousand separator
-            std::string do_grouping() const override {
-                return "\03";
-            }
-        };
-
         void run();
         void reset_run();
         void reset_plan();
-        void add_car_event(Car &car, size_t time);
-        void add_street_event(Street &street, size_t time);
+        void add_event(Car &car, size_t time);
         void initialize_run();
-        void process_car_events();
-        void process_street_events();
+        void process_event();
 
         const city_plan::CityPlan &city_plan_;
 
@@ -96,8 +94,7 @@ namespace simulation {
         std::vector<Car> cars_;
         std::unordered_map<size_t, Schedule> schedules_;
 
-        std::priority_queue<CarEvent, std::vector<CarEvent>, std::greater<>> car_events_;
-        std::priority_queue<StreetEvent, std::vector<StreetEvent>, std::greater<>> street_events_;
+        std::priority_queue<StreetEvent, std::vector<StreetEvent>, std::greater<>> event_queue_;
 
         Statistics stats_;
     };
