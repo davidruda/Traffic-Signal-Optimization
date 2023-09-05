@@ -100,20 +100,34 @@ namespace simulation {
         }
     }
 
-    void Simulation::add_event(Car &car, size_t time) {
+    void Simulation::add_event(Car &car, size_t current_time) {
         auto &&street = streets_[car.current_street()];
         auto &&intersection = intersections_[street.end()];
 
+        // latest_used_time is the last time the street was used
+        // (i.e. the last time a car passed through it)
+        // It can be in the future (later that the current time)
         auto latest_used_time = street.latest_used_time();
+
+        // earliest_possible_time is the theoretical next earliest time
+        // the street can be used
+        size_t earliest_possible_time = current_time;
         if (latest_used_time.has_value()) {
-            time = (*latest_used_time >= time) ? *latest_used_time + 1 : time;
+            earliest_possible_time = (*latest_used_time >= current_time) ? *latest_used_time + 1 : current_time;
         }
 
-        auto next_green_time = schedules_.at(intersection.id()).next_green(street.id(), time);
-        if (next_green_time.has_value()) {
-            street.add_car(car.id(), *next_green_time);
-            event_queue_.emplace(*next_green_time, street);
+        // If there's no schedule for the intersection, don't add the event
+        if (!schedules_.contains(intersection.id())) {
+            return;
         }
+        auto next_green_time = schedules_[intersection.id()].next_green(street.id(), earliest_possible_time);
+
+        // If the street has no scheduled green light, don't add the event
+        if (!next_green_time.has_value()) {
+            return;
+        }
+        street.add_car(car.id(), *next_green_time);
+        event_queue_.emplace(*next_green_time, street);
     }
 
     void Simulation::process_event() {
@@ -122,17 +136,22 @@ namespace simulation {
         event_queue_.pop();
 
         car.move_to_next_street();
-        auto &&next_street = streets_[car.current_street()];
+        auto &&street = streets_[car.current_street()];
 
+        // If car is at the last street in its path
         if (car.final_destination()) {
-            auto finish_time = current_time + next_street.length();
+            auto finish_time = current_time + street.length();
+
+            // If the car arrives at the end of the street before
+            // the end of the simulation, mark it as finished and update the stats
             if (finish_time <= city_plan_.duration()) {
                 car.set_finish_time(finish_time);
                 stats_.update(city_plan_, car);
             }
             return;
         }
-        add_event(car, current_time + next_street.length());
+        // Add event when the car arrives at the end of the street
+        add_event(car, current_time + street.length());
     }
 
     void Simulation::run() {

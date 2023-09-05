@@ -83,7 +83,7 @@ namespace simulation {
         void run();
         void reset_run();
         void reset_plan();
-        void add_event(Car &car, size_t time);
+        void add_event(Car &car, size_t current_time);
         void initialize_run();
         void process_event();
 
