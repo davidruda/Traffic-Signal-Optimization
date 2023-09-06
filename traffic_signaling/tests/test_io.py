@@ -30,12 +30,12 @@ class TestIO(unittest.TestCase):
 
         city_plan = CityPlan(input)
         simulation = Simulation(city_plan)
-        simulation.create_plan_default()
-        simulation.write_plan(output)
+        simulation.default_schedules()
+        simulation.write_schedules(output)
         score = simulation.score()
 
         simulation = Simulation(city_plan)
-        simulation.read_plan(output)
+        simulation.read_schedules(output)
         self.assertEqual(score, simulation.score())
 
     @parameterized.expand([
@@ -52,11 +52,11 @@ class TestIO(unittest.TestCase):
 
         city_plan = CityPlan(input)
         simulation = Simulation(city_plan)
-        simulation.create_plan_default()
-        simulation.write_plan(output)
+        simulation.default_schedules()
+        simulation.write_schedules(output)
         score = simulation.score()
 
-        simulation.read_plan(output)
+        simulation.read_schedules(output)
         self.assertEqual(score, simulation.score())
 
 if __name__ == '__main__':

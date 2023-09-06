@@ -39,16 +39,16 @@ class TestTime(unittest.TestCase):
         print(f'Simulation constructor: {time.time() - start:.4f}s')
 
         start = time.time()
-        simulation.create_plan_default()
-        print(f'create_plan_default: {time.time() - start:.4f}s')
+        simulation.default_schedules()
+        print(f'default_schedules: {time.time() - start:.4f}s')
 
         start = time.time()
-        simulation.write_plan(output)
-        print(f'write_plan: {time.time() - start:.4f}s')
+        simulation.write_schedules(output)
+        print(f'write_schedules: {time.time() - start:.4f}s')
 
         start = time.time()
-        simulation.read_plan(output)
-        print(f'read_plan: {time.time() - start:.4f}s')
+        simulation.read_schedules(output)
+        print(f'read_schedules: {time.time() - start:.4f}s')
 
         start = time.time()
         simulation.score()

@@ -34,7 +34,7 @@ class TestScore(unittest.TestCase):
     def test_score_default(self, data):
         city_plan = CityPlan(get_data_filename(data))
         simulation = Simulation(city_plan)
-        simulation.create_plan_default()
+        simulation.default_schedules()
         print(f'\n{"-" * 31} DATA {data} {"-" * 31}')
         score = simulation.score(verbose=True)
         self.assertEqual(score, self.scores[data])

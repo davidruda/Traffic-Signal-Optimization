@@ -8,12 +8,13 @@
 #include "simulation/simulation.hpp"
 
 std::unordered_map<std::string, size_t> SCORES = {
-        {"a", 1001},
-        {"b", 4566576},
-        {"c", 1299357},
-        {"d", 1573100},
-        {"e", 684769},
-        {"f", 819083}};
+    {"a", 1001},
+    {"b", 4566576},
+    {"c", 1299357},
+    {"d", 1573100},
+    {"e", 684769},
+    {"f", 819083}
+};
 
 int main(int argc, char *argv[]) {
     std::vector<std::string> args{argv + 1, argv + argc};
@@ -26,7 +27,7 @@ int main(int argc, char *argv[]) {
 
     city_plan::CityPlan city_plan{input_file};
     simulation::Simulation simulation{city_plan};
-    simulation.create_plan_default();
+    simulation.default_schedules();
     auto score = simulation.score(true);
 
     if (score != SCORES[data]) {
