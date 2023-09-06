@@ -15,7 +15,7 @@ public:
         used_ = used;
     }
 
-    bool is_used() const {
+    bool used() const {
         return used_;
     }
 
@@ -23,7 +23,7 @@ public:
         non_trivial_ = non_trivial;
     }
 
-    bool is_non_trivial() const {
+    bool non_trivial() const {
         return non_trivial_;
     }
 
@@ -31,16 +31,16 @@ public:
         return id_;
     }
 
-    const std::vector<size_t> &incoming() const {
+    const std::vector<size_t> &incoming_streets() const {
         return incoming_streets_;
     }
 
-    void add_incoming(size_t street_id) {
-        incoming_streets_.emplace_back(street_id);
+    void set_incoming_streets(std::vector<size_t> &&incoming_streets) {
+        incoming_streets_ = std::move(incoming_streets);
     }
 
-    void set_incoming(std::vector<size_t> incoming) {
-        incoming_streets_ = std::move(incoming);
+    void add_incoming_street(size_t street_id) {
+        incoming_streets_.emplace_back(street_id);
     }
 
     friend std::ostream &operator<<(std::ostream &os, const Intersection &obj);

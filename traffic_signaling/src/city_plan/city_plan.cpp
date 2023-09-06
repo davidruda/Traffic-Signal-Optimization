@@ -1,7 +1,5 @@
-#include <fstream>
 #include <iostream>
 #include <stdexcept>
-#include <vector>
 
 #include "city_plan/city_plan.hpp"
 
@@ -12,7 +10,7 @@ CityPlan::CityPlan(const std::string &filename) { // NOLINT(*-pro-type-member-in
     if (!file.is_open()) {
         throw std::runtime_error("Could not open file " + filename);
     }
-    *this = CityPlan(file);
+    *this = CityPlan{file};
 }
 
 CityPlan::CityPlan(std::ifstream &file) {
@@ -21,6 +19,7 @@ CityPlan::CityPlan(std::ifstream &file) {
     size_t number_of_streets;
     size_t number_of_cars;
     size_t bonus;
+    std::unordered_map<std::string_view, size_t> street_mapping;
 
     file >> duration >> number_of_intersections >> number_of_streets >> number_of_cars >> bonus;
 
@@ -39,6 +38,7 @@ CityPlan::CityPlan(std::ifstream &file) {
     }
 
     streets_.reserve(number_of_streets);
+    street_mapping.reserve(number_of_streets);
     cars_.reserve(number_of_cars);
 
     size_t start;
@@ -50,9 +50,9 @@ CityPlan::CityPlan(std::ifstream &file) {
 #ifdef DEBUG
         std::cout << start << " " << end << " " << name << " " << length << "\n";
 #endif
-        auto &&street = streets_.emplace_back(id, start, end, name, length);
-        street_mapping_.emplace(street.name(), id);
-        intersections_[end].add_incoming(id);
+        auto &&street = streets_.emplace_back(id, start, end, std::move(name), length);
+        street_mapping.emplace(street.name(), id);
+        intersections_[end].add_incoming_street(id);
     }
 
     size_t path_length;
@@ -70,7 +70,7 @@ CityPlan::CityPlan(std::ifstream &file) {
 #ifdef DEBUG
             std::cout << street_name << " ";
 #endif
-            auto &&street_id = street_mapping_[street_name];
+            auto &&street_id = street_mapping[street_name];
             path.emplace_back(street_id);
 
             // The last street in path is not marked as used because it doesn't
@@ -80,17 +80,17 @@ CityPlan::CityPlan(std::ifstream &file) {
                 intersections_[streets_[street_id].end()].set_used(true);
             }
         }
-        cars_.emplace_back(id, path);
+        cars_.emplace_back(id, std::move(path));
 #ifdef DEBUG
         std::cout << "\n";
 #endif
     }
 
     for (auto &&intersection: intersections_) {
-        if (intersection.is_used()) {
+        if (intersection.used()) {
             size_t used_streets = 0;
-            for (auto &&street_id: intersection.incoming()) {
-                if (streets_[street_id].is_used()) {
+            for (auto &&street_id: intersection.incoming_streets()) {
+                if (streets_[street_id].used()) {
                     ++used_streets;
                     if (used_streets >= 2) {
                         intersection.set_non_trivial(true);

@@ -8,7 +8,7 @@ namespace city_plan {
 class Street {
 public:
     Street(size_t id, size_t start_id, size_t end_id,
-           std::string name, size_t length)
+           std::string &&name, size_t length)
         : id_(id), start_id_(start_id), end_id_(end_id),
           name_(std::move(name)), length_(length) {}
 
@@ -32,7 +32,7 @@ public:
         used_ = used;
     }
 
-    bool is_used() const {
+    bool used() const {
         return used_;
     }
 
