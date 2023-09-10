@@ -2,7 +2,7 @@
 #include <iomanip>
 #include <ios>
 #include <iostream>
-#include <string>
+#include <string_view>
 
 #include "simulation/simulation.hpp"
 
@@ -38,14 +38,14 @@ void Simulation::reset_run() {
     }
 }
 
-void Simulation::reset_plan() {
+void Simulation::reset_schedules() {
     for (auto &&s: schedules_) {
         s.second.reset();
     }
 }
 
-void Simulation::read_plan(const std::string &filename) {
-    reset_plan();
+void Simulation::read_schedules(const std::string &filename) {
+    reset_schedules();
     std::ifstream file{filename};
     size_t number_of_intersections;
     size_t intersection_id;
@@ -53,42 +53,50 @@ void Simulation::read_plan(const std::string &filename) {
     std::string street_name;
     size_t green_light_duration;
 
+    std::unordered_map<std::string_view, size_t> street_mapping;
+    street_mapping.reserve(streets_.size());
+    for (auto &&s: streets_) {
+        street_mapping.emplace(s.name(), s.id());
+    }
+
     file >> number_of_intersections;
+    schedules_.reserve(number_of_intersections);
+
     for (size_t i = 0; i < number_of_intersections; ++i) {
         file >> intersection_id;
 
         file >> number_of_streets;
         for (size_t j = 0; j < number_of_streets; ++j) {
             file >> street_name >> green_light_duration;
-            auto &&street_id = city_plan_.get_street_id_by_name(street_name);
+            auto &&street_id = street_mapping[street_name];
             schedules_[intersection_id].add_street(street_id, green_light_duration);
         }
     }
 }
 
-void Simulation::write_plan(const std::string &filename) {
+void Simulation::write_schedules(const std::string &filename) const {
     std::ofstream file{filename};
     file << schedules_.size() << "\n";
 
     for (auto &&intersection: intersections_) {
         if (schedules_.contains(intersection.id())) {
-            auto &&schedule = schedules_[intersection.id()];
+            auto &&schedule = schedules_.at(intersection.id());
             file << intersection.id() << "\n"
                  << schedule.length() << "\n";
 
-            for (auto &&[street_id, green_light]: schedule.green_light_schedule()) {
+            for (auto &&[street_id, green_light]: schedule.green_lights()) {
                 file << streets_[street_id].name() << " " << green_light.duration() << "\n";
             }
         }
     }
 }
 
-void Simulation::create_plan_default() {
-    reset_plan();
+void Simulation::default_schedules() {
+    reset_schedules();
     for (auto &&intersection: intersections_) {
-        for (auto &&s: intersection.incoming()) {
+        for (auto &&s: intersection.incoming_streets()) {
             auto &&street = streets_[s];
-            if (street.is_used()) {
+            if (street.used()) {
                 schedules_[intersection.id()].add_street(street.id(), 1);
             }
         }
@@ -205,7 +213,7 @@ void Simulation::Statistics::update(const city_plan::CityPlan &city_plan, const 
 
 void Simulation::Statistics::summary(const city_plan::CityPlan &city_plan) {
     // Ensure that the thousand separator is used for printing numbers
-    // without relying on other locales, which may not be available.
+    // without relying on other locales such as en_US.UTF-8, which may not be available.
     std::locale custom_locale{std::locale{}, new ThousandSeparator};
     std::cout.imbue(custom_locale);
 

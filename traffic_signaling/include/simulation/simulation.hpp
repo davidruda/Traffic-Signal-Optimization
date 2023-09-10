@@ -6,8 +6,8 @@
 #include <optional>
 #include <queue>
 #include <string>
-#include <string_view>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 #include "car.hpp"
@@ -22,11 +22,11 @@ class Simulation {
 public:
     explicit Simulation(const city_plan::CityPlan &city_plan);
 
-    void read_plan(const std::string &filename);
-    void write_plan(const std::string &filename);
+    void read_schedules(const std::string &filename);
+    void write_schedules(const std::string &filename) const;
 
     // default means 1 second for every used street in the given order
-    void create_plan_default();
+    void default_schedules();
 
     size_t score(bool verbose = false);
 
@@ -42,8 +42,16 @@ public:
         return cars_;
     }
 
-    std::unordered_map<size_t, Schedule> &schedules() {
+    const std::unordered_map<size_t, Schedule> &schedules() const {
         return schedules_;
+    }
+
+    void set_schedules(std::unordered_map<size_t, Schedule> &&schedules) {
+        schedules_ = std::move(schedules);
+    }
+
+    const city_plan::CityPlan &city_plan() const {
+        return city_plan_;
     }
 
 private:
@@ -82,7 +90,7 @@ private:
 
     void run();
     void reset_run();
-    void reset_plan();
+    void reset_schedules();
     void add_event(Car &car, size_t current_time);
     void initialize_run();
     void process_event();

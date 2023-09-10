@@ -3,7 +3,6 @@
 
 #include <cassert>
 #include <optional>
-#include <string>
 #include <unordered_map>
 #include <vector>
 
@@ -55,14 +54,6 @@ public:
     std::pair<std::vector<size_t>, std::vector<size_t>> get_schedule() const;
 
     void set_schedule(const std::vector<size_t> &times, const std::vector<size_t> &order);
-
-    const std::unordered_map<size_t, size_t> &get_street_index() const {
-        return street_index_;
-    }
-
-    void set_street_index(std::unordered_map<size_t, size_t> &&street_index) {
-        street_index_ = std::move(street_index);
-    }
 
     void reset();
 

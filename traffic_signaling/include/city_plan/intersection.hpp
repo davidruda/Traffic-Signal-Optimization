@@ -2,7 +2,6 @@
 #define CITY_PLAN_INTERSECTION_HPP
 
 #include <iostream>
-#include <utility>
 #include <vector>
 
 namespace city_plan {
@@ -33,10 +32,6 @@ public:
 
     const std::vector<size_t> &incoming_streets() const {
         return incoming_streets_;
-    }
-
-    void set_incoming_streets(std::vector<size_t> &&incoming_streets) {
-        incoming_streets_ = std::move(incoming_streets);
     }
 
     void add_incoming_street(size_t street_id) {

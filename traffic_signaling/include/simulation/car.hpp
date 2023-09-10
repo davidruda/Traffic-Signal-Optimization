@@ -1,10 +1,7 @@
 #ifndef SIMULATION_CAR_HPP
 #define SIMULATION_CAR_HPP
 
-#include <functional>
 #include <limits>
-#include <utility>
-#include <vector>
 
 #include "city_plan/city_plan.hpp"
 

@@ -3,9 +3,6 @@
 
 #include <fstream>
 #include <string>
-#include <string_view>
-#include <unordered_map>
-#include <utility>
 #include <vector>
 
 #include "car.hpp"
@@ -17,12 +14,6 @@ class CityPlan {
 public:
     explicit CityPlan(const std::string &filename);
     explicit CityPlan(std::ifstream &file);
-
-    // Don't use this directly - it's just to provide pickling support for Python
-    CityPlan(std::vector<Car> &&cars, std::vector<Intersection> &&intersections,
-             std::vector<Street> &&streets, size_t bonus, size_t duration)
-        : duration_(duration), intersections_(std::move(intersections)),
-          streets_(std::move(streets)), cars_(std::move(cars)), bonus_(bonus) {}
 
     const std::vector<Intersection> &intersections() const {
         return intersections_;
