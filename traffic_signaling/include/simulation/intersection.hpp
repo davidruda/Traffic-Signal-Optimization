@@ -15,8 +15,8 @@ public:
         return data_.id();
     }
 
-    const std::vector<size_t> &incoming() const {
-        return data_.incoming();
+    const std::vector<size_t> &incoming_streets() const {
+        return data_.incoming_streets();
     }
 
     // Does nothing - Keep this method for consistency

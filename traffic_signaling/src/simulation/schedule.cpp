@@ -1,5 +1,7 @@
 #include "simulation/schedule.hpp"
 
+// TODO: add comments with explanations of the complicated parts
+
 namespace simulation {
 
 void TimeInterval::set_interval(size_t begin, size_t end) {
@@ -8,16 +10,18 @@ void TimeInterval::set_interval(size_t begin, size_t end) {
     end_ = end;
 }
 
-std::vector<std::pair<size_t, TimeInterval>> Schedule::green_light_schedule() const {
+std::vector<std::pair<size_t, TimeInterval>> Schedule::green_lights() const {
     std::unordered_map<size_t, size_t> inverted_index;
+    inverted_index.reserve(street_index_.size());
     for (auto &&[street_id, index]: street_index_) {
         inverted_index.emplace(index, street_id);
     }
-    std::vector<std::pair<size_t, TimeInterval>> green_light_schedule;
+    std::vector<std::pair<size_t, TimeInterval>> green_lights;
+    green_lights.reserve(green_lights_.size());
     for (size_t i = 0; i < green_lights_.size(); ++i) {
-        green_light_schedule.emplace_back(inverted_index[i], green_lights_[i]);
+        green_lights.emplace_back(inverted_index[i], green_lights_[i]);
     }
-    return green_light_schedule;
+    return green_lights;
 }
 
 void Schedule::add_street(size_t street_id, size_t green_light_duration) {
@@ -31,23 +35,35 @@ void Schedule::add_street(size_t street_id, size_t green_light_duration) {
     total_duration_ += green_light_duration;
 }
 
-std::optional<size_t> Schedule::next_green(size_t street_id, size_t current_time) {
+std::optional<size_t> Schedule::next_green(size_t street_id, size_t time) {
     if (street_index_.contains(street_id)) {
         auto &&green_light = green_lights_[street_index_[street_id]];
         if (green_light.duration() > 0) {
-            auto time_normalized = current_time % total_duration_;
+            auto time_normalized = time % total_duration_;
             auto start = green_light.begin();
             if (time_normalized < start) {
-                return (current_time - time_normalized) + start;
+                return (time - time_normalized) + start;
             }
             auto end = green_light.end();
             if (time_normalized >= end) {
-                return (current_time - time_normalized) + total_duration_ + start;
+                return (time - time_normalized) + total_duration_ + start;
             }
-            return current_time;
+            return time;
         }
     }
     return {};
+}
+
+std::pair<std::vector<size_t>, std::vector<size_t>> Schedule::get_schedule() const {
+    std::vector<size_t> times, order;
+    times.reserve(green_lights_.size());
+    order.reserve(green_lights_.size());
+    for (size_t i = 0; i < green_lights_.size(); ++i) {
+        times.push_back(green_lights_[i].duration());
+        order.push_back(i);
+    }
+
+    return std::make_pair(std::move(times), std::move(order));
 }
 
 void Schedule::set_schedule(const std::vector<size_t> &times, const std::vector<size_t> &order) {

@@ -13,10 +13,6 @@ public:
     explicit Street(const city_plan::Street &data)
         : data_(data) {}
 
-    void add_car(size_t car_id, size_t time);
-    size_t get_car();
-    void reset();
-
     size_t id() const {
         return data_.id();
     }
@@ -33,13 +29,17 @@ public:
         return data_.length();
     }
 
-    bool is_used() const {
-        return data_.is_used();
+    bool used() const {
+        return data_.used();
     }
 
     std::optional<size_t> latest_used_time() const {
         return latest_used_time_;
     }
+
+    void add_car(size_t car_id, size_t time);
+    size_t get_car();
+    void reset();
 
 private:
     const city_plan::Street &data_;

@@ -38,10 +38,6 @@ public:
         return finish_time_;
     }
 
-    bool finished() const {
-        return finish_time_ != UNFINISHED;
-    }
-
     void reset();
 
 private:

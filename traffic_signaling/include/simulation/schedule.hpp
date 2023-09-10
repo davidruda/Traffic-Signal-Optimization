@@ -7,6 +7,8 @@
 #include <unordered_map>
 #include <vector>
 
+// TODO: add comments with explanations of the datastructures (they're complex)
+
 namespace simulation {
 struct TimeInterval {
 public:
@@ -46,10 +48,22 @@ public:
         return total_duration_;
     }
 
-    std::vector<std::pair<size_t, TimeInterval>> green_light_schedule() const;
-    void set_schedule(const std::vector<size_t> &times, const std::vector<size_t> &order);
+    std::vector<std::pair<size_t, TimeInterval>> green_lights() const;
     void add_street(size_t street_id, size_t green_light_duration);
-    std::optional<size_t> next_green(size_t street_id, size_t current_time);
+    std::optional<size_t> next_green(size_t street_id, size_t time);
+
+    std::pair<std::vector<size_t>, std::vector<size_t>> get_schedule() const;
+
+    void set_schedule(const std::vector<size_t> &times, const std::vector<size_t> &order);
+
+    const std::unordered_map<size_t, size_t> &get_street_index() const {
+        return street_index_;
+    }
+
+    void set_street_index(std::unordered_map<size_t, size_t> &&street_index) {
+        street_index_ = std::move(street_index);
+    }
+
     void reset();
 
 private:
