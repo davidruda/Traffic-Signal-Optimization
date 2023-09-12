@@ -5,9 +5,7 @@ import os
 import time
 import threading
 
-from traffic_signaling.city_plan import *
-from traffic_signaling.simulation import *
-from traffic_signaling.data import *
+from _resolve_imports import *
 
 #TODO: Update this file to use unittest
 
