@@ -184,6 +184,14 @@ size_t Simulation::score(bool verbose) {
     return stats_.total_score_;
 }
 
+void Simulation::update_schedules(const std::unordered_map<size_t,
+    std::pair<std::vector<size_t>, std::vector<size_t>>> &schedules) {
+    for (auto &&[id, schedule_pair]: schedules) {
+        auto &&[times, order] = schedule_pair;
+        schedules_[id].set_schedule(times, order);
+    }
+}
+
 void Simulation::Statistics::reset(Simulation &simulation, bool verbose) {
     if (!verbose) {
         simulation.stats_.total_score_ = {};

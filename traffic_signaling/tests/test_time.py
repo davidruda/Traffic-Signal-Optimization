@@ -10,7 +10,8 @@ from _resolve_imports import *
 class TestTime(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.output_dir = f'{os.path.dirname(__file__)}/out'
+        test_name = __file__.split(os.sep)[-1].removesuffix('.py')
+        cls.output_dir = f'{os.path.dirname(__file__)}{os.sep}out_{test_name}'
         os.makedirs(cls.output_dir, exist_ok=True)
 
     @classmethod

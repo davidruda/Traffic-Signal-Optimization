@@ -50,6 +50,9 @@ public:
         schedules_ = std::move(schedules);
     }
 
+    void update_schedules(const std::unordered_map<size_t,
+        std::pair<std::vector<size_t>, std::vector<size_t>>> &schedules);
+
     const city_plan::CityPlan &city_plan() const {
         return city_plan_;
     }

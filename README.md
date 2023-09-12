@@ -8,21 +8,27 @@
 [Google Hash Code archive](https://codingcompetitions.withgoogle.com/hashcode/archive)  
 [Kaggle competition with additional data](https://www.kaggle.com/competitions/hashcode-2021-oqr-extension/overview)
 
----
 
-## How to build the simulation for use in Python
-- On Linux you’ll need to install the `python-dev` or `python3-dev` packages e.g. `sudo apt install python3-dev`
-- Simply run `pip install ./simulation` (ideally in a virtual environment)
-- Verify by running `python simulation/tests/test_time.py`
 
----
+## How to build and install the `traffic_signaling` package for use in Python
+- Note that you need to have Python headers installed on your system in order to build the package (some Linux distributions don’t install them by default)
+
+  - You can check the location of the headers by running `python3 -c "import sysconfig; print(sysconfig.get_path('include'))"`
+  - If not available, install them; e.g. `sudo apt install python3-dev` on Ubuntu
+
+- Run `pip install ./traffic_signaling` (preferably in a virtual environment)
+
+- Optionally, verify the package by running tests:
+
+  - `pip install -r traffic_signaling/tests/requirements.txt`
+  - `python3 -m unittest discover -s traffic_signaling/tests`
+
 
 ## Solutions
 
 - `7,885,740` - 1 sec green for every incoming street
 - `8,943,886` - 1 sec green for every used (with at least one car going through) incoming street
 
----
 
 ## References
 
@@ -36,7 +42,6 @@
 
 [**Artificial Intelligence: A Modern Approach**](https://aima.cs.berkeley.edu/) ([PDF](https://github.com/yanshengjia/ml-road/blob/master/resources/Artificial%20Intelligence%20-%20A%20Modern%20Approach%20(3rd%20Edition).pdf))
 
----
 
 ### Surrogate models
 
@@ -46,7 +51,6 @@
 
 [Learning surrogate models for simulation-based optimization](https://aiche.onlinelibrary.wiley.com/doi/10.1002/aic.14418)  
 
----
 
 ### Competition-related papers
 

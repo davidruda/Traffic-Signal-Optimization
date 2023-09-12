@@ -1,11 +1,11 @@
 import argparse
 import array
+from collections import namedtuple, defaultdict
 import datetime
 import random
 import re
 import time
-from collections import namedtuple, defaultdict
-from functools import partial
+import threading
 
 import numpy as np
 from deap import base, creator, tools
@@ -13,6 +13,15 @@ from traffic_signaling.city_plan import *
 from traffic_signaling.data import *
 from traffic_signaling.simulation import *
 
+parser = argparse.ArgumentParser()
+parser.add_argument('--data', default='a', type=str, help='Input data.')
+parser.add_argument('--population', default=100, type=int, help='Number of individuals in a population.')
+parser.add_argument('--generations', default=100, type=int, help='Number of generations.')
+parser.add_argument('--crossover', default=0.5, type=float, help='Crossover probability.')
+parser.add_argument('--mutation', default=0.2, type=float, help='Mutation probability.')
+parser.add_argument('--parallel', default=None, type=int, help='Number of threads for parallel evaluation.')
+parser.add_argument('--seed', default=42, type=int, help='Random seed.')
+parser.add_argument('--optimized_params', default='all', choices=['all', 'times', 'order'], help='Which parameters to optimize.')
 
 def varAnd(population, toolbox, cxpb, mutpb):
     offspring = [toolbox.clone(ind) for ind in population]
@@ -91,18 +100,24 @@ def eaSimple(population, toolbox, cxpb, mutpb, ngen, stats=None,
     return population, logbook
 
 
-def simulation_factory(city_plan):
+def simulation_factory():
     s = Simulation(city_plan)
-    s.create_plan_default()
+    s.default_schedules()
     return s
 
 Pair = namedtuple('Pair', ['times', 'order'])
 
-def evaluate_traffic_schedules(individual, city_plan, simulations, schedule_ids):
-    simulation = simulations[os.getpid()]
-    schedules = simulation.schedules
-    for i, (times, order) in enumerate(individual):
-        schedules[schedule_ids[i]].set_schedule(times, order)
+#def evaluate_traffic_schedules(individual):
+#    simulation = simulations[threading.get_ident()]
+#    schedules = simulation.schedules
+#    for i, (times, order) in enumerate(individual):
+#        schedules[schedule_ids[i]].set_schedule(times, order)
+#    fitness = simulation.score()
+#    return fitness,
+
+def evaluate_traffic_schedules(individual):
+    simulation = simulations[threading.get_ident()]
+    simulation.update_schedules(individual)
     fitness = simulation.score()
     return fitness,
 
@@ -110,8 +125,8 @@ def main(args):
     toolbox = base.Toolbox()
 
     if args.parallel:
-        import multiprocessing
-        pool = multiprocessing.Pool(processes=args.parallel)
+        import concurrent.futures
+        pool = concurrent.futures.ThreadPoolExecutor(max_workers=args.parallel)
         toolbox.register('map', pool.map)
 
     # Create logdir name
@@ -122,13 +137,14 @@ def main(args):
     ))
 
     creator.create('FitnessMax', base.Fitness, weights=(1.0,))
-    creator.create('Individual', list, fitness=creator.FitnessMax)
+    #creator.create('Individual', list, fitness=creator.FitnessMax)
+    creator.create('Individual', dict, fitness=creator.FitnessMax)
 
     def get_random_times(num_streets):
         #return [np.random.choice([0, 1], p=[0.05, 0.95]) for _ in range(num_streets)]
         #return [random.randint(0, max_green_time) for _ in range(num_streets)]
         #return np.random.choice([1], size=num_streets)
-        return array.array('I', [random.randint(1, 1) for _ in range(num_streets)])
+        return array.array('I', num_streets * [random.randint(1, 1)])
         #return np.array([random.randint(1, 1) for _ in range(num_streets)])
     
     def get_random_order(num_streets):
@@ -136,26 +152,43 @@ def main(args):
         return array.array('I', np.random.permutation(num_streets))
         #return np.random.permutation(num_streets)
 
-    def create_individual(schedules):
-        return [Pair(get_random_times(s.length), get_random_order(s.length)) for s in schedules]
+    def create_individual():
+        if args.optimized_params == 'all':
+            #individual = [
+            #    Pair(get_random_times(length), get_random_order(length))
+            #    for length in non_trivial_intersections_lengths
+            #]
+            individual = {
+                id: Pair(get_random_times(length), get_random_order(length))
+                for id, length in non_trivial_intersections_lengths
+            }
+        elif args.optimized_params == 'times':
+            ...
+        elif args.optimized_params == 'order':
+            ...
+        else:
+            raise ValueError('Invalid value for optimized_params')
+        return individual
 
-    func = partial(create_individual, schedules=schedules)
-    toolbox.register('individual', tools.initIterate, creator.Individual, func)
+    toolbox.register('individual', tools.initIterate, creator.Individual, create_individual)
     toolbox.register('population', tools.initRepeat, list, toolbox.individual)
 
-    func = partial(evaluate_traffic_schedules, city_plan=city_plan, simulations=simulations, schedule_ids=schedule_ids)
-    toolbox.register('evaluate', func)
+    toolbox.register('evaluate', evaluate_traffic_schedules)
 
     def crossover(ind1, ind2):
         assert len(ind1) == len(ind2)
-        for i in range(len(ind1)):
+        #for i in range(len(ind1)):
+        #for (times1, order1), (times2, order2) in zip(ind1.values(), ind2.values()):
+        for id in ind1:
             #tools.cxTwoPoint(ind1[i].times, ind2[i].times)
-            tools.cxOrdered(ind1[i].order, ind2[i].order)
+            #tools.cxOrdered(ind1[i].order, ind2[i].order)
+            #tools.cxOrdered(order1,  order2)
+            tools.cxOrdered(ind1[id].order,  ind2[id].order)
 
         return ind1, ind2
 
     def mutation(individual, indpb):
-        for times, order in individual:
+        for times, order in individual.values():
             # for i in range(len(times)):
             #    if random.random() < indpb:
             #        if random.random() < 0.5:
@@ -236,13 +269,14 @@ def main(args):
 
     def save_plan(individual):
         simulation = Simulation(city_plan)
-        simulation.create_plan_default()
-        schedules = simulation.schedules
-        for i, (times, order) in enumerate(individual):
-            schedules[schedule_ids[i]].set_schedule(times, order)
+        simulation.default_schedules()
+        #schedules = simulation.schedules
+        #for i, (times, order) in enumerate(individual):
+        #    schedules[schedule_ids[i]].set_schedule(times, order)
+        simulation.update_schedules(individual)
 
         os.makedirs(args.logdir, exist_ok=True)
-        simulation.write_plan(os.path.join(args.logdir, f'{args.data}.out.txt'))
+        simulation.write_schedules(os.path.join(args.logdir, f'{args.data}.out.txt'))
 
     best_individual = hof.items[0]
     best_fitness = hof.keys[0].values[0]
@@ -251,14 +285,6 @@ def main(args):
     print(f'Best fitness: {int(best_fitness):,}')
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--data', default='a', type=str, help='Input data.')
-    parser.add_argument('--population', default=100, type=int, help='Number of individuals in a population.')
-    parser.add_argument('--generations', default=100, type=int, help='Number of generations.')
-    parser.add_argument('--crossover', default=0.5, type=float, help='Crossover probability.')
-    parser.add_argument('--mutation', default=0.2, type=float, help='Mutation probability.')
-    parser.add_argument('--parallel', default=None, type=int, help='Number of processes for parallel computation.')
-    parser.add_argument('--seed', default=42, type=int, help='Random seed.')
     args = parser.parse_args()
 
     random.seed(args.seed)
@@ -270,21 +296,18 @@ if __name__ == '__main__':
 
     start_sim = time.time()
     city_plan = CityPlan(get_data_filename(args.data))
-    simulation = Simulation(city_plan)
-    simulation.create_plan_default()
     print(f'Simulation prepared: {time.time() - start_sim:.4f}s')
 
-    func = partial(simulation_factory, city_plan=city_plan)
-    simulations = defaultdict(func)
+    simulations = defaultdict(simulation_factory)
 
     start_schedule = time.time()
-    schedules = simulation.schedules
-    non_trivial_schedules = [schedules[intersection.id] for intersection in city_plan.intersections if
-                             intersection.non_trivial]
-    schedule_ids = [intersection.id for intersection in city_plan.intersections if
-                    intersection.non_trivial]
-    schedules = non_trivial_schedules
+
+    streets = city_plan.streets
+    non_trivial_intersections_lengths = [
+        (i.id, len([s for s in i.incoming_streets if streets[s].used]))
+        for i in city_plan.intersections if i.non_trivial
+    ]
+
     print(f'Schedules prepared: {time.time() - start_schedule:.4f}s')
 
     main(args)
-    
