@@ -1,0 +1,14 @@
+data=d
+population=100
+generations=100
+crossover=0.5
+mutation=0.2
+parallel=24
+seed=42
+optimize_params=order
+green_max=1
+green_min=0
+intersections=None
+logdir=logs\d\deap_test.py-2023-09-14_035242-c=0.5,d=d,g=100,gm=1,gm=0,i=None,m=0.2,op=order,p=24,p=100,s=42
+
+Elapsed time: 0:23:48

@@ -1,0 +1,12 @@
+data=e
+population=100
+generations=200
+crossover=0.5
+mutation=0.2
+parallel=24
+seed=42
+optimize_params=order
+intersections=None
+logdir=logs\e\deap_test.py-2023-09-14_032802-c=0.5,d=e,g=200,i=None,m=0.2,op=order,p=24,p=100,s=42
+
+Elapsed time: 0:00:55

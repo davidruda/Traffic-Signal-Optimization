@@ -6,7 +6,7 @@ out/
 *venv*/
 *build*/
 .idea/
-logs/
+#logs/
 
 *.egg-info
 
