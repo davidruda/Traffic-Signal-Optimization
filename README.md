@@ -25,7 +25,7 @@
 
 
 ## Solutions
-
+### [Solution Visualizer](https://yoann-dufresne.github.io/Hashcode_2021_visu/)
 - `7,885,740` - 1 sec green for every incoming street
 - `8,943,886` - 1 sec green for every used (with at least one car going through) incoming street
 

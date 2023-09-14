@@ -9,6 +9,7 @@ import threading
 
 import numpy as np
 from deap import base, creator, tools
+
 from traffic_signaling.city_plan import *
 from traffic_signaling.data import *
 from traffic_signaling.simulation import *
@@ -21,7 +22,12 @@ parser.add_argument('--crossover', default=0.5, type=float, help='Crossover prob
 parser.add_argument('--mutation', default=0.2, type=float, help='Mutation probability.')
 parser.add_argument('--parallel', default=None, type=int, help='Number of threads for parallel evaluation.')
 parser.add_argument('--seed', default=42, type=int, help='Random seed.')
-parser.add_argument('--optimized_params', default='all', choices=['all', 'times', 'order'], help='Which parameters to optimize.')
+parser.add_argument('--optimize_params', default='order', choices=['all', 'times', 'order'], help='Which parameters to optimize.')
+parser.add_argument('--green_max', default=1, type=int, help='Maximum possible green time for a street.')
+parser.add_argument('--green_min', default=0, type=int, help='Minimum possible green time for a street.')
+parser.add_argument('--intersections', default=None, nargs='+', help='Which specific intersections to optimize (if not all).')
+
+Pair = namedtuple('Pair', ['times', 'order'])
 
 def varAnd(population, toolbox, cxpb, mutpb):
     offspring = [toolbox.clone(ind) for ind in population]
@@ -100,22 +106,58 @@ def eaSimple(population, toolbox, cxpb, mutpb, ngen, stats=None,
     return population, logbook
 
 
-def simulation_factory():
+def save_statistics(logbook, show_plot=False):
+    import matplotlib.pyplot as plt
+    import matplotlib.ticker as ticker
+    import pandas as pd
+    gen, max, min, avg, std = logbook.select('gen', 'max', 'min', 'avg', 'std')
+    to_int = lambda x: int(x.replace(',', ''))
+
+    max, min, avg, std = (list(map(to_int, stat)) for stat in [max, min, avg, std])
+
+    os.makedirs(args.logdir, exist_ok=True)
+    df = pd.DataFrame({'gen': gen, 'max': max, 'min': min, 'std': std})
+    df.to_csv(os.path.join(args.logdir, f'{args.data}.csv'), index=False)
+
+    plt.plot(gen, max, label='max')
+    plt.plot(gen, min, label='min')
+    plt.plot(gen, avg, label='avg')
+    plt.xlabel('Number of generations')
+    plt.ylabel('Score')
+    plt.legend()
+    plt.title(f'Best score: {np.max(max):,}')
+
+    # Avoid scientific notation
+    #yticks = plt.gca().get_yticks()
+    #plt.gca().yaxis.set_major_locator(ticker.FixedLocator(yticks))
+    #plt.gca().set_yticklabels([f'{x:,.0f}' for x in yticks])#, rotation=45)
+    
+    #plt.tight_layout()
+
+    # Center the axes regardless of the labels
+    # pos = plt.gca().get_position()
+    # left = pos.x0
+    # right = pos.x1
+    # plt.subplots_adjust(right=(1 - left))
+
+    plt.savefig(os.path.join(args.logdir, f'{args.data}.pdf'), format='pdf')
+
+    if show_plot:
+        plt.show()
+
+def save_schedules(individual):
+    simulation = Simulation(city_plan)
+    simulation.default_schedules()
+    simulation.update_schedules(individual)
+    os.makedirs(args.logdir, exist_ok=True)
+    simulation.write_schedules(os.path.join(args.logdir, f'{args.data}.txt'))
+
+def default_simulation():
     s = Simulation(city_plan)
     s.default_schedules()
     return s
 
-Pair = namedtuple('Pair', ['times', 'order'])
-
-#def evaluate_traffic_schedules(individual):
-#    simulation = simulations[threading.get_ident()]
-#    schedules = simulation.schedules
-#    for i, (times, order) in enumerate(individual):
-#        schedules[schedule_ids[i]].set_schedule(times, order)
-#    fitness = simulation.score()
-#    return fitness,
-
-def evaluate_traffic_schedules(individual):
+def evaluate(individual):
     simulation = simulations[threading.get_ident()]
     simulation.update_schedules(individual)
     fitness = simulation.score()
@@ -124,105 +166,84 @@ def evaluate_traffic_schedules(individual):
 def main(args):
     toolbox = base.Toolbox()
 
-    if args.parallel:
+    if args.parallel and args.parallel > 0:
         import concurrent.futures
         pool = concurrent.futures.ThreadPoolExecutor(max_workers=args.parallel)
         toolbox.register('map', pool.map)
 
     # Create logdir name
-    args.logdir = os.path.join('logs', '{}-{}-{}'.format(
+    args.logdir = os.path.join('logs', args.data, '{}-{}-{}'.format(
         os.path.basename(globals().get('__file__', 'notebook')),
         datetime.datetime.now().strftime('%Y-%m-%d_%H%M%S'),
         ','.join(('{}={}'.format(re.sub('(.)[^_]*_?', r'\1', k), v) for k, v in sorted(vars(args).items())))
     ))
 
     creator.create('FitnessMax', base.Fitness, weights=(1.0,))
-    #creator.create('Individual', list, fitness=creator.FitnessMax)
     creator.create('Individual', dict, fitness=creator.FitnessMax)
 
-    def get_random_times(num_streets):
-        #return [np.random.choice([0, 1], p=[0.05, 0.95]) for _ in range(num_streets)]
-        #return [random.randint(0, max_green_time) for _ in range(num_streets)]
-        #return np.random.choice([1], size=num_streets)
-        return array.array('I', num_streets * [random.randint(1, 1)])
-        #return np.array([random.randint(1, 1) for _ in range(num_streets)])
+    def random_times(length, min, max, weights=None):
+        return array.array('I', random.choices(range(min, max + 1), weights, k=length))
+        #return array.array('I', length * [random.randint(1, 1)])
     
-    def get_random_order(num_streets):
-        #return np.random.permutation(num_streets)
-        return array.array('I', np.random.permutation(num_streets))
-        #return np.random.permutation(num_streets)
+    def random_order(length):
+        return array.array('I', np.random.permutation(length))
 
     def create_individual():
-        if args.optimized_params == 'all':
-            #individual = [
-            #    Pair(get_random_times(length), get_random_order(length))
-            #    for length in non_trivial_intersections_lengths
-            #]
-            individual = {
-                id: Pair(get_random_times(length), get_random_order(length))
-                for id, length in non_trivial_intersections_lengths
-            }
-        elif args.optimized_params == 'times':
-            ...
-        elif args.optimized_params == 'order':
-            ...
-        else:
-            raise ValueError('Invalid value for optimized_params')
+        min = args.green_min if args.green_min > 0 else 1
+        individual = {
+            id: 
+            Pair(
+                random_times(length, min, args.green_max),
+                random_order(length)
+            )
+            for id, length in non_trivial_intersections_lengths
+        }
         return individual
 
     toolbox.register('individual', tools.initIterate, creator.Individual, create_individual)
     toolbox.register('population', tools.initRepeat, list, toolbox.individual)
 
-    toolbox.register('evaluate', evaluate_traffic_schedules)
+    toolbox.register('evaluate', evaluate)
 
     def crossover(ind1, ind2):
-        assert len(ind1) == len(ind2)
-        #for i in range(len(ind1)):
-        #for (times1, order1), (times2, order2) in zip(ind1.values(), ind2.values()):
         for id in ind1:
-            #tools.cxTwoPoint(ind1[i].times, ind2[i].times)
-            #tools.cxOrdered(ind1[i].order, ind2[i].order)
-            #tools.cxOrdered(order1,  order2)
-            tools.cxOrdered(ind1[id].order,  ind2[id].order)
-
+            if args.optimize_params != 'order':
+                tools.cxTwoPoint(ind1[id].times, ind2[id].times)
+            if args.optimize_params != 'times':
+                tools.cxOrdered(ind1[id].order,  ind2[id].order)
         return ind1, ind2
 
     def mutation(individual, indpb):
+        def mutation_change_by_one(individual, low, up, indpb):
+            for i in range(len(individual)):
+                if random.random() < indpb:
+                    if random.random() < 0.5:
+                        individual[i] = min(individual[i] + 1, up)
+                    else:
+                        individual[i] = max(individual[i] - 1, low)
+            return individual,
+
         for times, order in individual.values():
-            # for i in range(len(times)):
-            #    if random.random() < indpb:
-            #        if random.random() < 0.5:
-            #            times[i] = min(times[i] + 1, max_green_time)
-            #        else:
-            #            times[i] = max(times[i] - 1, 0)
-            tools.mutShuffleIndexes(order, indpb)
+            if args.optimize_params != 'order':
+                mutation_change_by_one(times, args.green_min, args.green_max, indpb)
+                #tools.mutUniformInt(times, args.green_min, args.green_max, indpb)
+            if args.optimize_params != 'times':
+                tools.mutShuffleIndexes(order, indpb)
         return individual,
 
-    # Define the genetic operators (crossover and mutation)
     toolbox.register('mate', crossover)
     toolbox.register('mutate', mutation, indpb=0.05)
 
-    # Define the selection operator
     toolbox.register('select', tools.selTournament, tournsize=3)
 
     start_pop = time.time()
-    # Create the initial population
     population = toolbox.population(n=args.population)
     print(f'Population created: {time.time() - start_pop:.4f}s')
 
     stats = tools.Statistics(lambda individual: individual.fitness.values)
 
-    def print_population(population):
-        for i, individual in enumerate(population):
-            print(f'Individual {i}:')
-            print_individual(individual)
-        print()
-
-    def print_individual(individual):
-        for i, (times, order) in enumerate(individual):
-            print(f'Street {i}: {times} {order}')
-
-    # stats.register('print_population', print_population)
+    # This weird manipulation is necessary in order to avoid scientific notation
+    # and use thousands separator when printing statistics with tools.Statistics
     stats.register('max', lambda x: f'{int(np.max(x)):,}')
     stats.register('min', lambda x: f'{int(np.min(x)):,}')
     stats.register('avg', lambda x: f'{int(np.mean(x)):,}')
@@ -230,77 +251,29 @@ def main(args):
 
     hof = tools.HallOfFame(1)
 
-    print(f'eaSimple START: {time.time() - start_sim:.4f}s')
-    # Run the evolution using eaSimple
-    population, logbook = eaSimple(population, toolbox, cxpb=args.crossover,
-                                   mutpb=args.mutation, ngen=args.generations,
-                                   stats=stats, halloffame=hof, verbose=True)
-    #population, logbook = algorithms.eaSimple(population, toolbox, cxpb=args.crossover,
-    #                                          mutpb=args.mutation, ngen=args.generations,
-    #                                          stats=stats, halloffame=hof, verbose=True)
-
-    def plot_optimization(logbook, show=False):
-        import matplotlib.pyplot as plt
-        import matplotlib.ticker as ticker
-        gen, max, min, avg = logbook.select('gen', 'max', 'min', 'avg')
-        to_int = lambda x: int(x.replace(',', ''))
-
-        max, min, avg = (list(map(to_int, stats)) for stats in [max, min, avg])
-        plt.plot(gen, max, label='max')
-        plt.plot(gen, min, label='min')
-        plt.plot(gen, avg, label='avg')
-        plt.xlabel('Number of generations')
-        plt.ylabel('Score')
-        plt.legend()
-        plt.title(f'Best score: {np.max(max):,}')
-
-        yticks = plt.gca().get_yticks()
-        plt.gca().yaxis.set_major_locator(ticker.FixedLocator(yticks))
-        plt.gca().set_yticklabels([f'{x:,.0f}' for x in yticks])#, rotation=45)
-        plt.tight_layout()
-
-        os.makedirs(args.logdir, exist_ok=True)
-        plt.savefig(os.path.join(args.logdir, f'{args.data}.pdf'), format='pdf')
-        
-        if show:
-            plt.show()
-
-    plot_optimization(logbook)
-
-    def save_plan(individual):
-        simulation = Simulation(city_plan)
-        simulation.default_schedules()
-        #schedules = simulation.schedules
-        #for i, (times, order) in enumerate(individual):
-        #    schedules[schedule_ids[i]].set_schedule(times, order)
-        simulation.update_schedules(individual)
-
-        os.makedirs(args.logdir, exist_ok=True)
-        simulation.write_schedules(os.path.join(args.logdir, f'{args.data}.out.txt'))
+    #population, logbook = algorithms.eaSimple(
+    population, logbook = eaSimple(
+        population, toolbox, cxpb=args.crossover, mutpb=args.mutation,
+        ngen=args.generations, stats=stats, halloffame=hof, verbose=True
+    )
 
     best_individual = hof.items[0]
     best_fitness = hof.keys[0].values[0]
-
-    save_plan(best_individual)
     print(f'Best fitness: {int(best_fitness):,}')
+
+    save_statistics(logbook)
+    save_schedules(best_individual)
 
 if __name__ == '__main__':
     args = parser.parse_args()
 
     random.seed(args.seed)
     np.random.seed(args.seed)
-    
-    # Intersection details
-    #max_green_time = 2
-    max_green_time = 1
 
-    start_sim = time.time()
+    start = time.time()
     city_plan = CityPlan(get_data_filename(args.data))
-    print(f'Simulation prepared: {time.time() - start_sim:.4f}s')
 
-    simulations = defaultdict(simulation_factory)
-
-    start_schedule = time.time()
+    simulations = defaultdict(default_simulation)
 
     streets = city_plan.streets
     non_trivial_intersections_lengths = [
@@ -308,6 +281,9 @@ if __name__ == '__main__':
         for i in city_plan.intersections if i.non_trivial
     ]
 
-    print(f'Schedules prepared: {time.time() - start_schedule:.4f}s')
-
     main(args)
+    with open(os.path.join(args.logdir, 'info.txt'), 'w') as f:
+        for k, v in args.__dict__.items():
+            f.write(f'{k}={v}\n')
+        elapsed_time = datetime.timedelta(seconds=int(time.time() - start))
+        f.write(f'\nElapsed time: {elapsed_time}\n')
