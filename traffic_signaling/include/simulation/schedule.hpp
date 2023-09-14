@@ -59,6 +59,7 @@ public:
 
 private:
     size_t total_duration_{};
+    // mapping from street_id to index in green_lights
     std::unordered_map<size_t, size_t> street_index_;
     std::vector<TimeInterval> green_lights_;
 };

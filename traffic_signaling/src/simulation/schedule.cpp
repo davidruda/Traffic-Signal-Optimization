@@ -1,3 +1,5 @@
+#include <algorithm>
+
 #include "simulation/schedule.hpp"
 
 // TODO: add comments with explanations of the complicated parts
@@ -21,6 +23,13 @@ std::vector<std::pair<size_t, TimeInterval>> Schedule::green_lights() const {
     for (size_t i = 0; i < green_lights_.size(); ++i) {
         green_lights.emplace_back(inverted_index[i], green_lights_[i]);
     }
+
+    // Sort by start time of each street's green light
+    auto cmp = [](const auto &l, const auto &r) {
+        return l.second.begin() <= r.second.begin();
+    };
+    std::sort(green_lights.begin(), green_lights.end(), cmp);
+
     return green_lights;
 }
 
