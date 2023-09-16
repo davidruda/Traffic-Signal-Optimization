@@ -27,12 +27,15 @@ void test_io(const std::vector<std::string> &args, bool same_instance = false) {
     }
 
     if (score != score_1) {
-        std::cout << "------------------------------- DATA "
-                  // Ad hoc way to get the data name from the input file name.
-                  << input_file.substr(input_file.find(".txt") - 1, 1)
-                  << " -------------------------------\n";
+        std::cout
+                << "------------------------------- DATA "
+                // Ad hoc way to get the data name from the input file name.
+                << input_file.substr(input_file.find(".txt") - 1, 1)
+                << " -------------------------------\n";
 
-        auto &&msg = "Score mismatch: " + std::to_string(score) + " != " + std::to_string(score_1);
+        auto &&msg =
+                "Score mismatch: " + std::to_string(score) + " != " +
+                std::to_string(score_1);
         msg = (same_instance ? "[test_io_same_instance] " : "[test_io] ") + msg;
         std::cout << msg << "\n";
         throw std::runtime_error(msg);

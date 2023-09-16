@@ -1,7 +1,7 @@
 #ifndef SIMULATION_CAR_HPP
 #define SIMULATION_CAR_HPP
 
-#include <limits>
+#include <optional>
 
 #include "city_plan/city_plan.hpp"
 
@@ -31,20 +31,19 @@ public:
         finish_time_ = finish_time;
     }
 
-    size_t finish_time() const {
+    std::optional<size_t> finish_time() const {
         return finish_time_;
     }
 
-    void reset();
+    void reset() {
+        path_index_ = {};
+    }
 
 private:
     const city_plan::Car &data_;
 
-    static constexpr size_t START{};
-    static constexpr size_t UNFINISHED{std::numeric_limits<size_t>::max()};
-
-    size_t path_index_{START};
-    size_t finish_time_{UNFINISHED};
+    size_t path_index_{};
+    std::optional<size_t> finish_time_;
 };
 }
 

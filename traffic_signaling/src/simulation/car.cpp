@@ -1,9 +1,7 @@
 #include "simulation/car.hpp"
 
+// Keep this file for consistency
+
 namespace simulation {
 
-void Car::reset() {
-    path_index_ = {START};
-    finish_time_ = {UNFINISHED};
-}
 }
