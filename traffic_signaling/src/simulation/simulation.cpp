@@ -210,35 +210,35 @@ void Simulation::print_summary(const Simulation::Statistics &stats) const {
     std::cout.imbue(custom_locale);
 
     std::cout
-            << "The submission scored **" << total_score_ << " points**. "
-            << "This is the sum of " << stats.cars_finished_ * city_plan_.bonus()
-            << " bonus points for cars arriving before the deadline ("
-            << city_plan_.bonus() << " points each) and "
-            << total_score_ - stats.cars_finished_ * city_plan_.bonus()
-            << " points for early arrival times.\n\n"
-            << stats.cars_finished_ << " of "
-            << city_plan_.cars().size() << " cars arrived before the deadline (";
+        << "The submission scored **" << total_score_ << " points**. "
+        << "This is the sum of " << stats.cars_finished_ * city_plan_.bonus()
+        << " bonus points for cars arriving before the deadline ("
+        << city_plan_.bonus() << " points each) and "
+        << total_score_ - stats.cars_finished_ * city_plan_.bonus()
+        << " points for early arrival times.\n\n"
+        << stats.cars_finished_ << " of "
+        << city_plan_.cars().size() << " cars arrived before the deadline (";
     auto finished_percentage =
-            static_cast<float>(stats.cars_finished_) /
-            static_cast<float>(city_plan_.cars().size()) * 100;
+        static_cast<float>(stats.cars_finished_) /
+        static_cast<float>(city_plan_.cars().size()) * 100;
     std::cout
-            << std::fixed << std::setprecision(2) << finished_percentage << "%). ";
+        << std::fixed << std::setprecision(2) << finished_percentage << "%). ";
 
     if (stats.earliest_car_ && stats.latest_car_) {
         auto average_drive_time_ =
-                static_cast<float>(stats.total_driving_time_) /
-                static_cast<float>(stats.cars_finished_);
+            static_cast<float>(stats.total_driving_time_) /
+            static_cast<float>(stats.cars_finished_);
 
         std::cout
-                << "The earliest car (ID " << stats.earliest_car_->get().id()
-                << ") arrived at its destination after "
-                << *stats.earliest_car_->get().finish_time() << " seconds scoring "
-                << stats.max_car_score_ << " points, whereas the last car (ID "
-                << stats.latest_car_->get().id() << ") arrived at its destination after "
-                << *stats.latest_car_->get().finish_time() << " seconds scoring "
-                << stats.min_car_score_ << " points. "
-                << "Cars that arrived within the deadline drove for an average of "
-                << average_drive_time_ << " seconds to arrive at their destination.";
+            << "The earliest car (ID " << stats.earliest_car_->get().id()
+            << ") arrived at its destination after "
+            << *stats.earliest_car_->get().finish_time() << " seconds scoring "
+            << stats.max_car_score_ << " points, whereas the last car (ID "
+            << stats.latest_car_->get().id() << ") arrived at its destination after "
+            << *stats.latest_car_->get().finish_time() << " seconds scoring "
+            << stats.min_car_score_ << " points. "
+            << "Cars that arrived within the deadline drove for an average of "
+            << average_drive_time_ << " seconds to arrive at their destination.";
     }
     std::cout << "\n";
 }

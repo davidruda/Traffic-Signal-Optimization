@@ -23,8 +23,8 @@ int main(int argc, char *argv[]) {
     // Ad hoc way to get the data name from the input file name.
     auto data = input_file.substr(input_file.find(".txt") - 1, 1);
     std::cout
-            << "------------------------------- DATA " << data
-            << " -------------------------------\n";
+        << "------------------------------- DATA " << data
+        << " -------------------------------\n";
 
     city_plan::CityPlan city_plan{input_file};
     simulation::Simulation simulation{city_plan};
@@ -34,8 +34,8 @@ int main(int argc, char *argv[]) {
 
     if (score != SCORES[data]) {
         auto &&msg =
-                "Score mismatch: " + std::to_string(score) + " != " +
-                std::to_string(SCORES[data]);
+            "Score mismatch: " + std::to_string(score) + " != " +
+            std::to_string(SCORES[data]);
         std::cout << msg << "\n";
         throw std::runtime_error(msg);
     }

@@ -36,7 +36,8 @@ class TestScore(unittest.TestCase):
         simulation = Simulation(city_plan)
         simulation.default_schedules()
         print(f'\n{"-" * 31} DATA {data} {"-" * 31}')
-        score = simulation.score(verbose=True)
+        score = simulation.score()
+        simulation.summary()
         self.assertEqual(score, self.scores[data])
         self.calculated_scores[data] = score
 
