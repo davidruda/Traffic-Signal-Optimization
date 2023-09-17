@@ -38,7 +38,13 @@ public:
         incoming_streets_.emplace_back(street_id);
     }
 
-    friend std::ostream &operator<<(std::ostream &os, const Intersection &obj);
+    friend std::ostream &operator<<(std::ostream &os, const Intersection &obj) {
+        os << obj.id_ << "\n" << "Incoming streets:\n";
+        for (auto &&s: obj.incoming_streets_) {
+            os << s << "\n";
+        }
+        return os;
+    }
 
 private:
     const size_t id_;

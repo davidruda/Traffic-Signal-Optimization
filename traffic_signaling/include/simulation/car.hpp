@@ -27,23 +27,30 @@ public:
         return data_.id();
     }
 
-    void set_finish_time(size_t finish_time) {
-        finish_time_ = finish_time;
+    void arrive(const city_plan::CityPlan &city_plan, size_t arrival_time) {
+        arrival_time_ = arrival_time;
+        score_ = city_plan.bonus() + city_plan.duration() - arrival_time;
     }
 
-    std::optional<size_t> finish_time() const {
-        return finish_time_;
+    std::optional<size_t> arrival_time() const {
+        return arrival_time_;
+    }
+
+    size_t score() const {
+        return score_;
     }
 
     void reset() {
         path_index_ = {};
+        score_ = {};
     }
 
 private:
     const city_plan::Car &data_;
 
     size_t path_index_{};
-    std::optional<size_t> finish_time_;
+    std::optional<size_t> arrival_time_;
+    size_t score_{};
 };
 }
 

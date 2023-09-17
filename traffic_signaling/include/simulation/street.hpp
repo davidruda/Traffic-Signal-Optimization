@@ -13,33 +13,29 @@ public:
     explicit Street(const city_plan::Street &data)
         : data_(data) {}
 
+    void add_car(size_t car_id, size_t time) {
+        car_queue_.emplace(car_id);
+        latest_used_time_ = time;
+    }
+
+    size_t get_car() {
+        auto &&car = car_queue_.front();
+        car_queue_.pop();
+        return car;
+    }
+
     size_t id() const {
         return data_.id();
-    }
-
-    size_t end() const {
-        return data_.end();
-    }
-
-    const std::string &name() const {
-        return data_.name();
-    }
-
-    size_t length() const {
-        return data_.length();
-    }
-
-    bool used() const {
-        return data_.used();
     }
 
     std::optional<size_t> latest_used_time() const {
         return latest_used_time_;
     }
 
-    void add_car(size_t car_id, size_t time);
-    size_t get_car();
-    void reset();
+    void reset() {
+        car_queue_ = {};
+        latest_used_time_ = {};
+    }
 
 private:
     const city_plan::Street &data_;

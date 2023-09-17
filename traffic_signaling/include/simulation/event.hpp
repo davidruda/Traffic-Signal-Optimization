@@ -3,7 +3,6 @@
 
 #include <functional>
 
-#include "simulation/car.hpp"
 #include "simulation/street.hpp"
 
 namespace simulation {
@@ -19,7 +18,6 @@ public:
     bool operator>(const Event &other) const;
 
     enum Type {
-        CAR_EVENT_TYPE,
         STREET_EVENT_TYPE
     };
 
@@ -31,23 +29,6 @@ protected:
     static size_t counter_;
     size_t counter_id_;
     size_t time_;
-};
-
-class CarEvent : public Event {
-public:
-    CarEvent(size_t time, Car &car)
-        : Event(time), car_(car) {}
-
-    Type event_type() const override {
-        return Event::CAR_EVENT_TYPE;
-    }
-
-    Car &car() const {
-        return car_;
-    }
-
-private:
-    std::reference_wrapper<Car> car_;
 };
 
 class StreetEvent : public Event {

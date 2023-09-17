@@ -1,7 +1,5 @@
 #include <iostream>
 #include <stdexcept>
-#include <string_view>
-#include <unordered_map>
 #include <utility>
 
 #include "city_plan/city_plan.hpp"
@@ -16,79 +14,66 @@ CityPlan::CityPlan(const std::string &filename) { // NOLINT(*-pro-type-member-in
     *this = CityPlan{file};
 }
 
-CityPlan::CityPlan(std::ifstream &file) {
-    size_t duration;
+CityPlan::CityPlan(std::ifstream &file) { // NOLINT(*-pro-type-member-init)
     size_t number_of_intersections;
     size_t number_of_streets;
     size_t number_of_cars;
-    size_t bonus;
-    std::unordered_map<std::string_view, size_t> street_mapping;
 
-    file >> duration >> number_of_intersections >> number_of_streets >> number_of_cars >> bonus;
-
-    duration_ = duration;
-    bonus_ = bonus;
-
-#ifdef DEBUG
-    std::cout << duration_ << " " << number_of_intersections << " "
-              << number_of_streets << " " << number_of_cars << " "
-              << bonus_ << "\n";
-#endif
+    file >> duration_ >> number_of_intersections >> number_of_streets
+         >> number_of_cars >> bonus_;
 
     intersections_.reserve(number_of_intersections);
+    streets_.reserve(number_of_streets);
+    street_mapping_.reserve(number_of_streets);
+    cars_.reserve(number_of_cars);
+
     for (size_t id = 0; id < number_of_intersections; ++id) {
         intersections_.emplace_back(id);
     }
+    read_streets(file, number_of_streets);
+    read_cars(file, number_of_cars);
+    label_intersections();
+}
 
-    streets_.reserve(number_of_streets);
-    street_mapping.reserve(number_of_streets);
-    cars_.reserve(number_of_cars);
-
+void CityPlan::read_streets(std::ifstream &file, size_t count) {
     size_t start;
     size_t end;
     std::string name;
     size_t length;
-    for (size_t id = 0; id < number_of_streets; ++id) {
+    for (size_t id = 0; id < count; ++id) {
         file >> start >> end >> name >> length;
-#ifdef DEBUG
-        std::cout << start << " " << end << " " << name << " " << length << "\n";
-#endif
         auto &&street = streets_.emplace_back(id, start, end, std::move(name), length);
-        street_mapping.emplace(street.name(), id);
+        street_mapping_.emplace(street.name(), id);
         intersections_[end].add_incoming_street(id);
     }
+}
 
+void CityPlan::read_cars(std::ifstream &file, size_t count) {
     size_t path_length;
     std::string street_name;
 
-    for (size_t id = 0; id < number_of_cars; ++id) {
+    for (size_t id = 0; id < count; ++id) {
         file >> path_length;
-#ifdef DEBUG
-        std::cout << path_length << " ";
-#endif
+
         std::vector<size_t> path;
         path.reserve(path_length);
         for (size_t i = 0; i < path_length; ++i) {
             file >> street_name;
-#ifdef DEBUG
-            std::cout << street_name << " ";
-#endif
-            auto &&street_id = street_mapping[street_name];
+            auto &&street_id = street_mapping_[street_name];
             path.emplace_back(street_id);
 
-            // The last street in path is not marked as used because it doesn't
-            // use the traffic light
+            // The last street in path is not marked as used because the car
+            // doesn't use the traffic light there
             if (i < path_length - 1) {
                 streets_[street_id].set_used(true);
                 intersections_[streets_[street_id].end()].set_used(true);
             }
         }
         cars_.emplace_back(id, std::move(path));
-#ifdef DEBUG
-        std::cout << "\n";
-#endif
     }
+}
 
+void CityPlan::label_intersections() {
     for (auto &&intersection: intersections_) {
         if (intersection.used()) {
             size_t used_streets = 0;

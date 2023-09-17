@@ -25,15 +25,9 @@ target_compile_options(compiler_flags INTERFACE
 
 set(source_files
     src/city_plan/city_plan.cpp
-    src/city_plan/intersection.cpp
-    src/city_plan/street.cpp
-    src/city_plan/car.cpp
     src/simulation/event.cpp
     src/simulation/schedule.cpp
     src/simulation/simulation.cpp
-    src/simulation/intersection.cpp
-    src/simulation/street.cpp
-    src/simulation/car.cpp
 )
 
 add_executable(test_io tests/test_io.cpp "${source_files}")
