@@ -5,16 +5,16 @@
 # to PYTHONPATH
 
 try:
-    from traffic_signaling.data import get_data_filename
+    from traffic_signaling.data import *
 except ModuleNotFoundError:
-    from data import get_data_filename
+    from data import *
 
 try:
-    from traffic_signaling.city_plan import CityPlan
+    from traffic_signaling.city_plan import *
 except ModuleNotFoundError:
-    from city_plan import CityPlan
+    from city_plan import *
 
 try:
-    from traffic_signaling.simulation import Simulation
+    from traffic_signaling.simulation import *
 except ModuleNotFoundError:
-    from simulation import Simulation
+    from simulation import *

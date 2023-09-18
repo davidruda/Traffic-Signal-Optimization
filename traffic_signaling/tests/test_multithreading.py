@@ -4,57 +4,67 @@ import concurrent.futures
 import os
 import time
 import threading
+import unittest
 
 from _resolve_imports import *
 
-#TODO: Update this file to use unittest
-
 parser = argparse.ArgumentParser()
 parser.add_argument('--data', default='a', type=str, help='Input data.')
-parser.add_argument('--population', default=100, type=int, help='Number of individuals in a population.')
-parser.add_argument('--parallel', default=os.cpu_count(), type=int, help='Number of threads for parallel computation.')
+parser.add_argument('--simulations', default=100, type=int, help='Number of simulations for parallel computation.')
+parser.add_argument('--parallel', default=max(2, os.cpu_count()), type=int, help='Number of threads for parallel computation.')
 
-def eval(_):
-    return simulations[threading.get_ident()].score()
+class TestMultithreading(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.data = 'd'
+        cls.parallel = max(2, os.cpu_count())
+        cls.simulations = cls.parallel
 
-def test_run_times(args, map_func):
-    start = time.time()
-    scores = list(map_func(eval, args.population * [0]))
-    end = time.time() - start
-    print(f'{args.population} simulations finished: {end:.4f}s')
+    def test_multithreading(self):
+        _test_multithreading(self.data, self.simulations, self.parallel)
 
-    return scores, end
 
-def simulation_factory():
-    s = Simulation(city_plan)
-    s.default_schedules()
-    return s
+def _test_multithreading(data, count, parallel):
+    def simulation_factory():
+        s = Simulation(city_plan)
+        s.default_schedules()
+        return s
 
-def main(args):
+    def eval(_):
+        return simulations[threading.get_ident()].score()
+        
+    def run_simulations(map_func):
+        start = time.time()
+        scores = list(map_func(eval, count * [0]))
+        end = time.time() - start
+        print(f'{count} simulations finished: {end:.4f}s')
+        return scores, end
+
+    city_plan = CityPlan(get_data_filename(data))
     times = []
-    for n in range(1, args.parallel + 1):
+    print(f'\n{"-" * 31} DATA {data} {"-" * 31}')
+    for n in range(1, parallel + 1):
         print(f'{24 * "-"} Parallel: {n:2} threads {24 * "-"}')
         pool = concurrent.futures.ThreadPoolExecutor(max_workers=n)
-        global simulations
         simulations = defaultdict(simulation_factory)
-        _, elapsed_time = test_run_times(args, pool.map)
+        _, elapsed_time = run_simulations(pool.map)
         times.append(elapsed_time)
         pool.shutdown()
         print(70 * '-')
+    return times
 
+if __name__ == '__main__':
+    #unittest.main()
+    # Make it possible to run this test directly
+    # from the command line with arguments
+    args = parser.parse_args()
+    times = _test_multithreading(args.data, args.simulations, args.parallel)
     if times:
         import matplotlib.pyplot as plt
-
-        plt.plot(range(1, args.parallel + 1), times)
-        plt.xticks(range(1, args.parallel + 1))
+        plt.plot(range(1, len(times) + 1), times)
+        plt.xticks(range(1, len(times) + 1))
         plt.xlabel('Threads')
         plt.ylabel('Elapsed time in seconds')
         plt.title('Multithreading Performance Analysis')
         plt.show()
-
-if __name__ == '__main__':
-    args = parser.parse_args()
-    city_plan = CityPlan(get_data_filename(args.data))
-    simulations = None
-    main(args)
     
