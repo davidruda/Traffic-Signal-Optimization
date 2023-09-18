@@ -14,7 +14,6 @@
 #include "car.hpp"
 #include "city_plan/city_plan.hpp"
 #include "event.hpp"
-#include "intersection.hpp"
 #include "schedule.hpp"
 #include "street.hpp"
 
@@ -29,20 +28,10 @@ public:
     // default means 1 second for every used street in the given order
     void default_schedules();
 
+    //void scaled_schedules();
+
     size_t score();
     void summary() const;
-
-    const std::vector<Intersection> &intersections() const {
-        return intersections_;
-    }
-
-    const std::vector<Street> &streets() const {
-        return streets_;
-    }
-
-    const std::vector<Car> &cars() const {
-        return cars_;
-    }
 
     const std::unordered_map<size_t, Schedule> &schedules() const {
         return schedules_;
@@ -73,26 +62,15 @@ private:
         }
     };
 
-    struct Statistics {
-        size_t cars_finished_{};
-        size_t total_driving_time_{};
-        size_t max_car_score_{};
-        size_t min_car_score_{std::numeric_limits<size_t>::max()};
-        std::optional<std::reference_wrapper<const Car>> earliest_car_;
-        std::optional<std::reference_wrapper<const Car>> latest_car_;
-    };
-
     void run();
     void reset_run();
     void reset_schedules();
     void add_event(Car &car, size_t current_time);
     void initialize_run();
     void process_event();
-    void print_summary(const Statistics &stats) const;
 
     const city_plan::CityPlan &city_plan_;
 
-    std::vector<Intersection> intersections_;
     std::vector<Street> streets_;
     std::vector<Car> cars_;
     std::unordered_map<size_t, Schedule> schedules_;
