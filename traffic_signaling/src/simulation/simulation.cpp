@@ -84,7 +84,7 @@ void Simulation::default_schedules() {
     reset_schedules();
     for (auto &&intersection: city_plan_.intersections()) {
         if (intersection.used()) {
-            for (auto &&s: intersection.incoming_streets()) {
+            for (auto &&s: intersection.streets()) {
                 auto &&street = city_plan_.streets()[s];
                 if (street.used()) {
                     schedules_[intersection.id()].add_street(street.id(), 1);

@@ -30,17 +30,17 @@ public:
         return id_;
     }
 
-    const std::vector<size_t> &incoming_streets() const {
-        return incoming_streets_;
+    const std::vector<size_t> &streets() const {
+        return streets_;
     }
 
-    void add_incoming_street(size_t street_id) {
-        incoming_streets_.emplace_back(street_id);
+    void add_street(size_t street_id) {
+        streets_.emplace_back(street_id);
     }
 
     friend std::ostream &operator<<(std::ostream &os, const Intersection &obj) {
         os << obj.id_ << "\n" << "Incoming streets:\n";
-        for (auto &&s: obj.incoming_streets_) {
+        for (auto &&s: obj.streets_) {
             os << s << "\n";
         }
         return os;
@@ -49,7 +49,7 @@ public:
 private:
     const size_t id_;
     // incoming streets represented by street ids
-    std::vector<size_t> incoming_streets_;
+    std::vector<size_t> streets_;
     bool used_{};
     bool non_trivial_{};
 };

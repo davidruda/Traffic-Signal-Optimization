@@ -44,7 +44,7 @@ void CityPlan::read_streets(std::ifstream &file, size_t count) {
         file >> start >> end >> name >> length;
         auto &&street = streets_.emplace_back(id, start, end, std::move(name), length);
         street_mapping_.emplace(street.name(), id);
-        intersections_[end].add_incoming_street(id);
+        intersections_[end].add_street(id);
     }
 }
 
@@ -77,7 +77,7 @@ void CityPlan::label_intersections() {
     for (auto &&intersection: intersections_) {
         if (intersection.used()) {
             size_t used_streets = 0;
-            for (auto &&street_id: intersection.incoming_streets()) {
+            for (auto &&street_id: intersection.streets()) {
                 if (streets_[street_id].used()) {
                     ++used_streets;
                     if (used_streets >= 2) {
