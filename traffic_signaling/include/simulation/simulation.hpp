@@ -28,8 +28,6 @@ public:
     // default means 1 second for every used street in the given order
     void default_schedules();
 
-    //void scaled_schedules();
-
     size_t score();
     void summary() const;
 

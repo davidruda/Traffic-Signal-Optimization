@@ -3,7 +3,6 @@
 #include <ios>
 #include <iostream>
 
-
 #include "simulation/simulation.hpp"
 
 namespace simulation {
@@ -93,50 +92,6 @@ void Simulation::default_schedules() {
         }
     }
 }
-/*
-void Simulation::scaled_schedules() {
-    reset_schedules();
-    std::unordered_map<size_t, size_t> car_counts;
-    for (auto &&car: city_plan_.cars()) {
-        // size - 1 because the car doesn't need to wait for
-        // a green light at the last street
-        for (size_t i = 0; i < car.path().size() - 1; ++i) {
-            auto street_id = car.path()[i];
-            car_counts[street_id] += 1;
-        }
-    }
-
-    for (auto &&intersection: city_plan_.intersections()) {
-        if (intersection.non_trivial()) {
-            std::unordered_map<size_t, size_t> times;
-            for (auto &&street_id: intersection.incoming_streets()) {
-                if (city_plan_.streets()[street_id].used()) {
-                    times.emplace(street_id, car_counts[street_id]);
-                }
-            }
-            auto cmp = [](const auto &lhs, const auto &rhs) {
-                return lhs.second < rhs.second;
-            };
-            auto min_time = std::min_element(times.begin(), times.end(), cmp)->second;
-            for (auto &&[street_id, time]: times) {
-
-                auto scaled_time = static_cast<size_t>(std::round(static_cast<float>(time) / static_cast<float>(min_time)));
-                schedules_[intersection.id()].add_street(street_id, scaled_time);
-            }
-        }
-        else if (intersection.used()) {
-            for (auto &&street_id: intersection.incoming_streets()) {
-                auto &&street = city_plan_.streets()[street_id];
-                if (street.used()) {
-                    // If the intersection is used but not non-trivial,
-                    // it must have only one used incoming street
-                    schedules_[intersection.id()].add_street(street_id, 1);
-                    break;
-                }
-            }
-        }
-    }
-}*/
 
 void Simulation::initialize_run() {
     for (auto &&car: cars_) {
