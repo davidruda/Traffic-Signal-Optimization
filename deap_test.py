@@ -16,7 +16,7 @@ from traffic_signaling.data import *
 from traffic_signaling.simulation import *
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--data', default='d', type=str, help='Input data.')
+parser.add_argument('--data', default='a', type=str, help='Input data.')
 parser.add_argument('--population', default=100, type=int, help='Number of individuals in a population.')
 parser.add_argument('-g', '--generations', default=100, type=int, help='Number of generations.')
 parser.add_argument('--crossover', default=0.5, type=float, help='Crossover probability.')
@@ -343,7 +343,7 @@ if __name__ == '__main__':
         for i in intersections if i.non_trivial
         for s in i.streets if streets[s].used
     ]
-
+ 
     car_counts = car_counts[non_trivial_street_ids]
     counts_normalized = np.sqrt(car_counts / np.min(car_counts)).astype(int)
     values, counts = np.unique(counts_normalized, return_counts=True)
