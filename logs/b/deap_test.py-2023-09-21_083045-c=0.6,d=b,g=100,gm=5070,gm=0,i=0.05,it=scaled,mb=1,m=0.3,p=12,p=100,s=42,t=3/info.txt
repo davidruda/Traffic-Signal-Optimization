@@ -1,0 +1,15 @@
+data=b
+population=100
+generations=100
+crossover=0.6
+mutation=0.3
+indpb=0.05
+mut_bits=1
+tournsize=3
+parallel=12
+seed=42
+init_times=scaled
+green_max=5070
+green_min=0
+
+Elapsed time: 0:03:07

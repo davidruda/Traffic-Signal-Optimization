@@ -1,0 +1,13 @@
+data=f
+population=100
+generations=100
+crossover=0.5
+mutation=0.2
+indpb=0.1
+parallel=12
+seed=42
+green_max=1992
+green_min=0
+logdir=logs\f\deap_test.py-2023-09-19_131608-c=0.5,d=f,g=100,gm=1992,gm=0,i=0.1,m=0.2,p=12,p=100,s=42
+
+Elapsed time: 0:03:30

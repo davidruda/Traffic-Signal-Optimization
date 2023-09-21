@@ -1,0 +1,15 @@
+data=c
+population=100
+generations=100
+crossover=0.5
+mutation=0.2
+indpb=0.05
+mut_bits=1
+parallel=12
+seed=42
+init_times=scaled
+green_max=1640
+green_min=0
+logdir=logs\c\deap_test.py-2023-09-20_101337-c=0.5,d=c,g=100,gm=1640,gm=0,i=0.05,it=scaled,mb=1,m=0.2,p=12,p=100,s=42
+
+Elapsed time: 0:06:49
