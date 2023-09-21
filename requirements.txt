@@ -6,3 +6,4 @@ ipykernel
 deap
 matplotlib
 pandas
+scipy
