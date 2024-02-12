@@ -24,7 +24,6 @@ parser.add_argument('--mutation', default=0.2, type=float, help='Mutation probab
 #parser.add_argument('--mutation', default=0.5, type=float, help='Mutation probability.')
 parser.add_argument('--indpb', default=0.05, type=float, help='Probability of mutating each bit.')
 #parser.add_argument('--indpb', default=0.1, type=float, help='Probability of mutating each bit.')
-parser.add_argument('--mut_bits', default=1, type=float, help='Expected number of mutated bits per intersection.')
 parser.add_argument('--tournsize', default=3, type=int, help='Tournament size for selection.')
 parser.add_argument('--parallel', default=None, type=int, help='Number of threads for parallel evaluation.')
 parser.add_argument('--seed', default=42, type=int, help='Random seed.')
