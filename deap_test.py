@@ -167,6 +167,7 @@ def save_statistics(logdir, logbook, show_plot=False):
 
     fig.tight_layout()
     fig.savefig(os.path.join(logdir, f'{args.data}.pdf'), format='pdf')
+    fig.savefig(os.path.join(logdir, f'{args.data}.svg'), format='svg')
 
     if show_plot:
         plt.show()
@@ -342,12 +343,13 @@ if __name__ == '__main__':
         for i in intersections if i.non_trivial
         for s in i.streets if streets[s].used
     ]
- 
-    car_counts = car_counts[non_trivial_street_ids]
-    counts_normalized = np.sqrt(car_counts / np.min(car_counts)).astype(int)
-    values, counts = np.unique(counts_normalized, return_counts=True)
-    probabilities = counts / counts.sum()
-    car_counts_distribution = rv_discrete(values=(values, probabilities))
+
+    if args.init_times == 'scaled':
+        car_counts = car_counts[non_trivial_street_ids]
+        counts_normalized = np.sqrt(car_counts / np.min(car_counts)).astype(int)
+        values, counts = np.unique(counts_normalized, return_counts=True)
+        probabilities = counts / counts.sum()
+        car_counts_distribution = rv_discrete(values=(values, probabilities))
 
     args.green_max = city_plan.duration
     args.green_min = 0
