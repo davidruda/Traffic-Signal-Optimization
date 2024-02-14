@@ -44,11 +44,11 @@ void Schedule::add_street(size_t street_id, size_t green_light_duration) {
     total_duration_ += green_light_duration;
 }
 
-std::optional<size_t> Schedule::next_green(size_t street_id, size_t time) {
+std::optional<size_t> Schedule::next_green(size_t street_id, size_t time) const {
     if (!street_index_.contains(street_id)) {
         return {};
     }
-    auto &&green_light = green_lights_[street_index_[street_id]];
+    auto &&green_light = green_lights_[street_index_.at(street_id)];
     if (green_light.duration() <= 0) {
         return {};
     }

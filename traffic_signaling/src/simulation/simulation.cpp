@@ -83,10 +83,11 @@ void Simulation::default_schedules() {
     reset_schedules();
     for (auto &&intersection: city_plan_.intersections()) {
         if (intersection.used()) {
-            for (auto &&s: intersection.streets()) {
-                auto &&street = city_plan_.streets()[s];
+            auto &&schedule = schedules_[intersection.id()];
+            for (auto &&street_id: intersection.streets()) {
+                auto &&street = city_plan_.streets()[street_id];
                 if (street.used()) {
-                    schedules_[intersection.id()].add_street(street.id(), 1);
+                    schedule.add_street(street_id, 1);
                 }
             }
         }

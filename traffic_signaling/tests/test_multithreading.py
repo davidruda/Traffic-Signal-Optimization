@@ -18,7 +18,7 @@ class TestMultithreading(unittest.TestCase):
     def setUpClass(cls):
         cls.data = 'd'
         cls.parallel = max(2, os.cpu_count())
-        cls.simulations = cls.parallel
+        cls.simulations = cls.parallel #40
 
     def test_multithreading(self):
         _test_multithreading(self.data, self.simulations, self.parallel)

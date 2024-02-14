@@ -49,7 +49,7 @@ public:
 
     std::vector<std::pair<size_t, TimeInterval>> green_lights() const;
     void add_street(size_t street_id, size_t green_light_duration);
-    std::optional<size_t> next_green(size_t street_id, size_t time);
+    std::optional<size_t> next_green(size_t street_id, size_t time) const;
 
     std::pair<std::vector<size_t>, std::vector<size_t>> get_schedule() const;
 
