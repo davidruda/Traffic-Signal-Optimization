@@ -10,4 +10,6 @@ logs/
 
 *.egg-info
 
+*.pyd
+
 CMakeSettings.json
