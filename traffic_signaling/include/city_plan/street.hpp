@@ -28,12 +28,16 @@ public:
         return name_;
     }
 
-    void set_used(bool used) {
-        used_ = used;
+    void add_car() {
+        ++total_cars_;
+    }
+
+    size_t total_cars() const {
+        return total_cars_;
     }
 
     bool used() const {
-        return used_;
+        return total_cars_ > 0;
     }
 
     size_t length() const {
@@ -52,7 +56,8 @@ private:
     const size_t end_id_;
     const std::string name_;
     const size_t length_;
-    bool used_{};
+    // number of cars that use this street
+    size_t total_cars_{};
 };
 }
 

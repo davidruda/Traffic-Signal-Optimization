@@ -65,7 +65,7 @@ void CityPlan::read_cars(std::ifstream &file, size_t count) {
             // The last street in path is not marked as used because the car
             // doesn't use the traffic light there
             if (i < path_length - 1) {
-                streets_[street_id].set_used(true);
+                streets_[street_id].add_car();
                 intersections_[streets_[street_id].end()].set_used(true);
             }
         }

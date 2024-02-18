@@ -86,5 +86,9 @@ PYBIND11_MODULE(city_plan, m) {
         .def_property_readonly(
             "end",
             &city_plan::Street::end
+        )
+        .def_property_readonly(
+            "total_cars",
+            &city_plan::Street::total_cars
         );
 }
