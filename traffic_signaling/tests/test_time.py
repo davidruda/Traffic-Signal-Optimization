@@ -44,12 +44,12 @@ class TestTime(unittest.TestCase):
         print(f'default_schedules: {time.time() - start:.4f}s')
 
         start = time.time()
-        simulation.write_schedules(output)
-        print(f'write_schedules: {time.time() - start:.4f}s')
+        simulation.save_schedules(output)
+        print(f'save_schedules: {time.time() - start:.4f}s')
 
         start = time.time()
-        simulation.read_schedules(output)
-        print(f'read_schedules: {time.time() - start:.4f}s')
+        simulation.load_schedules(output)
+        print(f'load_schedules: {time.time() - start:.4f}s')
 
         start = time.time()
         simulation.score()

@@ -22,8 +22,8 @@ class Simulation {
 public:
     explicit Simulation(const city_plan::CityPlan &city_plan);
 
-    void read_schedules(const std::string &filename);
-    void write_schedules(const std::string &filename) const;
+    void load_schedules(const std::string &filename);
+    void save_schedules(const std::string &filename) const;
 
     // default means 1 second for every used street in the given order
     void default_schedules();
@@ -35,16 +35,11 @@ public:
         return schedules_;
     }
 
-    void set_schedules(std::unordered_map<size_t, Schedule> &&schedules) {
-        schedules_ = std::move(schedules);
-    }
+    void update_schedules(const std::vector<size_t> &intersection_ids,
+        const std::vector<std::pair<std::vector<size_t>, std::vector<size_t>>> &schedules,
+        bool relative = true);
 
-    void update_schedules(const std::unordered_map<size_t,
-        std::pair<std::vector<size_t>, std::vector<size_t>>> &schedules);
-
-    const city_plan::CityPlan &city_plan() const {
-        return city_plan_;
-    }
+    //std::vector<std::pair<size_t, std::pair<std::vector<size_t>, std::vector<size_t>>>> get_schedules() const;
 
 private:
     class ThousandSeparator : public std::numpunct<char> {

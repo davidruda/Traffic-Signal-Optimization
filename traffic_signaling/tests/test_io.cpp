@@ -12,17 +12,17 @@ void test_io(const std::vector<std::string> &args, bool same_instance = false) {
     city_plan::CityPlan city_plan{input_file};
     simulation::Simulation simulation{city_plan};
     simulation.default_schedules();
-    simulation.write_schedules(plan_file);
+    simulation.save_schedules(plan_file);
     auto score = simulation.score();
 
     size_t score_1;
     if (same_instance) {
-        simulation.read_schedules(plan_file);
+        simulation.load_schedules(plan_file);
         score_1 = simulation.score();
     }
     else {
         simulation::Simulation simulation_1{city_plan};
-        simulation_1.read_schedules(plan_file);
+        simulation_1.load_schedules(plan_file);
         score_1 = simulation_1.score();
     }
 

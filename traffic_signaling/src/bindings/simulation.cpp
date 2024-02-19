@@ -17,25 +17,28 @@ PYBIND11_MODULE(simulation, m) {
             py::keep_alive<1, 2>()
         )
         .def(
-            "read_schedules",
-            &simulation::Simulation::read_schedules,
+            "load_schedules",
+            &simulation::Simulation::load_schedules,
             py::arg("filename"),
             py::call_guard<py::gil_scoped_release>()
         )
         .def(
-            "write_schedules",
-            &simulation::Simulation::write_schedules,
+            "save_schedules",
+            &simulation::Simulation::save_schedules,
             py::arg("filename"),
             py::call_guard<py::gil_scoped_release>()
         )
         .def(
             "default_schedules",
-            &simulation::Simulation::default_schedules
+            &simulation::Simulation::default_schedules,
+            py::call_guard<py::gil_scoped_release>()
         )
         .def(
             "update_schedules",
             &simulation::Simulation::update_schedules,
+            py::arg("ids"),
             py::arg("schedules"),
+            py::arg("relative") = true,
             py::call_guard<py::gil_scoped_release>()
         )
         .def(
@@ -48,23 +51,27 @@ PYBIND11_MODULE(simulation, m) {
             &simulation::Simulation::summary,
             py::call_guard<py::scoped_ostream_redirect>()
         )
-        .def_property(
-            "schedules",
-            &simulation::Simulation::schedules,
-            &simulation::Simulation::set_schedules
-        )
+        //.def_property(
+        //    "schedules",
+        //    &simulation::Simulation::schedules,
+        //    &simulation::Simulation::set_schedules
+        //)
         .def_property_readonly(
-            "city_plan",
-            &simulation::Simulation::city_plan
+            "schedules",
+            &simulation::Simulation::schedules
         );
 
     py::class_<simulation::Schedule>(m, "Schedule")
-        .def(
-            "set_schedule",
-            &simulation::Schedule::set_schedule,
-            py::arg("times"),
-            py::arg("order")
-        )
+        //.def(
+        //    "set",
+        //    &simulation::Schedule::set,
+        //    py::arg("order"),
+        //    py::arg("times")
+        //)
+        //.def(
+        //    "get",
+        //    &simulation::Schedule::get
+        //)
         .def_property_readonly(
             "length",
             &simulation::Schedule::length

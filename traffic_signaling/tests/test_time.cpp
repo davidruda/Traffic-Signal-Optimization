@@ -30,8 +30,8 @@ int main(int argc, char *argv[]) {
     TIME(city_plan::CityPlan city_plan{input_file}, "CityPlan constructor")
     TIME(simulation::Simulation simulation{city_plan}, "Simulation constructor")
     TIME(simulation.default_schedules(), "default_schedules")
-    TIME(simulation.write_schedules(plan_file), "write_schedules")
-    TIME(simulation.read_schedules(plan_file), "read_schedules")
+    TIME(simulation.save_schedules(plan_file), "save_schedules")
+    TIME(simulation.load_schedules(plan_file), "load_schedules")
     TIME(auto score = simulation.score(), "score")
 
     std::cout << score << "\n";

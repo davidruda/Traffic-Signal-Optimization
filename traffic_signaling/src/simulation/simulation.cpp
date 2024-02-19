@@ -2,6 +2,9 @@
 #include <iomanip>
 #include <ios>
 #include <iostream>
+#include <cassert>
+#include <algorithm>
+#include <iterator>
 
 #include "simulation/simulation.hpp"
 
@@ -19,6 +22,18 @@ Simulation::Simulation(const city_plan::CityPlan &city_plan)
         cars_.emplace_back(c);
     }
 }
+//Simulation::Simulation(const city_plan::CityPlan &city_plan)
+//    : city_plan_(city_plan) {
+//    streets_.reserve(city_plan_.streets().size());
+//    cars_.reserve(city_plan_.cars().size());
+//
+//    for (auto &&s: city_plan_.streets()) {
+//        streets_.emplace(s.id(), s);
+//    }
+//    for (auto &&c: city_plan_.cars()) {
+//        cars_.emplace(c.id(), c);
+//    }
+//}
 
 void Simulation::reset_run() {
     total_score_ = {};
@@ -37,7 +52,7 @@ void Simulation::reset_schedules() {
     }
 }
 
-void Simulation::read_schedules(const std::string &filename) {
+void Simulation::load_schedules(const std::string &filename) {
     reset_schedules();
     std::ifstream file{filename};
     size_t number_of_intersections;
@@ -55,25 +70,26 @@ void Simulation::read_schedules(const std::string &filename) {
         file >> number_of_streets;
         for (size_t j = 0; j < number_of_streets; ++j) {
             file >> street_name >> green_light_duration;
-            auto &&street_id = city_plan_.street_mapping().at(street_name);
+            auto street_id = city_plan_.street_id(street_name);
             schedules_[intersection_id].add_street(street_id, green_light_duration);
         }
     }
 }
 
-void Simulation::write_schedules(const std::string &filename) const {
+void Simulation::save_schedules(const std::string &filename) const {
     std::ofstream file{filename};
     file << schedules_.size() << "\n";
 
     for (auto &&intersection: city_plan_.intersections()) {
         if (schedules_.contains(intersection.id())) {
             auto &&schedule = schedules_.at(intersection.id());
-            file << intersection.id() << "\n"
-                 << schedule.length() << "\n";
+            file << intersection.id() << "\n";
 
-            for (auto &&[street_id, green_light]: schedule.green_lights()) {
-                file << city_plan_.streets()[street_id].name() << " "
-                     << green_light.duration() << "\n";
+            auto &&[street_ids, times] = schedule.get();
+            file << times.size() << "\n";
+            for (size_t i = 0; i < times.size(); ++i) {
+                file << city_plan_.streets()[street_ids[i]].name() << " "
+                     << times[i] << "\n";
             }
         }
     }
@@ -84,11 +100,8 @@ void Simulation::default_schedules() {
     for (auto &&intersection: city_plan_.intersections()) {
         if (intersection.used()) {
             auto &&schedule = schedules_[intersection.id()];
-            for (auto &&street_id: intersection.streets()) {
-                auto &&street = city_plan_.streets()[street_id];
-                if (street.used()) {
-                    schedule.add_street(street_id, 1);
-                }
+            for (auto &&street_id: intersection.used_streets()) {
+                schedule.add_street(street_id, 1);
             }
         }
     }
@@ -232,11 +245,42 @@ void Simulation::summary() const {
     std::cout << "\n";
 }
 
-void Simulation::update_schedules(const std::unordered_map<size_t,
-    std::pair<std::vector<size_t>, std::vector<size_t>>> &schedules) {
-    for (auto &&[id, schedule_pair]: schedules) {
-        auto &&[times, order] = schedule_pair;
-        schedules_[id].set_schedule(times, order);
+//std::vector<std::pair<size_t, std::pair<std::vector<size_t>, std::vector<size_t>>>> Simulation::get_schedules() const {
+//    std::vector<std::pair<size_t, std::pair<std::vector<size_t>, std::vector<size_t>>>> schedules;
+//    schedules.reserve(schedules_.size());
+//    for (auto &&[id, schedule]: schedules_) {
+//        schedules.emplace_back(id, schedule.get());
+//    }
+//    return schedules;
+//}
+
+
+// TODO: maybe rewrite this function specifically for python types
+// relative - whether the order is of indices relative to the intersection
+// or absolute street ids
+void Simulation::update_schedules(const std::vector<size_t> &intersection_ids,
+    const std::vector<std::pair<std::vector<size_t>, std::vector<size_t>>> &schedules,
+    bool relative) {
+    assert(intersection_ids.size() == schedules.size());
+    for (size_t i = 0; i < intersection_ids.size(); ++i) {
+        auto id = intersection_ids[i];
+        auto &&[order, times] = schedules[i];
+
+        // TODO: maybe solve the relative/absolute street id problem differently
+        if (relative) {
+            std::vector<size_t> street_ids;
+            street_ids.reserve(order.size());
+            auto &&streets = city_plan_.intersections()[id].used_streets();
+
+            std::transform(order.begin(), order.end(), std::back_inserter(street_ids),
+                [&streets](size_t street_index) {
+                    return streets[street_index];
+                });
+            schedules_[id].set(street_ids, times);
+        }
+        else {
+            schedules_[id].set(order, times);
+        }
     }
 }
 }
