@@ -54,6 +54,10 @@ PYBIND11_MODULE(city_plan, m) {
             &city_plan::Intersection::streets
         )
         .def_property_readonly(
+            "used_streets",
+            &city_plan::Intersection::used_streets
+        )
+        .def_property_readonly(
             "used",
             &city_plan::Intersection::used
         )

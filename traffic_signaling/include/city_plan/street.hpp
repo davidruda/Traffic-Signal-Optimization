@@ -58,6 +58,7 @@ private:
     const size_t length_;
     // number of cars that use this street
     size_t total_cars_{};
+    // TODO: maybe use a vector of cars instead of a counter
 };
 }
 

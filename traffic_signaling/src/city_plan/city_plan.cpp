@@ -1,6 +1,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <utility>
+#include <set>
 
 #include "city_plan/city_plan.hpp"
 
@@ -32,7 +33,6 @@ CityPlan::CityPlan(std::ifstream &file) { // NOLINT(*-pro-type-member-init)
     }
     read_streets(file, number_of_streets);
     read_cars(file, number_of_cars);
-    label_intersections();
 }
 
 void CityPlan::read_streets(std::ifstream &file, size_t count) {
@@ -52,6 +52,7 @@ void CityPlan::read_cars(std::ifstream &file, size_t count) {
     size_t path_length;
     std::string street_name;
 
+    std::unordered_map<size_t, std::set<size_t>> used_streets;
     for (size_t id = 0; id < count; ++id) {
         file >> path_length;
 
@@ -62,30 +63,21 @@ void CityPlan::read_cars(std::ifstream &file, size_t count) {
             auto &&street_id = street_mapping_[street_name];
             path.emplace_back(street_id);
 
-            // The last street in path is not marked as used because the car
+            // The last street in path is not used because the car
             // doesn't use the traffic light there
             if (i < path_length - 1) {
                 streets_[street_id].add_car();
-                intersections_[streets_[street_id].end()].set_used(true);
+                //intersections_[streets_[street_id].end()].add_used_street(street_id);
+                used_streets[streets_[street_id].end()].emplace(street_id);
             }
         }
         cars_.emplace_back(id, std::move(path));
     }
-}
 
-void CityPlan::label_intersections() {
-    for (auto &&intersection: intersections_) {
-        if (intersection.used()) {
-            size_t used_streets = 0;
-            for (auto &&street_id: intersection.streets()) {
-                if (streets_[street_id].used()) {
-                    ++used_streets;
-                    if (used_streets >= 2) {
-                        intersection.set_non_trivial(true);
-                        break;
-                    }
-                }
-            }
+    // Make sure to add used streets in the increasing order of intersection ids
+    for (auto &&[intersection_id, street_ids]: used_streets) {
+        for (auto &&street_id: street_ids) {
+            intersections_[intersection_id].add_used_street(street_id);
         }
     }
 }
