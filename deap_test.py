@@ -1,19 +1,23 @@
 import argparse
 import array
 from collections import namedtuple, defaultdict
+from functools import partial
 import datetime
 import random
 import re
 import time
 import threading
 
-from deap import base, creator, tools
+from deap import base, creator, tools, algorithms
 import numpy as np
 from scipy.stats import rv_discrete
 
 from traffic_signaling.city_plan import *
 from traffic_signaling.data import *
 from traffic_signaling.simulation import *
+
+#from operators import fill_with, crossover, mutation
+from operators import eaSimple, crossover, mutation
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--data', default='a', type=str, help='Input data.')
@@ -27,94 +31,16 @@ parser.add_argument('--indpb', default=0.05, type=float, help='Probability of mu
 parser.add_argument('--tournsize', default=3, type=int, help='Tournament size for selection.')
 parser.add_argument('--parallel', default=None, type=int, help='Number of threads for parallel evaluation.')
 parser.add_argument('--seed', default=42, type=int, help='Random seed.')
-parser.add_argument('--init_times', default='scaled', choices=['scaled', 'default'], help='Way of initializing green times.')
+#parser.add_argument('--init_times', default='scaled', choices=['scaled', 'default'], help='Way of initializing green times.')
+parser.add_argument('--init_times', default='default', choices=['scaled', 'default'], help='Way of initializing green times.')
 
-Pair = namedtuple('Pair', ['times', 'order'])
+Pair = namedtuple('Pair', ['order', 'times'])
 
-def varAnd(population, toolbox, cxpb, mutpb):
-    offspring = [toolbox.clone(ind) for ind in population]
-
-    # Apply crossover and mutation on the offspring
-    for i in range(1, len(offspring), 2):
-        if random.random() < cxpb:
-            offspring[i - 1], offspring[i] = toolbox.mate(offspring[i - 1],
-                                                          offspring[i])
-            del offspring[i - 1].fitness.values, offspring[i].fitness.values
-
-    for i in range(len(offspring)):
-        if random.random() < mutpb:
-            offspring[i], = toolbox.mutate(offspring[i])
-            del offspring[i].fitness.values
-
-    return offspring
-
-def eaSimple(population, toolbox, cxpb, mutpb, ngen, stats=None,
-             halloffame=None, verbose=__debug__):
-    logbook = tools.Logbook()
-    logbook.header = ['gen', 'nevals'] + (stats.fields if stats else [])
-
-    start_evaluate = time.time()
-    # Evaluate the individuals with an invalid fitness
-    invalid_ind = [ind for ind in population if not ind.fitness.valid]
-    fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
-    for ind, fit in zip(invalid_ind, fitnesses):
-        ind.fitness.values = fit
-    print(f'Evaluation: {time.time() - start_evaluate:.4f}s')
-
-    if halloffame is not None:
-        halloffame.update(population)
-
-    record = stats.compile(population) if stats else {}
-    logbook.record(gen=0, nevals=len(invalid_ind), **record)
-    if verbose:
-        print(logbook.stream)
-
-    # Begin the generational process
-    for gen in range(1, ngen + 1):
-        start = time.time()
-
-        # Select the next generation individuals
-        offspring = toolbox.select(population, len(population))
-
-        start_mutate = time.time()
-        # Vary the pool of individuals
-        offspring = varAnd(offspring, toolbox, cxpb, mutpb)
-        print(f'Cross+Mut: {time.time() - start_mutate:.4f}s')
-
-        start_evaluate = time.time()
-        # Evaluate the individuals with an invalid fitness
-        invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
-
-        fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
-        for ind, fit in zip(invalid_ind, fitnesses):
-            ind.fitness.values = fit
-        print(f'Evaluation: {time.time() - start_evaluate:.4f}s')
-
-        # Update the hall of fame with the generated individuals
-        if halloffame is not None:
-            halloffame.update(offspring)
-
-        # Replace the current population by the offspring
-        population[:] = offspring
-
-        # Append the current generation statistics to the logbook
-        record = stats.compile(population) if stats else {}
-        logbook.record(gen=gen, nevals=len(invalid_ind), **record)
-        if verbose:
-            print(logbook.stream)
-
-        print(f'Generation {gen}: {time.time() - start:.4f}s')
-
-    return population, logbook
-
-
-def normalized_score(x):
-    baseline = DEFAULT_SCORE[args.data]
-    max_known = MAX_KNOWN_SCORE[args.data]
-    normalized = (x - baseline) / (max_known - baseline)
+def normalized_score(x, min, max):
+    normalized = (x - min) / (max - min)
     return np.round(normalized, decimals=2)
 
-def save_statistics(logdir, logbook, show_plot=False):
+def save_statistics(args, logdir, logbook, show_plot=False):
     import matplotlib.pyplot as plt
     import matplotlib.ticker as ticker
     import pandas as pd
@@ -172,49 +98,27 @@ def save_statistics(logdir, logbook, show_plot=False):
     if show_plot:
         plt.show()
 
-def save_schedules(logdir, individual):
-    simulation = Simulation(city_plan)
-    simulation.default_schedules()
-    simulation.update_schedules(individual)
+def save_schedules(logdir, city_plan, individual):
+    simulation = default_simulation(city_plan)
+    #simulation.update_schedules(individual)
+    simulation.update_schedules(non_trivial_ids, individual)
     os.makedirs(logdir, exist_ok=True)
-    simulation.write_schedules(os.path.join(logdir, f'{args.data}.txt'))
+    simulation.save_schedules(os.path.join(logdir, f'{args.data}.txt'))
 
-def default_simulation():
+def default_simulation(city_plan):
     s = Simulation(city_plan)
     s.default_schedules()
     return s
 
-def evaluate(individual):
+def evaluate(individual, simulations):
     simulation = simulations[threading.get_ident()]
-    simulation.update_schedules(individual)
+    #simulation.update_schedules(individual)
+    simulation.update_schedules(non_trivial_ids, individual)
     fitness = simulation.score()
-    return fitness,
+    return fitness, 
 
-def crossover(ind1, ind2):
-    for id in ind1:
-        tools.cxTwoPoint(ind1[id].times, ind2[id].times)
-        tools.cxOrdered(ind1[id].order,  ind2[id].order)
-    return ind1, ind2
-
-def mutation(individual, indpb):
-    def mutation_change_by_one(individual, low, up, indpb):
-        for i in range(len(individual)):
-            if random.random() < indpb:
-                if random.random() < 0.5:
-                    individual[i] = min(individual[i] + 1, up)
-                else:
-                    individual[i] = max(individual[i] - 1, low)
-        return individual,
-
-    for times, order in individual.values():
-        #indpb = mut_bits / len(times)
-        mutation_change_by_one(times, args.green_min, args.green_max, indpb)
-        #tools.mutUniformInt(times, args.green_min, args.green_max, indpb)
-        tools.mutShuffleIndexes(order, indpb)
-    return individual,
-
-def times_distribution(n):
-    times = car_counts_distribution.rvs(size=n)
+def times_distribution(distribution, n):
+    times = distribution.rvs(size=n)
     return array.array('I', times)
 
 def scaled_times_squared(car_counts):
@@ -234,23 +138,36 @@ def random_times(length, min, max, weights=None):
     #return array.array('I', length * [random.randint(1, 1)])
     
 def default_times(length):
+    #return np.ones(length, dtype=int)
     return array.array('I', length * [1])
 
 def random_order(length):
+    #return np.random.permutation(length)
     return array.array('I', np.random.permutation(length))
 
+#def create_individual():
+#    individual = [
+#        Pair(
+#            random_order(len(car_counts)),
+#            times_distribution(len(car_counts))
+#            #scaled_times_squared(car_counts) # scaled_times(car_counts) 
+#            if args.init_times == 'scaled'
+#            else default_times(len(car_counts))
+#        )
+#        for car_counts in non_trivial_intersections
+#    ]
+#    return individual
+
 def create_individual():
-    individual = {
-        id: 
+    individual = [
         Pair(
-            times_distribution(len(car_counts))
-            #scaled_times_squared(car_counts) # scaled_times(car_counts) 
-            if args.init_times == 'scaled'
-            else default_times(len(car_counts)),
-            random_order(len(car_counts))
+            # order
+            random_order(len(i.used_streets)),
+            # times
+            default_times(len(i.used_streets))            
         )
-        for id, car_counts in non_trivial_intersections
-    }
+        for i in intersections if i.non_trivial
+    ]
     return individual
 
 def main(args):
@@ -268,25 +185,29 @@ def main(args):
     ))
 
     creator.create('FitnessMax', base.Fitness, weights=(1.0,))
-    creator.create('Individual', dict, fitness=creator.FitnessMax)
+    #creator.create('Individual', dict, fitness=creator.FitnessMax)
+    creator.create('Individual', list, fitness=creator.FitnessMax)
 
     toolbox.register('individual', tools.initIterate, creator.Individual, create_individual)
     toolbox.register('population', tools.initRepeat, list, toolbox.individual)
 
-    toolbox.register('evaluate', evaluate)
+    toolbox.register('evaluate', evaluate, simulations=simulations)
 
     toolbox.register('mate', crossover)
-    toolbox.register('mutate', mutation, indpb=args.indpb)
+    #toolbox.register('mutate', mutation, indpb=args.indpb)
+    toolbox.register('mutate', mutation, indpb=args.indpb, low=args.green_min, up=args.green_max)
 
     toolbox.register('select', tools.selTournament, tournsize=args.tournsize)
 
     stats = tools.Statistics(lambda individual: individual.fitness.values)
 
-    stats.register('norm_max', lambda x: normalized_score(np.max(x)))
+
+    norm_score = partial(normalized_score, min=DEFAULT_SCORE[args.data], max=MAX_KNOWN_SCORE[args.data])
+    stats.register('norm_max', lambda x: norm_score(np.max(x)))
     # This weird manipulation is necessary in order to avoid scientific notation
     # and use thousands separator when printing statistics with tools.Statistics
     stats.register('max', lambda x: f'{int(np.max(x)):,}')
-    stats.register('norm_avg', lambda x: normalized_score(np.mean(x)))
+    stats.register('norm_avg', lambda x: norm_score(np.mean(x)))
     stats.register('avg', lambda x: f'{int(np.mean(x)):,}')
 
     hof = tools.HallOfFame(1)
@@ -311,8 +232,8 @@ def main(args):
     best_fitness = hof.keys[0].values[0]
     print(f'Best fitness: {int(best_fitness):,}')
 
-    save_statistics(logdir, logbook, show_plot=False)
-    save_schedules(logdir, best_individual)
+    save_statistics(args, logdir, logbook, show_plot=False)
+    save_schedules(logdir, city_plan, best_individual)
 
 if __name__ == '__main__':
     args = parser.parse_args()
@@ -322,36 +243,31 @@ if __name__ == '__main__':
     
 
     city_plan = CityPlan(get_data_filename(args.data))
-
-    simulations = defaultdict(default_simulation)
+    
+    default_sim = partial(default_simulation, city_plan=city_plan)
+    simulations = defaultdict(default_sim)
 
     cars = city_plan.cars
     streets = city_plan.streets
     intersections = city_plan.intersections
 
-    car_counts = np.zeros(len(streets), dtype=int)
-    for c in cars:
-        car_counts[c.path[:-1]] += 1
-
-    non_trivial_intersections = [
-        (i.id, car_counts[[s for s in i.streets if streets[s].used]])
+    car_counts = [
+        streets[street_id].total_cars
         for i in intersections if i.non_trivial
+        for street_id in i.used_streets
     ]
-
-    non_trivial_street_ids = [
-        s
-        for i in intersections if i.non_trivial
-        for s in i.streets if streets[s].used
+    
+    non_trivial_ids = [
+        i.id for i in intersections if i.non_trivial
     ]
 
     if args.init_times == 'scaled':
-        car_counts = car_counts[non_trivial_street_ids]
         counts_normalized = np.sqrt(car_counts / np.min(car_counts)).astype(int)
         values, counts = np.unique(counts_normalized, return_counts=True)
         probabilities = counts / counts.sum()
         car_counts_distribution = rv_discrete(values=(values, probabilities))
 
-    args.green_max = city_plan.duration
+    args.green_max = 1#city_plan.duration
     args.green_min = 0
 
     main(args)

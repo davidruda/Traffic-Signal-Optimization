@@ -1,15 +1,17 @@
 .vscode/
 .vs/
 __pycache__/
-output/
+*output*
 out/
 *venv*/
 *build*/
 .idea/
 logs/
+*old*
 
 *.egg-info
 
 *.pyd
+*.html
 
 CMakeSettings.json
