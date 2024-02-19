@@ -1,5 +1,4 @@
 #include <algorithm>
-#include <vcruntime.h>
 
 #include "simulation/schedule.hpp"
 
