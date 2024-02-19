@@ -11,6 +11,9 @@
 
 
 ## How to build and install the `traffic_signaling` package for use in Python
+
+- C++20 code - `gcc 11`, `clang 16` or `MSVC 19.29` (or later) is required to build the package
+
 - Note that you need to have Python headers installed on your system in order to build the package (some Linux distributions don’t install them by default)
 
   - You can check the location of the headers by running `python3 -c "import sysconfig; print(sysconfig.get_path('include'))"`
