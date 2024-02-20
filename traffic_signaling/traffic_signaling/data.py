@@ -5,6 +5,11 @@ try:
 except ImportError:
     from city_plan import *
 
+try:
+    from .simulation import *
+except ImportError:
+    from simulation import *
+
 TEST_DATA = ['a', 'b', 'c', 'd', 'e', 'f']
 DEFAULT_SCORE = {
     'a': 1_001,
@@ -44,6 +49,16 @@ def get_data_filename(data: str) -> str:
         msg = f'Invalid data! Possible values are {", ".join(TEST_DATA)}'
         raise ValueError(msg)
     return os.path.join(os.path.dirname(__file__), 'data', f'{data}.txt')
+
+# factory function creating a CityPlan object 
+def city_plan(data: str) -> CityPlan:
+    return CityPlan(get_data_filename(data))
+
+# factory function creating a Simulation object with default schedules
+def default_simulation(city_plan: CityPlan) -> Simulation:
+    s = Simulation(city_plan)
+    s.default_schedules()
+    return s
 
 def calculate_upper_bound(data: str) -> int:
     """

@@ -26,16 +26,14 @@ class TestIO(unittest.TestCase):
         ('f')
     ])
     def test_io(self, data):
-        input = get_data_filename(data)
         output = f'{self.output_dir}/{data}.txt'
 
-        city_plan = CityPlan(input)
-        simulation = Simulation(city_plan)
-        simulation.default_schedules()
+        plan = city_plan(data)
+        simulation = default_simulation(plan)
         simulation.save_schedules(output)
         score = simulation.score()
 
-        simulation = Simulation(city_plan)
+        simulation = Simulation(plan)
         simulation.load_schedules(output)
         self.assertEqual(score, simulation.score())
 
@@ -48,12 +46,10 @@ class TestIO(unittest.TestCase):
         ('f')
     ])
     def test_io_same_instance(self, data):
-        input = get_data_filename(data)
         output = f'{self.output_dir}/{data}.txt'
 
-        city_plan = CityPlan(input)
-        simulation = Simulation(city_plan)
-        simulation.default_schedules()
+        plan = city_plan(data)
+        simulation = default_simulation(plan)
         simulation.save_schedules(output)
         score = simulation.score()
 

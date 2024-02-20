@@ -32,11 +32,11 @@ class TestTime(unittest.TestCase):
 
         print(f'\n{"-" * 31} DATA {data} {"-" * 31}')
         start = time.time()
-        city_plan = CityPlan(input)
+        plan = CityPlan(input)
         print(f'CityPlan constructor: {time.time() - start:.4f}s')
 
         start = time.time()
-        simulation = Simulation(city_plan)
+        simulation = Simulation(plan)
         print(f'Simulation constructor: {time.time() - start:.4f}s')
 
         start = time.time()

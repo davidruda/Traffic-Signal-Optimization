@@ -1,6 +1,7 @@
 import argparse
 from collections import defaultdict
 import concurrent.futures
+from functools import partial
 import os
 import time
 import threading
@@ -25,11 +26,6 @@ class TestMultithreading(unittest.TestCase):
 
 
 def _test_multithreading(data, count, parallel):
-    def simulation_factory():
-        s = Simulation(city_plan)
-        s.default_schedules()
-        return s
-
     def eval(_):
         return simulations[threading.get_ident()].score()
         
@@ -40,7 +36,8 @@ def _test_multithreading(data, count, parallel):
         print(f'{count} simulations finished: {end:.4f}s')
         return scores, end
 
-    city_plan = CityPlan(get_data_filename(data))
+    plan = city_plan(data)
+    simulation_factory = partial(default_simulation, plan)
     times = []
     print(f'\n{"-" * 31} DATA {data} {"-" * 31}')
     for n in range(1, parallel + 1):
