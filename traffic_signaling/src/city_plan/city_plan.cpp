@@ -10,7 +10,7 @@ namespace city_plan {
 CityPlan::CityPlan(const std::string &filename) { // NOLINT(*-pro-type-member-init)
     std::ifstream file{filename};
     if (!file.is_open()) {
-        throw std::runtime_error("Could not open file " + filename);
+        throw std::runtime_error{"Could not open file " + filename};
     }
     *this = CityPlan{file};
 }

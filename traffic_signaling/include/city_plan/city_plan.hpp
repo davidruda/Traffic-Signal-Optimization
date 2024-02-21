@@ -6,6 +6,7 @@
 #include <vector>
 #include <string_view>
 #include <unordered_map>
+#include <ranges>
 
 #include "car.hpp"
 #include "intersection.hpp"
@@ -35,6 +36,16 @@ public:
 
     size_t bonus() const {
         return bonus_;
+    }
+
+    auto used_intersections() const {
+        auto used = [](const Intersection &i) { return i.used(); };
+        return intersections_ | std::ranges::views::filter(used);
+    }
+
+    auto non_trivial_intersections() const {
+        auto non_trivial = [](const Intersection &i) { return i.non_trivial(); };
+        return intersections_ | std::ranges::views::filter(non_trivial);
     }
 
     size_t street_id(std::string_view name) const {

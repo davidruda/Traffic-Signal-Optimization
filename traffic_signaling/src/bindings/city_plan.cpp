@@ -1,3 +1,6 @@
+#include <vector>
+#include <functional>
+
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
@@ -5,94 +8,119 @@
 
 namespace py = pybind11;
 
+using namespace city_plan;
+
 PYBIND11_MODULE(city_plan, m) {
     m.doc() = "pybind11 city_plan module";
 
-    py::class_<city_plan::CityPlan>(m, "CityPlan")
+    py::class_<CityPlan>(m, "CityPlan")
         .def(
             py::init<const std::string &>(),
-            py::arg("filename")
+            py::arg("filename"),
+            py::call_guard<py::gil_scoped_release>()
         )
         .def_property_readonly(
             "intersections",
-            &city_plan::CityPlan::intersections
+            &CityPlan::intersections
         )
         .def_property_readonly(
             "streets",
-            &city_plan::CityPlan::streets
+            &CityPlan::streets
         )
         .def_property_readonly(
             "cars",
-            &city_plan::CityPlan::cars
+            &CityPlan::cars
         )
         .def_property_readonly(
             "duration",
-            &city_plan::CityPlan::duration
+            &CityPlan::duration
         )
         .def_property_readonly(
             "bonus",
-            &city_plan::CityPlan::bonus
+            &CityPlan::bonus
+        )
+        // Binding lambda functions
+        // https://pybind11.readthedocs.io/en/stable/classes.html?highlight=lambda#binding-lambda-functions
+        .def(
+            "used_intersections",
+            // necessary conversion because pybind doesn't support C++20 ranges/views
+            [](const CityPlan &cp) {
+                auto &&ui = cp.used_intersections();
+                return std::vector<std::reference_wrapper<const Intersection>>{ui.begin(), ui.end()};
+            }
+        )
+        .def(
+            "non_trivial_intersections",
+            // necessary conversion because pybind doesn't support C++20 ranges/views
+            [](const CityPlan &cp) {
+                auto &&nt = cp.non_trivial_intersections();
+                return std::vector<std::reference_wrapper<const Intersection>>{nt.begin(), nt.end()};
+            }
         );
 
-    py::class_<city_plan::Car>(m, "Car")
+    py::class_<Car>(m, "Car")
         .def_property_readonly(
             "id",
-            &city_plan::Car::id
+            &Car::id
         )
         .def_property_readonly(
             "path",
-            &city_plan::Car::path
+            &Car::path
         );
 
-    py::class_<city_plan::Intersection>(m, "Intersection")
+    py::class_<Intersection>(m, "Intersection")
         .def_property_readonly(
             "id",
-            &city_plan::Intersection::id
+            &Intersection::id
         )
         .def_property_readonly(
             "streets",
-            &city_plan::Intersection::streets
+            &Intersection::streets
         )
         .def_property_readonly(
             "used_streets",
-            &city_plan::Intersection::used_streets
+            &Intersection::used_streets
+            //[](const Intersection &i) {
+            //    i.used_streets() | std::ranges::views::transform();
+            //    return std::vector<std::reference_wrapper<const Street>>{us.begin(), us.end()};
+            //}
         )
         .def_property_readonly(
             "used",
-            &city_plan::Intersection::used
+            &Intersection::used
         )
         .def_property_readonly(
             "non_trivial",
-            &city_plan::Intersection::non_trivial
+            &Intersection::non_trivial
         );
 
-    py::class_<city_plan::Street>(m, "Street")
+    py::class_<Street>(m, "Street")
         .def_property_readonly(
             "id",
-            &city_plan::Street::id
+            &Street::id
         )
         .def_property_readonly(
             "name",
-            &city_plan::Street::name
+            &Street::name
         )
         .def_property_readonly(
             "used",
-            &city_plan::Street::used
+            &Street::used
         )
         .def_property_readonly(
             "length",
-            &city_plan::Street::length
+            &Street::length
         )
         .def_property_readonly(
             "start",
-            &city_plan::Street::start
+            &Street::start
         )
         .def_property_readonly(
             "end",
-            &city_plan::Street::end
+            &Street::end
         )
         .def_property_readonly(
             "total_cars",
-            &city_plan::Street::total_cars
+            &Street::total_cars
         );
 }

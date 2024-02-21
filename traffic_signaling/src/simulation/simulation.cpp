@@ -97,12 +97,10 @@ void Simulation::save_schedules(const std::string &filename) const {
 
 void Simulation::default_schedules() {
     reset_schedules();
-    for (auto &&intersection: city_plan_.intersections()) {
-        if (intersection.used()) {
-            auto &&schedule = schedules_[intersection.id()];
-            for (auto &&street_id: intersection.used_streets()) {
-                schedule.add_street(street_id, 1);
-            }
+    for (auto &&intersection: city_plan_.used_intersections()) {
+        auto &&schedule = schedules_[intersection.id()];
+        for (auto &&street_id: intersection.used_streets()) {
+            schedule.add_street(street_id, 1);
         }
     }
 }
