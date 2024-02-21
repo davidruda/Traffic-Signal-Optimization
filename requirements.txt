@@ -7,3 +7,4 @@ deap
 matplotlib
 pandas
 scipy
+Cython

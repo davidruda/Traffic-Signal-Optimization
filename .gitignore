@@ -11,7 +11,10 @@ logs/
 
 *.egg-info
 
+# Compiled python modules
 *.pyd
+*.so
+
 *.html
 
 CMakeSettings.json

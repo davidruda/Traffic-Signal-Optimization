@@ -1,6 +1,7 @@
+# time py deap_test.py --data d --generations 10 --parallel 16 --init_times default
 import argparse
 import array
-from collections import namedtuple, defaultdict
+from collections import defaultdict
 from functools import partial
 import datetime
 import random
@@ -31,10 +32,7 @@ parser.add_argument('--indpb', default=0.05, type=float, help='Probability of mu
 parser.add_argument('--tournsize', default=3, type=int, help='Tournament size for selection.')
 parser.add_argument('--parallel', default=None, type=int, help='Number of threads for parallel evaluation.')
 parser.add_argument('--seed', default=42, type=int, help='Random seed.')
-#parser.add_argument('--init_times', default='scaled', choices=['scaled', 'default'], help='Way of initializing green times.')
 parser.add_argument('--init_times', default='default', choices=['scaled', 'default'], help='Way of initializing green times.')
-
-Pair = namedtuple('Pair', ['order', 'times'])
 
 def normalized_score(x, min, max):
     normalized = (x - min) / (max - min)
@@ -98,17 +96,12 @@ def save_statistics(args, logdir, logbook, show_plot=False):
     if show_plot:
         plt.show()
 
-def save_schedules(logdir, city_plan, individual):
-    simulation = default_simulation(city_plan)
+def save_schedules(logdir, plan, individual):
+    simulation = default_simulation(plan)
     #simulation.update_schedules(individual)
     simulation.update_schedules(non_trivial_ids, individual)
     os.makedirs(logdir, exist_ok=True)
     simulation.save_schedules(os.path.join(logdir, f'{args.data}.txt'))
-
-def default_simulation(city_plan):
-    s = Simulation(city_plan)
-    s.default_schedules()
-    return s
 
 def evaluate(individual, simulations):
     simulation = simulations[threading.get_ident()]
@@ -147,7 +140,7 @@ def random_order(length):
 
 #def create_individual():
 #    individual = [
-#        Pair(
+#        (
 #            random_order(len(car_counts)),
 #            times_distribution(len(car_counts))
 #            #scaled_times_squared(car_counts) # scaled_times(car_counts) 
@@ -160,13 +153,13 @@ def random_order(length):
 
 def create_individual():
     individual = [
-        Pair(
+        (
             # order
             random_order(len(i.used_streets)),
             # times
             default_times(len(i.used_streets))            
         )
-        for i in intersections if i.non_trivial
+        for i in non_trivial_intersections
     ]
     return individual
 
@@ -233,33 +226,30 @@ def main(args):
     print(f'Best fitness: {int(best_fitness):,}')
 
     save_statistics(args, logdir, logbook, show_plot=False)
-    save_schedules(logdir, city_plan, best_individual)
+    save_schedules(logdir, plan, best_individual)
 
 if __name__ == '__main__':
     args = parser.parse_args()
 
     random.seed(args.seed)
     np.random.seed(args.seed)
-    
 
-    city_plan = CityPlan(get_data_filename(args.data))
-    
-    default_sim = partial(default_simulation, city_plan=city_plan)
+    plan = create_city_plan(args.data)
+    default_sim = partial(default_simulation, city_plan=plan)
     simulations = defaultdict(default_sim)
 
-    cars = city_plan.cars
-    streets = city_plan.streets
-    intersections = city_plan.intersections
+    cars = plan.cars
+    streets = plan.streets
+    intersections = plan.intersections
+    non_trivial_intersections = plan.non_trivial_intersections()
 
     car_counts = [
         streets[street_id].total_cars
-        for i in intersections if i.non_trivial
+        for i in non_trivial_intersections
         for street_id in i.used_streets
     ]
     
-    non_trivial_ids = [
-        i.id for i in intersections if i.non_trivial
-    ]
+    non_trivial_ids = [i.id for i in non_trivial_intersections]
 
     if args.init_times == 'scaled':
         counts_normalized = np.sqrt(car_counts / np.min(car_counts)).astype(int)
@@ -267,7 +257,7 @@ if __name__ == '__main__':
         probabilities = counts / counts.sum()
         car_counts_distribution = rv_discrete(values=(values, probabilities))
 
-    args.green_max = 1#city_plan.duration
+    args.green_max = 1#plan.duration
     args.green_min = 0
 
     main(args)
