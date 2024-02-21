@@ -1,7 +1,6 @@
 #ifndef SIMULATION_SCHEDULE_HPP
 #define SIMULATION_SCHEDULE_HPP
 
-#include <cassert>
 #include <optional>
 #include <unordered_map>
 #include <vector>

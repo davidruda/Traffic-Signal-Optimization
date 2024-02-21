@@ -36,7 +36,7 @@ def _test_multithreading(data, count, parallel):
         print(f'{count} simulations finished: {end:.4f}s')
         return scores, end
 
-    plan = city_plan(data)
+    plan = create_city_plan(data)
     simulation_factory = partial(default_simulation, plan)
     times = []
     print(f'\n{"-" * 31} DATA {data} {"-" * 31}')

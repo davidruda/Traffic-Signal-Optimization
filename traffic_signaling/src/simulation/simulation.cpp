@@ -5,6 +5,7 @@
 #include <cassert>
 #include <algorithm>
 #include <iterator>
+#include <optional>
 
 #include "simulation/simulation.hpp"
 
@@ -281,4 +282,22 @@ void Simulation::update_schedules(const std::vector<size_t> &intersection_ids,
         }
     }
 }
+
+//void Simulation::update_schedules(const std::vector<std::pair<std::vector<size_t>, std::vector<size_t>>> &schedules, bool relative) {
+//    std::vector<size_t> intersection_ids;
+//    intersection_ids.reserve(schedules.size());
+//    std::transform(schedules.begin(), schedules.end(), std::back_inserter(intersection_ids),
+//        [](const auto &s) {
+//            return s.first[0];
+//        });
+//
+//    update_schedules(intersection_ids, schedules, relative);
+//}
+
+Simulation default_simulation(const city_plan::CityPlan &city_plan) {
+    Simulation s{city_plan};
+    s.default_schedules();
+    return s;
+}
+
 }

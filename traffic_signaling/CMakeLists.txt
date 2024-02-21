@@ -54,9 +54,13 @@ if(BUILD_PYBIND_MODULES)
         pybind11
         GIT_REPOSITORY https://github.com/pybind/pybind11.git
         FIND_PACKAGE_ARGS
-    )
-    FetchContent_MakeAvailable(pybind11)
-
+        )
+        FetchContent_MakeAvailable(pybind11)
+        
+    # If there are issues with building pybind11 modules (e.g. on WSL, cmake
+    # keeps including the pybind sources from Windows), try to build and install
+    # pybind from sources as described here:
+    # https://pybind11.readthedocs.io/en/stable/compiling.html#find-package-vs-add-subdirectory
     pybind11_add_module(city_plan src/bindings/city_plan.cpp "${source_files}")
     target_link_libraries(city_plan PUBLIC compiler_flags)
     target_include_directories(city_plan PUBLIC include)

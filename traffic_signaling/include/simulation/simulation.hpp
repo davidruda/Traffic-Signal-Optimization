@@ -2,9 +2,7 @@
 #define SIMULATION_SIMULATION_HPP
 
 #include <functional>
-#include <limits>
 #include <locale>
-#include <optional>
 #include <queue>
 #include <string>
 #include <unordered_map>
@@ -39,6 +37,8 @@ public:
         const std::vector<std::pair<std::vector<size_t>, std::vector<size_t>>> &schedules,
         bool relative = true);
 
+    //void update_schedules(const std::vector<std::pair<std::vector<size_t>, std::vector<size_t>>> &schedules, bool relative = true);
+
     //std::vector<std::pair<size_t, std::pair<std::vector<size_t>, std::vector<size_t>>>> get_schedules() const;
 
 private:
@@ -72,6 +72,10 @@ private:
 
     size_t total_score_{};
 };
+
+// factory function creating a simulation with default schedules
+Simulation default_simulation(const city_plan::CityPlan &city_plan);
+
 }
 
 #endif

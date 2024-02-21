@@ -26,7 +26,7 @@ class TestScore(unittest.TestCase):
         ('f')
     ])
     def test_default_score(self, data):
-        plan = city_plan(data)
+        plan = create_city_plan(data)
         simulation = default_simulation(plan)
         print(f'\n{"-" * 31} DATA {data} {"-" * 31}')
         score = simulation.score()

@@ -1,4 +1,4 @@
-#include <algorithm>
+#include <cassert>
 
 #include "simulation/schedule.hpp"
 

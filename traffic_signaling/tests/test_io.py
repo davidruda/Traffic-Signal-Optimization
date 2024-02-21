@@ -28,7 +28,7 @@ class TestIO(unittest.TestCase):
     def test_io(self, data):
         output = f'{self.output_dir}/{data}.txt'
 
-        plan = city_plan(data)
+        plan = create_city_plan(data)
         simulation = default_simulation(plan)
         simulation.save_schedules(output)
         score = simulation.score()
@@ -48,7 +48,7 @@ class TestIO(unittest.TestCase):
     def test_io_same_instance(self, data):
         output = f'{self.output_dir}/{data}.txt'
 
-        plan = city_plan(data)
+        plan = create_city_plan(data)
         simulation = default_simulation(plan)
         simulation.save_schedules(output)
         score = simulation.score()
