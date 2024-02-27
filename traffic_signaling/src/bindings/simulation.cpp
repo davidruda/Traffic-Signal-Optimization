@@ -41,11 +41,16 @@ PYBIND11_MODULE(simulation, m) {
         .def(
             "update_schedules",
             &Simulation::update_schedules,
-            py::arg("ids"),
             py::arg("schedules"),
             py::arg("relative") = true,
             py::call_guard<py::gil_scoped_release>()
         )
+        //.def(
+        //    "update_schedules",
+        //    [](const Simulation &s, const std::vector<std::pair<std::vector<size_t>, std::vector<size_t>>> &schedules) {
+        //        s.c
+        //    }
+        //)
         .def(
             "score",
             &Simulation::score,

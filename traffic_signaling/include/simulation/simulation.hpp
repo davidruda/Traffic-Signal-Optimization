@@ -33,11 +33,11 @@ public:
         return schedules_;
     }
 
-    void update_schedules(const std::vector<size_t> &intersection_ids,
-        const std::vector<std::pair<std::vector<size_t>, std::vector<size_t>>> &schedules,
-        bool relative = true);
+    void update_schedules(const std::vector<std::pair<std::vector<size_t>, std::vector<size_t>>> &schedules, bool relative = true);
 
-    //void update_schedules(const std::vector<std::pair<std::vector<size_t>, std::vector<size_t>>> &schedules, bool relative = true);
+    //void update_schedules(const std::vector<size_t> &intersection_ids,
+    //    const std::vector<std::pair<std::vector<size_t>, std::vector<size_t>>> &schedules,
+    //    bool relative = true);
 
     //std::vector<std::pair<size_t, std::pair<std::vector<size_t>, std::vector<size_t>>>> get_schedules() const;
 

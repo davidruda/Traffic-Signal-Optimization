@@ -1,15 +1,16 @@
 # time py deap_test.py --data d --generations 10 --parallel 16 --init_times default
 import argparse
-import array
+from array import array
 from collections import defaultdict
-from functools import partial
 import datetime
+from functools import partial
+import os
 import random
 import re
 import time
 import threading
 
-from deap import base, creator, tools, algorithms
+from deap import base, creator, tools
 import numpy as np
 from scipy.stats import rv_discrete
 
@@ -21,7 +22,7 @@ from traffic_signaling.simulation import *
 from operators import eaSimple, crossover, mutation
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--data', default='a', type=str, help='Input data.')
+parser.add_argument('--data', default='d', type=str, help='Input data.')
 parser.add_argument('--population', default=100, type=int, help='Number of individuals in a population.')
 parser.add_argument('-g', '--generations', default=100, type=int, help='Number of generations.')
 parser.add_argument('--crossover', default=0.5, type=float, help='Crossover probability.')
@@ -30,13 +31,16 @@ parser.add_argument('--mutation', default=0.2, type=float, help='Mutation probab
 parser.add_argument('--indpb', default=0.05, type=float, help='Probability of mutating each bit.')
 #parser.add_argument('--indpb', default=0.1, type=float, help='Probability of mutating each bit.')
 parser.add_argument('--tournsize', default=3, type=int, help='Tournament size for selection.')
-parser.add_argument('--parallel', default=None, type=int, help='Number of threads for parallel evaluation.')
+parser.add_argument('--parallel', default=os.cpu_count(), type=int, help='Number of threads for parallel evaluation.')
 parser.add_argument('--seed', default=42, type=int, help='Random seed.')
 parser.add_argument('--init_times', default='default', choices=['scaled', 'default'], help='Way of initializing green times.')
 
-def normalized_score(x, min, max):
-    normalized = (x - min) / (max - min)
-    return np.round(normalized, decimals=2)
+def normalize(x, min, max):
+    """
+    Normalize `x` to the range [0, 1] and round to 2 decimal places.
+    """
+    x_norm = (x - min) / (max - min)
+    return np.round(x_norm, decimals=2)
 
 def save_statistics(args, logdir, logbook, show_plot=False):
     import matplotlib.pyplot as plt
@@ -98,45 +102,45 @@ def save_statistics(args, logdir, logbook, show_plot=False):
 
 def save_schedules(logdir, plan, individual):
     simulation = default_simulation(plan)
-    #simulation.update_schedules(individual)
-    simulation.update_schedules(non_trivial_ids, individual)
+    simulation.update_schedules(individual)
+    #simulation.update_schedules(non_trivial_ids, individual)
     os.makedirs(logdir, exist_ok=True)
     simulation.save_schedules(os.path.join(logdir, f'{args.data}.txt'))
 
 def evaluate(individual, simulations):
     simulation = simulations[threading.get_ident()]
-    #simulation.update_schedules(individual)
-    simulation.update_schedules(non_trivial_ids, individual)
+    simulation.update_schedules(individual)
+    #simulation.update_schedules(non_trivial_ids, individual)
     fitness = simulation.score()
     return fitness, 
 
 def times_distribution(distribution, n):
     times = distribution.rvs(size=n)
-    return array.array('I', times)
+    return array('I', times)
 
 def scaled_times_squared(car_counts):
     #times = np.sqrt(car_counts).astype(int)
     times = np.sqrt(car_counts / np.min(car_counts)).astype(int)
-    return array.array('I', times)
+    return array('I', times)
     
 def scaled_times(car_counts):
     # scaling
     #car_counts -= np.min(car_counts) - 1
     times = np.round(car_counts / np.min(car_counts)).astype(int)
     #times = (car_counts / np.gcd.reduce(car_counts)).astype(int)
-    return array.array('I', times)
+    return array('I', times)
 
 def random_times(length, min, max, weights=None):
-    return array.array('I', random.choices(range(min, max + 1), weights, k=length))
-    #return array.array('I', length * [random.randint(1, 1)])
+    return array('I', random.choices(range(min, max + 1), weights, k=length))
+    #return array('I', length * [random.randint(1, 1)])
     
 def default_times(length):
     #return np.ones(length, dtype=int)
-    return array.array('I', length * [1])
+    return array('I', length * [1])
 
 def random_order(length):
     #return np.random.permutation(length)
-    return array.array('I', np.random.permutation(length))
+    return array('I', np.random.permutation(length))
 
 #def create_individual():
 #    individual = [
@@ -195,7 +199,7 @@ def main(args):
     stats = tools.Statistics(lambda individual: individual.fitness.values)
 
 
-    norm_score = partial(normalized_score, min=DEFAULT_SCORE[args.data], max=MAX_KNOWN_SCORE[args.data])
+    norm_score = partial(normalize, min=DEFAULT_SCORE[args.data], max=MAX_KNOWN_SCORE[args.data])
     stats.register('norm_max', lambda x: norm_score(np.max(x)))
     # This weird manipulation is necessary in order to avoid scientific notation
     # and use thousands separator when printing statistics with tools.Statistics
@@ -249,7 +253,7 @@ if __name__ == '__main__':
         for street_id in i.used_streets
     ]
     
-    non_trivial_ids = [i.id for i in non_trivial_intersections]
+    #non_trivial_ids = [i.id for i in non_trivial_intersections]
 
     if args.init_times == 'scaled':
         counts_normalized = np.sqrt(car_counts / np.min(car_counts)).astype(int)
@@ -258,6 +262,6 @@ if __name__ == '__main__':
         car_counts_distribution = rv_discrete(values=(values, probabilities))
 
     args.green_max = 1#plan.duration
-    args.green_min = 0
+    args.green_min = 1
 
     main(args)

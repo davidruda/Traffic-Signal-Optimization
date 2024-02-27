@@ -253,35 +253,57 @@ void Simulation::summary() const {
 //    return schedules;
 //}
 
-
 // TODO: maybe rewrite this function specifically for python types
 // relative - whether the order is of indices relative to the intersection
 // or absolute street ids
-void Simulation::update_schedules(const std::vector<size_t> &intersection_ids,
-    const std::vector<std::pair<std::vector<size_t>, std::vector<size_t>>> &schedules,
-    bool relative) {
-    assert(intersection_ids.size() == schedules.size());
-    for (size_t i = 0; i < intersection_ids.size(); ++i) {
-        auto id = intersection_ids[i];
-        auto &&[order, times] = schedules[i];
+void Simulation::update_schedules(const std::vector<std::pair<std::vector<size_t>, std::vector<size_t>>> &schedules, bool relative) {
+    size_t i = 0;
+    for (auto &&intersection: city_plan_.non_trivial_intersections()) {
+        auto id = intersection.id();
+        auto &&[order, times] = schedules[i++];
 
         // TODO: maybe solve the relative/absolute street id problem differently
         if (relative) {
-            std::vector<size_t> street_ids;
-            street_ids.reserve(order.size());
-            auto &&streets = city_plan_.intersections()[id].used_streets();
-
-            std::transform(order.begin(), order.end(), std::back_inserter(street_ids),
-                [&streets](size_t street_index) {
-                    return streets[street_index];
-                });
-            schedules_[id].set(street_ids, times);
+            auto &&used_streets_ids = city_plan_.intersections()[id].used_streets();
+            auto street_ids = order | std::ranges::views::transform([&](size_t street_index) {
+                return used_streets_ids[street_index];
+            });
+            schedules_[id].set({street_ids.begin(), street_ids.end()}, times);
         }
         else {
             schedules_[id].set(order, times);
         }
     }
 }
+
+// TODO: maybe rewrite this function specifically for python types
+// relative - whether the order is of indices relative to the intersection
+// or absolute street ids
+//void Simulation::update_schedules(const std::vector<size_t> &intersection_ids,
+//    const std::vector<std::pair<std::vector<size_t>, std::vector<size_t>>> &schedules,
+//    bool relative) {
+//    assert(intersection_ids.size() == schedules.size());
+//    for (size_t i = 0; i < intersection_ids.size(); ++i) {
+//        auto id = intersection_ids[i];
+//        auto &&[order, times] = schedules[i];
+//
+//        // TODO: maybe solve the relative/absolute street id problem differently
+//        if (relative) {
+//            std::vector<size_t> street_ids;
+//            street_ids.reserve(order.size());
+//            auto &&streets = city_plan_.intersections()[id].used_streets();
+//
+//            std::transform(order.begin(), order.end(), std::back_inserter(street_ids),
+//                [&streets](size_t street_index) {
+//                    return streets[street_index];
+//                });
+//            schedules_[id].set(street_ids, times);
+//        }
+//        else {
+//            schedules_[id].set(order, times);
+//        }
+//    }
+//}
 
 //void Simulation::update_schedules(const std::vector<std::pair<std::vector<size_t>, std::vector<size_t>>> &schedules, bool relative) {
 //    std::vector<size_t> intersection_ids;

@@ -15,7 +15,6 @@ class Simulation:
     def default_schedules(self) -> None: ...
     def update_schedules(
         self,
-        ids: list[int],
         schedules: list[tuple[list[int], list[int]]],
         relative: bool = True
     ) -> None: ...

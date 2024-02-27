@@ -6,15 +6,13 @@ import cython
 
 from deap.base import Toolbox
 from deap.tools import Logbook, Statistics, HallOfFame
-#from deap.tools import cxTwoPoint, cxOrdered, mutShuffleIndexes, Logbook
-#from deap.algorithms import eaSimple, varAnd
 
 IND_TYPE = list[tuple[array, array]]
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
 @cython.initializedcheck(False)
-def fill_with(ind1: IND_TYPE, ind2: IND_TYPE) -> None:
+def _fill_with(ind1: IND_TYPE, ind2: IND_TYPE) -> None:
     """
     Fill `ind1` with values from `ind2`.
     """
@@ -30,25 +28,25 @@ def fill_with(ind1: IND_TYPE, ind2: IND_TYPE) -> None:
 @cython.boundscheck(False)
 @cython.wraparound(False)
 @cython.initializedcheck(False)
-def cxTwoPoint(ind1: cython.uint[:], ind2: cython.uint[:]):
+def _cxTwoPoint(ind1: cython.uint[:], ind2: cython.uint[:]):
     size: cython.Py_ssize_t = min(len(ind1), len(ind2))
     cxpoint1: cython.int = random.randint(1, size)
     cxpoint2: cython.int = random.randint(1, size - 1)
-    
+
     if cxpoint2 >= cxpoint1:
         cxpoint2 += 1
     else:  # Swap the two cx points
         cxpoint1, cxpoint2 = cxpoint2, cxpoint1
 
-    for i in range(cxpoint1, cxpoint2):
-        ind1[i], ind2[i] = ind2[i], ind1[i]
+    ind1[cxpoint1:cxpoint2], ind2[cxpoint1:cxpoint2] \
+        = ind2[cxpoint1:cxpoint2], ind1[cxpoint1:cxpoint2]
 
     return ind1, ind2
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
 @cython.initializedcheck(False)
-def cxOrdered(ind1: cython.uint[:], ind2: cython.uint[:]):
+def _cxOrdered(ind1: cython.uint[:], ind2: cython.uint[:]):
     a: cython.int
     b: cython.int
     i: cython.int
@@ -57,7 +55,7 @@ def cxOrdered(ind1: cython.uint[:], ind2: cython.uint[:]):
     temp1: cython.uint[:]
     temp2: cython.uint[:]
     size: cython.Py_ssize_t = min(len(ind1), len(ind2))
-    
+
     a, b = random.sample(range(size), 2)
     if a > b:
         a, b = b, a
@@ -93,9 +91,7 @@ def mutation_change_by_one(individual: cython.uint[:], indpb: cython.float, low:
     size: cython.Py_ssize_t = len(individual)
 
     for i in range(size):
-        #if crandom() < indpb:
         if random.random() < indpb:
-            #if crandom() < 0.5:
             if random.random() < 0.5:
                 individual[i] = min(individual[i] + 1, up)
             else:
@@ -105,14 +101,12 @@ def mutation_change_by_one(individual: cython.uint[:], indpb: cython.float, low:
 @cython.boundscheck(False)
 @cython.wraparound(False)
 @cython.initializedcheck(False)
-def mutShuffleIndexes(individual: cython.uint[:], indpb: cython.float):
+def _mutShuffleIndexes(individual: cython.uint[:], indpb: cython.float):
     swap_indx: cython.Py_ssize_t
     size: cython.Py_ssize_t = len(individual)
-    
+
     for i in range(size):
-        #if crandom() < indpb:
         if random.random() < indpb:
-            #swap_indx = crandrange(0, size - 1)
             swap_indx = random.randint(0, size - 2)
             if swap_indx >= i:
                 swap_indx += 1
@@ -121,26 +115,13 @@ def mutShuffleIndexes(individual: cython.uint[:], indpb: cython.float):
 
     return individual,
 
-def crossover(ind1: IND_TYPE, ind2: IND_TYPE) -> tuple[IND_TYPE, IND_TYPE]:
-    for (order1, times1), (order2, times2) in zip(ind1, ind2):
-        cxOrdered(order1, order2)
-        cxTwoPoint(times1, times2)
-
-    return ind1, ind2
-
-def mutation(individual: IND_TYPE, indpb: float, low: int, up: int) -> tuple[IND_TYPE]:
-    for order, times in individual:
-        mutShuffleIndexes(order, indpb)
-        #tools.mutUniformInt(times, low, up, indpb)
-        mutation_change_by_one(times, indpb, low, up)
-    return individual,
-
 #def varAnd(population, toolbox, cxpb, mutpb):
-def varAnd(population: list[IND_TYPE], offspring: list[IND_TYPE], toolbox: Toolbox, cxpb: float, mutpb: float) -> list[IND_TYPE]:
-#def varAnd(population, offspring, toolbox, cxpb, mutpb):
+def _varAnd(population: list[IND_TYPE], pop2: list[IND_TYPE], toolbox: Toolbox, cxpb: float, mutpb: float) -> list[IND_TYPE]:
     #offspring = [toolbox.clone(ind) for ind in population]
-    for new, old in zip(offspring, population):
-        fill_with(new, old)
+    for new, old in zip(pop2, population):
+        _fill_with(new, old)
+        new.fitness.values = old.fitness.values
+    offspring = pop2
 
     # Apply crossover and mutation on the offspring
     for i in range(1, len(offspring), 2):
@@ -156,11 +137,9 @@ def varAnd(population: list[IND_TYPE], offspring: list[IND_TYPE], toolbox: Toolb
 
     return offspring
 
-def eaSimple(population: list[IND_TYPE], toolbox: Toolbox, cxpb: float, 
-             mutpb: float, ngen: int, stats: Statistics | None = None,
-             halloffame: HallOfFame | None = None, verbose: bool | None = __debug__) -> tuple[list[IND_TYPE], Logbook]:
-#def eaSimple(population, toolbox, cxpb, mutpb, ngen, stats=None,
-#             halloffame=None, verbose=__debug__):
+def _eaSimple(population: list[IND_TYPE], toolbox: Toolbox, cxpb: float, 
+              mutpb: float, ngen: int, stats: Statistics | None = None,
+              halloffame: HallOfFame | None = None, verbose: bool | None = __debug__) -> tuple[list[IND_TYPE], Logbook]:
     logbook = Logbook()
     logbook.header = ['gen', 'nevals'] + (stats.fields if stats else [])
 
@@ -179,20 +158,19 @@ def eaSimple(population: list[IND_TYPE], toolbox: Toolbox, cxpb: float,
     logbook.record(gen=0, nevals=len(invalid_ind), **record)
     if verbose:
         print(logbook.stream)
-
-    offspring = [toolbox.clone(ind) for ind in population]
+        
+    pop2 = [toolbox.clone(ind) for ind in population]
 
     # Begin the generational process
     for gen in range(1, ngen + 1):
         start = time.time()
 
         # Select the next generation individuals
-        #offspring = toolbox.select(population, len(population))
-        selected = toolbox.select(population, len(population))
+        offspring = toolbox.select(population, len(population))
 
         start_mutate = time.time()
         # Vary the pool of individuals
-        offspring = varAnd(selected, offspring, toolbox, cxpb, mutpb)
+        offspring = _varAnd(offspring, pop2, toolbox, cxpb, mutpb)
         #offspring = varAnd(offspring, toolbox, cxpb, mutpb)
         print(f'Cross+Mut: {time.time() - start_mutate:.4f}s')
 
@@ -211,7 +189,8 @@ def eaSimple(population: list[IND_TYPE], toolbox: Toolbox, cxpb: float,
 
         # Replace the current population by the offspring
         #population[:] = offspring
-        population, offspring = offspring, population
+        population, pop2 = offspring, population
+
 
         # Append the current generation statistics to the logbook
         record = stats.compile(population) if stats else {}
@@ -222,3 +201,27 @@ def eaSimple(population: list[IND_TYPE], toolbox: Toolbox, cxpb: float,
         print(f'Generation {gen}: {time.time() - start:.4f}s')
 
     return population, logbook
+
+if cython.compiled:
+    cxTwoPoint = _cxTwoPoint
+    cxOrdered = _cxOrdered
+    mutShuffleIndexes = _mutShuffleIndexes
+    eaSimple = _eaSimple
+else:
+    from deap.tools import cxTwoPoint, cxOrdered, mutShuffleIndexes
+    from deap.algorithms import eaSimple as eaSimple_deap
+    eaSimple = eaSimple_deap
+
+def crossover(ind1: IND_TYPE, ind2: IND_TYPE) -> tuple[IND_TYPE, IND_TYPE]:
+    for (order1, times1), (order2, times2) in zip(ind1, ind2):
+        cxOrdered(order1, order2)
+        cxTwoPoint(times1, times2)
+
+    return ind1, ind2
+
+def mutation(individual: IND_TYPE, indpb: float, low: int, up: int) -> tuple[IND_TYPE]:
+    for order, times in individual:
+        mutShuffleIndexes(order, indpb)
+        #tools.mutUniformInt(times, low, up, indpb)
+        mutation_change_by_one(times, indpb, low, up)
+    return individual,
