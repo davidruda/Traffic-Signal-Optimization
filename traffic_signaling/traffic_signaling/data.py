@@ -55,14 +55,8 @@ def calculate_upper_bound(data: str) -> int:
     Theoretical maximum score if none of the cars
     ever has to wait at a traffic light.
     """ 
-        
-    def car_score(car):
-        # The car path begins at the end of the first street
-        path_duration = sum(street.length for street in car.path[1:])
-        return city_plan.bonus + city_plan.duration - path_duration
+    plan = CityPlan(get_data_filename(data))
+    car_score = lambda car: plan.bonus + plan.duration - car.path_duration()
 
-    city_plan = CityPlan(get_data_filename(data))
-    upper_bound = sum(
-        car_score(c) for c in city_plan.cars if car_score(c) > 0
-    )
+    upper_bound = sum(car_score(c) for c in plan.cars if car_score(c) > 0)
     return upper_bound

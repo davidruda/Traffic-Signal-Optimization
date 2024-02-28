@@ -66,6 +66,10 @@ PYBIND11_MODULE(city_plan, m) {
         .def_property_readonly(
             "path",
             &Car::path
+        )
+        .def(
+            "path_duration",
+            &Car::path_duration
         );
 
     py::class_<Intersection>(m, "Intersection")
@@ -80,10 +84,6 @@ PYBIND11_MODULE(city_plan, m) {
         .def_property_readonly(
             "used_streets",
             &Intersection::used_streets
-            //[](const Intersection &i) {
-            //    i.used_streets() | std::ranges::views::transform();
-            //    return std::vector<std::reference_wrapper<const Street>>{us.begin(), us.end()};
-            //}
         )
         .def_property_readonly(
             "used",
