@@ -8,9 +8,9 @@
 #include <unordered_map>
 #include <ranges>
 
-#include "car.hpp"
-#include "intersection.hpp"
-#include "street.hpp"
+#include "city_plan/intersection.hpp"
+#include "city_plan/street.hpp"
+#include "city_plan/car.hpp"
 
 namespace city_plan {
 class CityPlan {

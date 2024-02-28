@@ -3,9 +3,8 @@
 
 #include <optional>
 #include <queue>
-#include <string>
 
-#include "city_plan/city_plan.hpp"
+#include "city_plan/street.hpp"
 
 namespace simulation {
 class Street {

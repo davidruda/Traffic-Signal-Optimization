@@ -9,11 +9,11 @@
 #include <utility>
 #include <vector>
 
-#include "car.hpp"
 #include "city_plan/city_plan.hpp"
-#include "event.hpp"
-#include "schedule.hpp"
-#include "street.hpp"
+#include "simulation/car.hpp"
+#include "simulation/event.hpp"
+#include "simulation/schedule.hpp"
+#include "simulation/street.hpp"
 
 namespace simulation {
 class Simulation {

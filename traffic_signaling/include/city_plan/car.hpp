@@ -1,32 +1,28 @@
 #ifndef CITY_PLAN_CAR_HPP
 #define CITY_PLAN_CAR_HPP
 
-#include <iostream>
 #include <vector>
+#include <functional>
+
+#include "city_plan/street.hpp"
 
 namespace city_plan {
 class Car {
 public:
-    Car(size_t id, std::vector<size_t> &&path)
+    Car(size_t id, std::vector<std::reference_wrapper<const Street>> &&path)
         : id_(id), path_(std::move(path)) {}
 
     size_t id() const {
         return id_;
     }
 
-    const std::vector<size_t> &path() const {
+    const std::vector<std::reference_wrapper<const Street>> &path() const {
         return path_;
     }
 
-    friend std::ostream &operator<<(std::ostream &os, const Car &obj) {
-        os << "[" << obj.id_ << " path_length: " << obj.path_.size() << "]";
-        return os;
-    }
-
 private:
-    const size_t id_;
-    // path represented with street ids
-    const std::vector<size_t> path_;
+    size_t id_;
+    std::vector<std::reference_wrapper<const Street>> path_;
 };
 }
 

@@ -1,27 +1,29 @@
 #ifndef CITY_PLAN_STREET_HPP
 #define CITY_PLAN_STREET_HPP
 
-#include <iostream>
 #include <string>
 
 namespace city_plan {
+// necessary forward declaration to resolve circular dependency
+class Intersection;
+
 class Street {
 public:
-    Street(size_t id, size_t start_id, size_t end_id,
+    Street(size_t id, const Intersection &start, const Intersection &end,
            std::string &&name, size_t length)
-        : id_(id), start_id_(start_id), end_id_(end_id),
+        : id_(id), start_(start), end_(end),
           name_(std::move(name)), length_(length) {}
 
     size_t id() const {
         return id_;
     }
 
-    size_t start() const {
-        return start_id_;
+    const Intersection &start() const {
+        return start_;
     }
 
-    size_t end() const {
-        return end_id_;
+    const Intersection &end() const {
+        return end_;
     }
 
     const std::string &name() const {
@@ -44,18 +46,12 @@ public:
         return length_;
     }
 
-    friend std::ostream &operator<<(std::ostream &os, const Street &obj) {
-        os << "[" << obj.id_ << " " << obj.name_ << " " << obj.start_id_
-           << " -> " << obj.end_id_ << " length: " << obj.length_ << "]";
-        return os;
-    }
-
 private:
-    const size_t id_;
-    const size_t start_id_;
-    const size_t end_id_;
-    const std::string name_;
-    const size_t length_;
+    size_t id_;
+    const Intersection &start_;
+    const Intersection &end_;
+    std::string name_;
+    size_t length_;
     // number of cars that use this street
     size_t total_cars_{};
     // TODO: maybe use a vector of cars instead of a counter

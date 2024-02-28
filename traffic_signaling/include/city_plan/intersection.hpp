@@ -1,15 +1,17 @@
 #ifndef CITY_PLAN_INTERSECTION_HPP
 #define CITY_PLAN_INTERSECTION_HPP
 
-#include <iostream>
 #include <vector>
 #include <unordered_map>
+#include <functional>
+
+// circular dependency resolved by forward declaration
+#include "city_plan/street.hpp"
 
 namespace city_plan {
 class Intersection {
 public:
-    explicit Intersection(size_t id)
-        : id_(id) {}
+    explicit Intersection(size_t id) : id_(id) {}
 
     bool used() const {
         return !used_streets_.empty();
@@ -23,21 +25,21 @@ public:
         return id_;
     }
 
-    const std::vector<size_t> &streets() const {
+    const std::vector<std::reference_wrapper<const Street>> &streets() const {
         return streets_;
     }
 
-    const std::vector<size_t> &used_streets() const {
+    const std::vector<std::reference_wrapper<const Street>> &used_streets() const {
         return used_streets_;
     }
 
-    void add_street(size_t street_id) {
-        streets_.emplace_back(street_id);
+    void add_street(const Street& street) {
+        streets_.emplace_back(street);
     }
 
-    void add_used_street(size_t street_id) {
-        street_index_[street_id] = used_streets_.size();
-        used_streets_.push_back(street_id);
+    void add_used_street(const Street& street) {
+        street_index_[street.id()] = used_streets_.size();
+        used_streets_.emplace_back(street);
     }
 
     // returns the index of the street_id relative to this intersection
@@ -46,19 +48,11 @@ public:
         return street_index_.at(street_id);
     }
 
-    friend std::ostream &operator<<(std::ostream &os, const Intersection &obj) {
-        os << obj.id_ << "\n" << "Incoming streets:\n";
-        for (auto &&s: obj.streets_) {
-            os << s << "\n";
-        }
-        return os;
-    }
-
 private:
-    const size_t id_;
+    size_t id_;
     // incoming streets represented by street ids
-    std::vector<size_t> streets_;
-    std::vector<size_t> used_streets_;
+    std::vector<std::reference_wrapper<const Street>> streets_;
+    std::vector<std::reference_wrapper<const Street>> used_streets_;
     // a mapping from used street_id to an index relative to this intersection
     std::unordered_map<size_t, size_t> street_index_;
 };

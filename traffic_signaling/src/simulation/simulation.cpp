@@ -23,18 +23,6 @@ Simulation::Simulation(const city_plan::CityPlan &city_plan)
         cars_.emplace_back(c);
     }
 }
-//Simulation::Simulation(const city_plan::CityPlan &city_plan)
-//    : city_plan_(city_plan) {
-//    streets_.reserve(city_plan_.streets().size());
-//    cars_.reserve(city_plan_.cars().size());
-//
-//    for (auto &&s: city_plan_.streets()) {
-//        streets_.emplace(s.id(), s);
-//    }
-//    for (auto &&c: city_plan_.cars()) {
-//        cars_.emplace(c.id(), c);
-//    }
-//}
 
 void Simulation::reset_run() {
     total_score_ = {};
@@ -100,8 +88,9 @@ void Simulation::default_schedules() {
     reset_schedules();
     for (auto &&intersection: city_plan_.used_intersections()) {
         auto &&schedule = schedules_[intersection.id()];
-        for (auto &&street_id: intersection.used_streets()) {
-            schedule.add_street(street_id, 1);
+
+        for (const city_plan::Street &street: intersection.used_streets()) {
+            schedule.add_street(street.id(), 1);
         }
     }
 }
@@ -114,7 +103,7 @@ void Simulation::initialize_run() {
 
 void Simulation::add_event(Car &car, size_t current_time) {
     auto street_id = car.current_street();
-    auto intersection_id = city_plan_.streets()[street_id].end();
+    auto intersection_id = city_plan_.streets()[street_id].end().id();
 
     // latest_used_time is the last time the street was used
     // (i.e. the last time a car passed through it)
@@ -160,7 +149,7 @@ void Simulation::process_event() {
         // If the car arrives at the end of the street before
         // the end of the simulation, mark it as finished and update the stats
         if (finish_time <= city_plan_.duration()) {
-            car.arrive(city_plan_, finish_time);
+            car.arrive(finish_time, city_plan_.duration(), city_plan_.bonus());
             total_score_ += car.score();
         }
         return;
@@ -264,9 +253,13 @@ void Simulation::update_schedules(const std::vector<std::pair<std::vector<size_t
 
         // TODO: maybe solve the relative/absolute street id problem differently
         if (relative) {
-            auto &&used_streets_ids = city_plan_.intersections()[id].used_streets();
+            //auto &&used_streets_ids = city_plan_.intersections()[id].used_streets();
+            //auto street_ids = order | std::ranges::views::transform([&](size_t street_index) {
+            //    return used_streets_ids[street_index];
+            //});
+            auto &&used_streets = city_plan_.intersections()[id].used_streets();
             auto street_ids = order | std::ranges::views::transform([&](size_t street_index) {
-                return used_streets_ids[street_index];
+                return used_streets[street_index].get().id();
             });
             schedules_[id].set({street_ids.begin(), street_ids.end()}, times);
         }

@@ -3,7 +3,7 @@
 
 #include <optional>
 
-#include "city_plan/city_plan.hpp"
+#include "city_plan/car.hpp"
 
 namespace simulation {
 class Car {
@@ -12,7 +12,7 @@ public:
         : data_(data) {}
 
     size_t current_street() const {
-        return data_.path()[path_index_];
+        return data_.path()[path_index_].get().id();
     }
 
     void move_to_next_street() {
@@ -27,9 +27,9 @@ public:
         return data_.id();
     }
 
-    void arrive(const city_plan::CityPlan &city_plan, size_t arrival_time) {
+    void arrive(size_t arrival_time, size_t max_time, size_t bonus) {
         arrival_time_ = arrival_time;
-        score_ = city_plan.bonus() + city_plan.duration() - arrival_time;
+        score_ = bonus + max_time - arrival_time;
     }
 
     std::optional<size_t> arrival_time() const {
@@ -42,6 +42,7 @@ public:
 
     void reset() {
         path_index_ = {};
+        arrival_time_ = {};
         score_ = {};
     }
 
