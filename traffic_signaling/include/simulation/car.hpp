@@ -11,7 +11,7 @@ public:
     explicit Car(const city_plan::Car &data)
         : data_(data) {}
 
-    size_t current_street() const {
+    unsigned long current_street() const {
         return data_.path()[path_index_].get().id();
     }
 
@@ -23,20 +23,20 @@ public:
         return data_.path().size() - 1 == path_index_;
     }
 
-    size_t id() const {
+    unsigned long id() const {
         return data_.id();
     }
 
-    void arrive(size_t arrival_time, size_t max_time, size_t bonus) {
+    void arrive(unsigned long arrival_time, unsigned long max_time, unsigned long bonus) {
         arrival_time_ = arrival_time;
         score_ = bonus + max_time - arrival_time;
     }
 
-    std::optional<size_t> arrival_time() const {
+    std::optional<unsigned long> arrival_time() const {
         return arrival_time_;
     }
 
-    size_t score() const {
+    unsigned long score() const {
         return score_;
     }
 
@@ -49,9 +49,9 @@ public:
 private:
     const city_plan::Car &data_;
 
-    size_t path_index_{};
-    std::optional<size_t> arrival_time_;
-    size_t score_{};
+    unsigned long path_index_{};
+    std::optional<unsigned long> arrival_time_;
+    unsigned long score_{};
 };
 }
 

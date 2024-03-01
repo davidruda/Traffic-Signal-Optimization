@@ -15,9 +15,9 @@ CityPlan::CityPlan(const std::string &filename) { // NOLINT(*-pro-type-member-in
 }
 
 CityPlan::CityPlan(std::ifstream &file) { // NOLINT(*-pro-type-member-init)
-    size_t number_of_intersections;
-    size_t number_of_streets;
-    size_t number_of_cars;
+    unsigned long number_of_intersections;
+    unsigned long number_of_streets;
+    unsigned long number_of_cars;
 
     file >> duration_ >> number_of_intersections >> number_of_streets
          >> number_of_cars >> bonus_;
@@ -27,19 +27,19 @@ CityPlan::CityPlan(std::ifstream &file) { // NOLINT(*-pro-type-member-init)
     street_mapping_.reserve(number_of_streets);
     cars_.reserve(number_of_cars);
 
-    for (size_t id = 0; id < number_of_intersections; ++id) {
+    for (unsigned long id = 0; id < number_of_intersections; ++id) {
         intersections_.emplace_back(id);
     }
     read_streets(file, number_of_streets);
     read_cars(file, number_of_cars);
 }
 
-void CityPlan::read_streets(std::ifstream &file, size_t count) {
-    size_t start_id;
-    size_t end_id;
+void CityPlan::read_streets(std::ifstream &file, unsigned long count) {
+    unsigned long start_id;
+    unsigned long end_id;
     std::string name;
-    size_t length;
-    for (size_t id = 0; id < count; ++id) {
+    unsigned long length;
+    for (unsigned long id = 0; id < count; ++id) {
         file >> start_id >> end_id >> name >> length;
         auto &&start = intersections_[start_id];
         auto &&end = intersections_[end_id];
@@ -49,17 +49,17 @@ void CityPlan::read_streets(std::ifstream &file, size_t count) {
     }
 }
 
-void CityPlan::read_cars(std::ifstream &file, size_t count) {
-    size_t path_length;
+void CityPlan::read_cars(std::ifstream &file, unsigned long count) {
+    unsigned long path_length;
     std::string street_name;
 
-    std::unordered_map<size_t, std::set<size_t>> used_streets;
-    for (size_t id = 0; id < count; ++id) {
+    std::unordered_map<unsigned long, std::set<unsigned long>> used_streets;
+    for (unsigned long id = 0; id < count; ++id) {
         file >> path_length;
 
         std::vector<std::reference_wrapper<const Street>> path;
         path.reserve(path_length);
-        for (size_t i = 0; i < path_length; ++i) {
+        for (unsigned long i = 0; i < path_length; ++i) {
             file >> street_name;
             auto &&street_id = street_mapping_[street_name];
             path.emplace_back(streets_[street_id]);

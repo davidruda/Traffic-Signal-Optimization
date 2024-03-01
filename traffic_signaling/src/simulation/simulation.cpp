@@ -44,20 +44,20 @@ void Simulation::reset_schedules() {
 void Simulation::load_schedules(const std::string &filename) {
     reset_schedules();
     std::ifstream file{filename};
-    size_t number_of_intersections;
-    size_t intersection_id;
-    size_t number_of_streets;
+    unsigned long number_of_intersections;
+    unsigned long intersection_id;
+    unsigned long number_of_streets;
     std::string street_name;
-    size_t green_light_duration;
+    unsigned long green_light_duration;
 
     file >> number_of_intersections;
     schedules_.reserve(number_of_intersections);
 
-    for (size_t i = 0; i < number_of_intersections; ++i) {
+    for (unsigned long i = 0; i < number_of_intersections; ++i) {
         file >> intersection_id;
 
         file >> number_of_streets;
-        for (size_t j = 0; j < number_of_streets; ++j) {
+        for (unsigned long j = 0; j < number_of_streets; ++j) {
             file >> street_name >> green_light_duration;
             auto street_id = city_plan_.street_id(street_name);
             schedules_[intersection_id].add_street(street_id, green_light_duration);
@@ -101,7 +101,7 @@ void Simulation::initialize_run() {
     }
 }
 
-void Simulation::add_event(Car &car, size_t current_time) {
+void Simulation::add_event(Car &car, unsigned long current_time) {
     auto street_id = car.current_street();
     auto intersection_id = city_plan_.streets()[street_id].end().id();
 
@@ -112,7 +112,7 @@ void Simulation::add_event(Car &car, size_t current_time) {
 
     // earliest_possible_time is the theoretical next earliest time
     // the street can be used
-    size_t earliest_possible_time = current_time;
+    auto earliest_possible_time = current_time;
     if (latest_used_time.has_value()) {
         earliest_possible_time =
             (*latest_used_time >= current_time) ?
@@ -170,14 +170,14 @@ void Simulation::run() {
     }
 }
 
-size_t Simulation::score() {
+unsigned long Simulation::score() {
     run();
     return total_score_;
 }
 
 void Simulation::summary() const {
-    size_t cars_finished = 0;
-    size_t total_driving_time = 0;
+    unsigned long cars_finished = 0;
+    unsigned long total_driving_time = 0;
     std::optional<std::reference_wrapper<const Car>> earliest_car;
     std::optional<std::reference_wrapper<const Car>> latest_car;
     for (auto &&c: cars_) {
@@ -245,7 +245,7 @@ void Simulation::summary() const {
 // TODO: maybe rewrite this function specifically for python types
 // relative - whether the order is of indices relative to the intersection
 // or absolute street ids
-void Simulation::update_schedules(const std::vector<std::pair<std::vector<size_t>, std::vector<size_t>>> &schedules, bool relative) {
+void Simulation::update_schedules(const std::vector<std::pair<std::vector<unsigned long>, std::vector<unsigned long>>> &schedules, bool relative) {
     size_t i = 0;
     for (auto &&intersection: city_plan_.non_trivial_intersections()) {
         auto id = intersection.id();
@@ -258,7 +258,7 @@ void Simulation::update_schedules(const std::vector<std::pair<std::vector<size_t
             //    return used_streets_ids[street_index];
             //});
             auto &&used_streets = city_plan_.intersections()[id].used_streets();
-            auto street_ids = order | std::ranges::views::transform([&](size_t street_index) {
+            auto street_ids = order | std::ranges::views::transform([&](unsigned long street_index) {
                 return used_streets[street_index].get().id();
             });
             schedules_[id].set({street_ids.begin(), street_ids.end()}, times);

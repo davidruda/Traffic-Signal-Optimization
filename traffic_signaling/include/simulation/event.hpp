@@ -10,7 +10,7 @@ class Event {
 public:
     virtual ~Event() = default;
 
-    size_t time() const {
+    unsigned long time() const {
         return time_;
     }
 
@@ -24,16 +24,16 @@ public:
     virtual Type event_type() const = 0;
 
 protected:
-    explicit Event(size_t time);
+    explicit Event(unsigned long time);
 
     static size_t counter_;
     size_t counter_id_;
-    size_t time_;
+    unsigned long time_;
 };
 
 class StreetEvent : public Event {
 public:
-    StreetEvent(size_t time, Street &street)
+    StreetEvent(unsigned long time, Street &street)
         : Event(time), street_(street) {}
 
     Type event_type() const override {

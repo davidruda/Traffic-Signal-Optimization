@@ -11,7 +11,7 @@
 namespace city_plan {
 class Intersection {
 public:
-    explicit Intersection(size_t id) : id_(id) {}
+    explicit Intersection(unsigned long id) : id_(id) {}
 
     bool used() const {
         return !used_streets_.empty();
@@ -21,7 +21,7 @@ public:
         return used_streets_.size() > 1;
     }
 
-    size_t id() const {
+    unsigned long id() const {
         return id_;
     }
 
@@ -38,23 +38,23 @@ public:
     }
 
     void add_used_street(const Street& street) {
-        street_index_[street.id()] = used_streets_.size();
+        street_index_[street.id()] = static_cast<unsigned long>(used_streets_.size());
         used_streets_.emplace_back(street);
     }
 
     // returns the index of the street_id relative to this intersection
     // only valid for used streets
-    size_t street_index(size_t street_id) const {
+    unsigned long street_index(unsigned long street_id) const {
         return street_index_.at(street_id);
     }
 
 private:
-    size_t id_;
+    unsigned long id_;
     // incoming streets represented by street ids
     std::vector<std::reference_wrapper<const Street>> streets_;
     std::vector<std::reference_wrapper<const Street>> used_streets_;
     // a mapping from used street_id to an index relative to this intersection
-    std::unordered_map<size_t, size_t> street_index_;
+    std::unordered_map<unsigned long, unsigned long> street_index_;
 };
 }
 

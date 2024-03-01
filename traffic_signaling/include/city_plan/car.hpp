@@ -10,10 +10,10 @@
 namespace city_plan {
 class Car {
 public:
-    Car(size_t id, std::vector<std::reference_wrapper<const Street>> &&path)
+    Car(unsigned long id, std::vector<std::reference_wrapper<const Street>> &&path)
         : id_(id), path_(std::move(path)) {}
 
-    size_t id() const {
+    unsigned long id() const {
         return id_;
     }
 
@@ -21,8 +21,8 @@ public:
         return path_;
     }
 
-    size_t path_duration() const {
-        size_t duration = 0;
+    unsigned long path_duration() const {
+        unsigned long duration = 0;
         // The car path begins at the end of the first street
         // so we skip the first street
         for (const Street &s: path_ | std::views::drop(1)) {
@@ -32,7 +32,7 @@ public:
     }
 
 private:
-    size_t id_;
+    unsigned long id_;
     std::vector<std::reference_wrapper<const Street>> path_;
 };
 }

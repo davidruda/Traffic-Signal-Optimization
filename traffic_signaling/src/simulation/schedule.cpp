@@ -6,13 +6,13 @@
 
 namespace simulation {
 
-void Schedule::add_street(size_t street_id, size_t green_light_duration) {
+void Schedule::add_street(unsigned long street_id, unsigned long green_light_duration) {
     order_.push_back(street_id);
     green_lights_.try_emplace(street_id, total_duration_, total_duration_ + green_light_duration);
     total_duration_ += green_light_duration;
 }
 
-std::optional<size_t> Schedule::next_green(size_t street_id, size_t time) const {
+std::optional<unsigned long> Schedule::next_green(unsigned long street_id, unsigned long time) const {
     if (!green_lights_.contains(street_id)) {
         return {};
     }
@@ -33,8 +33,8 @@ std::optional<size_t> Schedule::next_green(size_t street_id, size_t time) const 
     return time;
 }
 
-std::pair<std::vector<size_t>, std::vector<size_t>> Schedule::get() const {
-    std::vector<size_t> times;
+std::pair<std::vector<unsigned long>, std::vector<unsigned long>> Schedule::get() const {
+    std::vector<unsigned long> times;
     times.reserve(order_.size());
     for (auto &&street_id: order_) {
         times.push_back(green_lights_.at(street_id).size());
@@ -42,7 +42,7 @@ std::pair<std::vector<size_t>, std::vector<size_t>> Schedule::get() const {
     return std::make_pair(order_, std::move(times));
 }
 
-void Schedule::set(const std::vector<size_t> &order, const std::vector<size_t> &times) {
+void Schedule::set(const std::vector<unsigned long> &order, const std::vector<unsigned long> &times) {
     assert(order.size() == times.size());
     reset();
     for (size_t i = 0; i < order.size(); ++i) {

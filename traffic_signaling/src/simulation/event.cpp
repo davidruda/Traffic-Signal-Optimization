@@ -7,7 +7,7 @@ namespace simulation {
 
 size_t Event::counter_{};
 
-Event::Event(size_t time)
+Event::Event(unsigned long time)
     : time_(time) {
     assert(counter_ < std::numeric_limits<size_t>::max());
     counter_id_ = counter_++;

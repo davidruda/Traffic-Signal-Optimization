@@ -248,12 +248,10 @@ if __name__ == '__main__':
     non_trivial_intersections = plan.non_trivial_intersections()
 
     car_counts = [
-        streets[street_id].total_cars
+        s.total_cars
         for i in non_trivial_intersections
-        for street_id in i.used_streets
+        for s in i.used_streets
     ]
-    
-    #non_trivial_ids = [i.id for i in non_trivial_intersections]
 
     if args.init_times == 'scaled':
         counts_normalized = np.sqrt(car_counts / np.min(car_counts)).astype(int)

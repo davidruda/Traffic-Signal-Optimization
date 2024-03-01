@@ -26,20 +26,20 @@ public:
     // default means 1 second for every used street in the given order
     void default_schedules();
 
-    size_t score();
+    unsigned long score();
     void summary() const;
 
-    const std::unordered_map<size_t, Schedule> &schedules() const {
+    const std::unordered_map<unsigned long, Schedule> &schedules() const {
         return schedules_;
     }
 
-    void update_schedules(const std::vector<std::pair<std::vector<size_t>, std::vector<size_t>>> &schedules, bool relative = true);
+    void update_schedules(const std::vector<std::pair<std::vector<unsigned long>, std::vector<unsigned long>>> &schedules, bool relative = true);
 
-    //void update_schedules(const std::vector<size_t> &intersection_ids,
-    //    const std::vector<std::pair<std::vector<size_t>, std::vector<size_t>>> &schedules,
+    //void update_schedules(const std::vector<unsigned long> &intersection_ids,
+    //    const std::vector<std::pair<std::vector<unsigned long>, std::vector<unsigned long>>> &schedules,
     //    bool relative = true);
 
-    //std::vector<std::pair<size_t, std::pair<std::vector<size_t>, std::vector<size_t>>>> get_schedules() const;
+    //std::vector<std::pair<unsigned long, std::pair<std::vector<unsigned long>, std::vector<unsigned long>>>> get_schedules() const;
 
 private:
     class ThousandSeparator : public std::numpunct<char> {
@@ -58,7 +58,7 @@ private:
     void run();
     void reset_run();
     void reset_schedules();
-    void add_event(Car &car, size_t current_time);
+    void add_event(Car &car, unsigned long current_time);
     void initialize_run();
     void process_event();
 
@@ -66,11 +66,11 @@ private:
 
     std::vector<Street> streets_;
     std::vector<Car> cars_;
-    std::unordered_map<size_t, Schedule> schedules_;
+    std::unordered_map<unsigned long, Schedule> schedules_;
 
     std::priority_queue<StreetEvent, std::vector<StreetEvent>, std::greater<>> event_queue_;
 
-    size_t total_score_{};
+    unsigned long total_score_{};
 };
 
 // factory function creating a simulation with default schedules

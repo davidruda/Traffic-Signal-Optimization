@@ -16,10 +16,10 @@ def _fill_with(ind1: IND_TYPE, ind2: IND_TYPE) -> None:
     """
     Fill `ind1` with values from `ind2`.
     """
-    order1: cython.uint[:]
-    times1: cython.uint[:]
-    order2: cython.uint[:]
-    times2: cython.uint[:]
+    order1: cython.ulong[:]
+    times1: cython.ulong[:]
+    order2: cython.ulong[:]
+    times2: cython.ulong[:]
     for (order1, times1), (order2, times2) in zip(ind1, ind2):
         for i in range(len(order1)):
             order1[i] = order2[i]
@@ -28,7 +28,7 @@ def _fill_with(ind1: IND_TYPE, ind2: IND_TYPE) -> None:
 @cython.boundscheck(False)
 @cython.wraparound(False)
 @cython.initializedcheck(False)
-def _cxTwoPoint(ind1: cython.uint[:], ind2: cython.uint[:]):
+def _cxTwoPoint(ind1: cython.ulong[:], ind2: cython.ulong[:]):
     size: cython.Py_ssize_t = min(len(ind1), len(ind2))
     cxpoint1: cython.int = random.randint(1, size)
     cxpoint2: cython.int = random.randint(1, size - 1)
@@ -46,14 +46,14 @@ def _cxTwoPoint(ind1: cython.uint[:], ind2: cython.uint[:]):
 @cython.boundscheck(False)
 @cython.wraparound(False)
 @cython.initializedcheck(False)
-def _cxOrdered(ind1: cython.uint[:], ind2: cython.uint[:]):
+def _cxOrdered(ind1: cython.ulong[:], ind2: cython.ulong[:]):
     a: cython.int
     b: cython.int
     i: cython.int
     k1: cython.int
     k2: cython.int
-    temp1: cython.uint[:]
-    temp2: cython.uint[:]
+    temp1: cython.ulong[:]
+    temp2: cython.ulong[:]
     size: cython.Py_ssize_t = min(len(ind1), len(ind2))
 
     a, b = random.sample(range(size), 2)
@@ -87,7 +87,7 @@ def _cxOrdered(ind1: cython.uint[:], ind2: cython.uint[:]):
 @cython.boundscheck(False)
 @cython.wraparound(False)
 @cython.initializedcheck(False)
-def mutation_change_by_one(individual: cython.uint[:], indpb: cython.float, low: cython.int, up: cython.int):
+def mutation_change_by_one(individual: cython.ulong[:], indpb: cython.float, low: cython.int, up: cython.int):
     size: cython.Py_ssize_t = len(individual)
 
     for i in range(size):
@@ -101,7 +101,7 @@ def mutation_change_by_one(individual: cython.uint[:], indpb: cython.float, low:
 @cython.boundscheck(False)
 @cython.wraparound(False)
 @cython.initializedcheck(False)
-def _mutShuffleIndexes(individual: cython.uint[:], indpb: cython.float):
+def _mutShuffleIndexes(individual: cython.ulong[:], indpb: cython.float):
     swap_indx: cython.Py_ssize_t
     size: cython.Py_ssize_t = len(individual)
 

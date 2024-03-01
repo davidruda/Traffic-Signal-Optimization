@@ -30,11 +30,11 @@ public:
         return cars_;
     }
 
-    size_t duration() const {
+    unsigned long duration() const {
         return duration_;
     }
 
-    size_t bonus() const {
+    unsigned long bonus() const {
         return bonus_;
     }
 
@@ -48,23 +48,21 @@ public:
         return intersections_ | std::ranges::views::filter(non_trivial);
     }
 
-    size_t street_id(std::string_view name) const {
+    unsigned long street_id(std::string_view name) const {
         return street_mapping_.at(name);
     }
 
-    friend std::ostream &operator<<(std::ostream &os, const CityPlan &obj);
-
 private:
-    void read_streets(std::ifstream &file, size_t count);
-    void read_cars(std::ifstream &file, size_t count);
+    void read_streets(std::ifstream &file, unsigned long count);
+    void read_cars(std::ifstream &file, unsigned long count);
 
-    size_t duration_;
+    unsigned long duration_;
     std::vector<Intersection> intersections_;
     std::vector<Street> streets_;
     std::vector<Car> cars_;
-    size_t bonus_;
+    unsigned long bonus_;
     // mapping from street name to street id
-    std::unordered_map<std::string_view, size_t> street_mapping_;
+    std::unordered_map<std::string_view, unsigned long> street_mapping_;
 };
 }
 
