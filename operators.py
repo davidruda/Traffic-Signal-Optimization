@@ -93,9 +93,13 @@ def mutation_change_by_one(individual: cython.ulong[:], indpb: cython.float, low
     for i in range(size):
         if random.random() < indpb:
             if random.random() < 0.5:
-                individual[i] = min(individual[i] + 1, up)
+                # Make sure the number doesn't overflow
+                if individual[i] < up:
+                    individual[i] = individual[i] + 1
             else:
-                individual[i] = max(individual[i] - 1, low)
+                # Make sure the number doesn't overflow
+                if individual[i] > low:
+                    individual[i] = individual[i] - 1
     return individual,
 
 @cython.boundscheck(False)
