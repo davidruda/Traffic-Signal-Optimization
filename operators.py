@@ -87,7 +87,7 @@ def _cxOrdered(ind1: cython.ulong[:], ind2: cython.ulong[:]):
 @cython.boundscheck(False)
 @cython.wraparound(False)
 @cython.initializedcheck(False)
-def mutation_change_by_one(individual: cython.ulong[:], indpb: cython.float, low: cython.int, up: cython.int):
+def mutation_change_by_one(individual: cython.ulong[:], indpb: cython.float, low: cython.uint, up: cython.uint):
     size: cython.Py_ssize_t = len(individual)
 
     for i in range(size):
