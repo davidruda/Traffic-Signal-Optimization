@@ -104,5 +104,13 @@ PYBIND11_MODULE(simulation, m) {
         .def_property_readonly(
             "duration",
             &Schedule::duration
+        )
+        .def_property_readonly(
+            "order",
+            &Schedule::order
+        )
+        .def_property_readonly(
+            "times",
+            &Schedule::times
         );
 }

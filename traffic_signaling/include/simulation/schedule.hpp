@@ -21,6 +21,14 @@ public:
         return total_duration_;
     }
 
+    const std::vector<unsigned long> &order() const {
+        return order_;
+    }
+
+    const std::vector<unsigned long> &times() const {
+        return times_;
+    }
+
     void add_street(unsigned long street_id, unsigned long green_light_duration);
     std::optional<unsigned long> next_green(unsigned long street_id, unsigned long time) const;
 
@@ -37,6 +45,7 @@ private:
 
     // order of the street_ids in the green light schedule
     std::vector<unsigned long> order_;
+    std::vector<unsigned long> times_;
     // green light intervals indexed by street_id 
     std::unordered_map<unsigned long, TimeInterval> green_lights_;
 };

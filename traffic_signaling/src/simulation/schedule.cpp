@@ -8,6 +8,7 @@ namespace simulation {
 
 void Schedule::add_street(unsigned long street_id, unsigned long green_light_duration) {
     order_.push_back(street_id);
+    times_.push_back(green_light_duration);
     green_lights_.try_emplace(street_id, total_duration_, total_duration_ + green_light_duration);
     total_duration_ += green_light_duration;
 }
@@ -34,12 +35,7 @@ std::optional<unsigned long> Schedule::next_green(unsigned long street_id, unsig
 }
 
 std::pair<std::vector<unsigned long>, std::vector<unsigned long>> Schedule::get() const {
-    std::vector<unsigned long> times;
-    times.reserve(order_.size());
-    for (auto &&street_id: order_) {
-        times.push_back(green_lights_.at(street_id).size());
-    }
-    return std::make_pair(order_, std::move(times));
+    return std::make_pair(order_, times_);
 }
 
 void Schedule::set(const std::vector<unsigned long> &order, const std::vector<unsigned long> &times) {
@@ -51,8 +47,9 @@ void Schedule::set(const std::vector<unsigned long> &order, const std::vector<un
 }
 
 void Schedule::reset() {
-    total_duration_ = 0;
+    total_duration_ = {};
     order_ = {};
+    times_ = {};
     green_lights_ = {};
 }
 }
