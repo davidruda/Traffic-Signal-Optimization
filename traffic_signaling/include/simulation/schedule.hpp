@@ -32,7 +32,9 @@ public:
     void add_street(unsigned long street_id, unsigned long green_light_duration);
     std::optional<unsigned long> next_green(unsigned long street_id, unsigned long time) const;
 
-    std::pair<std::vector<unsigned long>, std::vector<unsigned long>> get() const;
+    std::pair<std::vector<unsigned long>, std::vector<unsigned long>> get() const {
+        return std::make_pair(order_, times_);
+    }
 
     void set(const std::vector<unsigned long> &order, const std::vector<unsigned long> &times);
 

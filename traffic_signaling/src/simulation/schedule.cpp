@@ -34,10 +34,6 @@ std::optional<unsigned long> Schedule::next_green(unsigned long street_id, unsig
     return time;
 }
 
-std::pair<std::vector<unsigned long>, std::vector<unsigned long>> Schedule::get() const {
-    return std::make_pair(order_, times_);
-}
-
 void Schedule::set(const std::vector<unsigned long> &order, const std::vector<unsigned long> &times) {
     assert(order.size() == times.size());
     reset();
