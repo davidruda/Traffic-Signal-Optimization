@@ -29,13 +29,16 @@ class TestIO(unittest.TestCase):
         output = f'{self.output_dir}/{data}.txt'
 
         plan = create_city_plan(data)
-        simulation = default_simulation(plan)
-        simulation.save_schedules(output)
-        score = simulation.score()
+        for schedule_option in ['default', 'adaptive']:
+            simulation = Simulation(plan)
+            getattr(simulation, f'{schedule_option}_schedules')()
 
-        simulation = Simulation(plan)
-        simulation.load_schedules(output)
-        self.assertEqual(score, simulation.score())
+            simulation.save_schedules(output)
+            score = simulation.score()
+
+            simulation = Simulation(plan)
+            simulation.load_schedules(output)
+            self.assertEqual(score, simulation.score())
 
     @parameterized.expand([
         ('a'),
@@ -49,12 +52,15 @@ class TestIO(unittest.TestCase):
         output = f'{self.output_dir}/{data}.txt'
 
         plan = create_city_plan(data)
-        simulation = default_simulation(plan)
-        simulation.save_schedules(output)
-        score = simulation.score()
+        for schedule_option in ['default', 'adaptive']:
+            simulation = Simulation(plan)
+            getattr(simulation, f'{schedule_option}_schedules')()
 
-        simulation.load_schedules(output)
-        self.assertEqual(score, simulation.score())
+            simulation.save_schedules(output)
+            score = simulation.score()
+
+            simulation.load_schedules(output)
+            self.assertEqual(score, simulation.score())
 
 if __name__ == '__main__':
     unittest.main()

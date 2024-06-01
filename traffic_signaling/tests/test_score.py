@@ -25,13 +25,18 @@ class TestScore(unittest.TestCase):
         ('e'),
         ('f')
     ])
-    def test_default_score(self, data):
+    def test_scores(self, data):
         plan = create_city_plan(data)
         simulation = default_simulation(plan)
-        print(f'\n{"-" * 31} DATA {data} {"-" * 31}')
+        print('\n' + f' DATA {data} '.center(70, '-'))
         score = simulation.score()
+        print(' default_schedules '.center(70, '*'))
         simulation.summary()
         self.assertEqual(score, DEFAULT_SCORE[data])
+        simulation.adaptive_schedules()
+        score = simulation.score()
+        print('\n' + ' adaptive_schedules '.center(70, '*'))
+        simulation.summary()
 
     @parameterized.expand([
         ('a'),

@@ -55,5 +55,13 @@ class TestTime(unittest.TestCase):
         simulation.score()
         print(f'score: {time.time() - start:.4f}s')
 
+        start = time.time()
+        simulation.adaptive_schedules()
+        print(f'adaptive_schedules: {time.time() - start:.4f}s')
+
+        start = time.time()
+        simulation.score()
+        print(f'score: {time.time() - start:.4f}s')
+
 if __name__ == '__main__':
     unittest.main()

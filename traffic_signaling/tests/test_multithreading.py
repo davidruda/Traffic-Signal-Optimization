@@ -39,9 +39,9 @@ def _test_multithreading(data, count, parallel):
     plan = create_city_plan(data)
     simulation_factory = partial(default_simulation, plan)
     times = []
-    print(f'\n{"-" * 31} DATA {data} {"-" * 31}')
+    print('\n' + f' DATA {data} '.center(70, '-'))
     for n in range(1, parallel + 1):
-        print(f'{24 * "-"} Parallel: {n:2} threads {24 * "-"}')
+        print(f' Parallel: {n:2} threads '.center(70, '-'))
         pool = concurrent.futures.ThreadPoolExecutor(max_workers=n)
         simulations = defaultdict(simulation_factory)
         _, elapsed_time = run_simulations(pool.map)

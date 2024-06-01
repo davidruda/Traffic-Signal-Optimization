@@ -1,4 +1,3 @@
-#include <chrono>
 #include <iostream>
 #include <stdexcept>
 #include <string>
@@ -7,7 +6,7 @@
 
 #include "simulation/simulation.hpp"
 
-std::unordered_map<std::string, size_t> SCORES = {
+std::unordered_map<std::string, unsigned long> DEFAULT_SCORE = {
     {"a", 1001},
     {"b", 4566576},
     {"c", 1299357},
@@ -30,13 +29,23 @@ int main(int argc, char *argv[]) {
     simulation::Simulation simulation{city_plan};
     simulation.default_schedules();
     auto score = simulation.score();
+    std::cout
+        << "************************* default_schedules "
+           "**************************\n";
     simulation.summary();
 
-    if (score != SCORES[data]) {
+    if (score != DEFAULT_SCORE[data]) {
         auto &&msg =
             "Score mismatch: " + std::to_string(score) + " != " +
-            std::to_string(SCORES[data]);
+            std::to_string(DEFAULT_SCORE[data]);
         std::cout << msg << "\n";
-        throw std::runtime_error(msg);
+        throw std::runtime_error{msg};
     }
+
+    simulation.adaptive_schedules();
+    score = simulation.score();
+    std::cout 
+        << "\n************************* adaptive_schedules "
+           "*************************\n";
+    simulation.summary();
 }

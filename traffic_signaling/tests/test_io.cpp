@@ -5,40 +5,50 @@
 
 #include "simulation/simulation.hpp"
 
+using namespace std::string_literals; // for string operator""s
+
 void test_io(const std::vector<std::string> &args, bool same_instance = false) {
     auto &&input_file = args[0];
     auto &&plan_file = args[1];
 
     city_plan::CityPlan city_plan{input_file};
     simulation::Simulation simulation{city_plan};
-    simulation.default_schedules();
-    simulation.save_schedules(plan_file);
-    auto score = simulation.score();
+    for (auto &&schedule_option: {"default"s, "adaptive"s}) {
+        if (schedule_option == "default") {
+            simulation.default_schedules();
+        }
+        else if (schedule_option == "adaptive") {
+            simulation.adaptive_schedules();
+        }
 
-    size_t score_1;
-    if (same_instance) {
-        simulation.load_schedules(plan_file);
-        score_1 = simulation.score();
-    }
-    else {
-        simulation::Simulation simulation_1{city_plan};
-        simulation_1.load_schedules(plan_file);
-        score_1 = simulation_1.score();
-    }
+        simulation.save_schedules(plan_file);
+        auto score = simulation.score();
 
-    if (score != score_1) {
-        std::cout
-            << "------------------------------- DATA "
-            // Ad hoc way to get the data name from the input file name.
-            << input_file.substr(input_file.find(".txt") - 1, 1)
-            << " -------------------------------\n";
+        unsigned long score_1;
+        if (same_instance) {
+            simulation.load_schedules(plan_file);
+            score_1 = simulation.score();
+        }
+        else {
+            simulation::Simulation simulation_1{city_plan};
+            simulation_1.load_schedules(plan_file);
+            score_1 = simulation_1.score();
+        }
 
-        auto &&msg =
-            "Score mismatch: " + std::to_string(score) + " != " +
-            std::to_string(score_1);
-        msg = (same_instance ? "[test_io_same_instance] " : "[test_io] ") + msg;
-        std::cout << msg << "\n";
-        throw std::runtime_error(msg);
+        if (score != score_1) {
+            std::cout
+                << "------------------------------- DATA "
+                // Ad hoc way to get the data name from the input file name.
+                << input_file.substr(input_file.find(".txt") - 1, 1)
+                << " -------------------------------\n";
+
+            std::string msg{
+                (same_instance ? "[test_io_same_instance] " : "[test_io] ") + "*"s + schedule_option + "* "
+                "Score mismatch: " + std::to_string(score) + " != " + std::to_string(score_1)
+            };
+            std::cout << msg << "\n";
+            throw std::runtime_error{msg};
+        }
     }
 }
 
