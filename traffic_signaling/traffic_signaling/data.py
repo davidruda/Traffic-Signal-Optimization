@@ -16,6 +16,15 @@ DEFAULT_SCORE = {
     'f': 819_083
 }
 
+ADAPTIVE_SCORE = {
+    'a': 2_002,
+    'b': 4_568_568,
+    'c': 1_305_874,
+    'd': 2_477_913,
+    'e': 702_570,
+    'f': 824_879
+}
+
 # Sources:
 # https://github.com/sagishporer/hashcode-2021-qualification#score
 # (https://codeforces.com/blog/entry/88188#comment-768121)

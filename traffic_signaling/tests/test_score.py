@@ -11,11 +11,11 @@ class TestScore(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        total_score = sum(DEFAULT_SCORE.values())
-        total_upper_bound = sum(UPPER_BOUND.values())
         print(f'\n{"-" * 70}')
-        print(f'TOTAL DEFAULT SCORE:\t{total_score:12,}')
-        print(f'TOTAL UPPER BOUND:\t{total_upper_bound:12,}')
+        print(f'TOTAL DEFAULT SCORE:\t{sum(DEFAULT_SCORE.values()):12,}')
+        print(f'TOTAL ADAPTIVE SCORE:\t{sum(ADAPTIVE_SCORE.values()):12,}')
+        print(f'TOTAL MAX KNOWN SCORE:\t{sum(MAX_KNOWN_SCORE.values()):12,}')
+        print(f'TOTAL UPPER BOUND:\t{sum(UPPER_BOUND.values()):12,}')
 
     @parameterized.expand([
         ('a'),
@@ -37,6 +37,7 @@ class TestScore(unittest.TestCase):
         score = simulation.score()
         print('\n' + ' adaptive_schedules '.center(70, '*'))
         simulation.summary()
+        self.assertEqual(score, ADAPTIVE_SCORE[data])
 
     @parameterized.expand([
         ('a'),
