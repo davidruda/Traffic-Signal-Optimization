@@ -54,8 +54,8 @@ if(BUILD_PYBIND_MODULES)
         pybind11
         GIT_REPOSITORY https://github.com/pybind/pybind11.git
         FIND_PACKAGE_ARGS
-        )
-        FetchContent_MakeAvailable(pybind11)
+    )
+    FetchContent_MakeAvailable(pybind11)
         
     # If there are issues with building pybind11 modules (e.g. on WSL, cmake
     # keeps including the pybind sources from Windows), try to build and install
