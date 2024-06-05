@@ -6,13 +6,13 @@
 #include <algorithm>
 #include <iterator>
 #include <optional>
+#include <ranges>
 
 #include "simulation/simulation.hpp"
 
 namespace simulation {
 
-Simulation::Simulation(const city_plan::CityPlan &city_plan)
-    : city_plan_(city_plan) {
+Simulation::Simulation(const city_plan::CityPlan &city_plan) : city_plan_(city_plan) {
     streets_.reserve(city_plan_.streets().size());
     cars_.reserve(city_plan_.cars().size());
 
@@ -53,15 +53,23 @@ void Simulation::load_schedules(const std::string &filename) {
     file >> number_of_intersections;
     schedules_.reserve(number_of_intersections);
 
-    for (unsigned long i = 0; i < number_of_intersections; ++i) {
-        file >> intersection_id;
+    for (auto i = 0UL; i < number_of_intersections; ++i) {
+        file >> intersection_id >> number_of_streets;
 
-        file >> number_of_streets;
-        for (unsigned long j = 0; j < number_of_streets; ++j) {
+        std::vector<unsigned long> order(number_of_streets), times(number_of_streets);
+        for (auto j = 0UL; j < number_of_streets; ++j) {
             file >> street_name >> green_light_duration;
-            auto street_id = city_plan_.street_id(street_name);
-            schedules_[intersection_id].add_street(street_id, green_light_duration);
+            order[j] = city_plan_.street_id(street_name);
+            times[j] = green_light_duration;
         }
+
+        if (schedules_.contains(intersection_id)) {
+            schedules_.at(intersection_id).set(std::move(order), std::move(times));
+            continue;
+        }
+        schedules_.try_emplace(
+            intersection_id, city_plan_.intersections()[intersection_id], std::move(order), std::move(times)
+        );
     }
 }
 
@@ -87,11 +95,27 @@ void Simulation::save_schedules(const std::string &filename) const {
 void Simulation::default_schedules() {
     reset_schedules();
     for (auto &&intersection: city_plan_.used_intersections()) {
-        auto &&schedule = schedules_[intersection.id()];
-
-        for (const city_plan::Street &street: intersection.used_streets()) {
-            schedule.add_street(street.id(), 1);
+        if (schedules_.contains(intersection.id())) {
+            schedules_.at(intersection.id()).set_default();
+            continue;
         }
+        schedules_.try_emplace(intersection.id(), intersection, "default");
+    }
+}
+
+void Simulation::adaptive_schedules() {
+    reset_schedules();
+    for (auto &&intersection: city_plan_.used_intersections()) {
+        if (schedules_.contains(intersection.id())) {
+            schedules_.at(intersection.id()).set_adaptive();
+            continue;
+        }
+        schedules_.try_emplace(intersection.id(), intersection, "adaptive");
+    }
+    run();
+    reset_run();
+    for (auto &&intersection: city_plan_.used_intersections()) {
+        schedules_.at(intersection.id()).fill_missing_streets();
     }
 }
 
@@ -123,7 +147,7 @@ void Simulation::add_event(Car &car, unsigned long current_time) {
     if (!schedules_.contains(intersection_id)) {
         return;
     }
-    auto next_green_time = schedules_[intersection_id].next_green(street_id, earliest_possible_time);
+    auto next_green_time = schedules_.at(intersection_id).next_green(street_id, earliest_possible_time);
 
     // If the street has no scheduled green light, don't add the event
     if (!next_green_time.has_value()) {
@@ -253,18 +277,14 @@ void Simulation::update_schedules(const std::vector<std::pair<std::vector<unsign
 
         // TODO: maybe solve the relative/absolute street id problem differently
         if (relative) {
-            //auto &&used_streets_ids = city_plan_.intersections()[id].used_streets();
-            //auto street_ids = order | std::ranges::views::transform([&](size_t street_index) {
-            //    return used_streets_ids[street_index];
-            //});
             auto &&used_streets = city_plan_.intersections()[id].used_streets();
             auto street_ids = order | std::ranges::views::transform([&](unsigned long street_index) {
-                return used_streets[street_index].get().id();
+                return static_cast<const city_plan::Street &>(used_streets[street_index]).id();
             });
-            schedules_[id].set({street_ids.begin(), street_ids.end()}, times);
+            schedules_.at(id).set({street_ids.begin(), street_ids.end()}, times);
         }
         else {
-            schedules_[id].set(order, times);
+            schedules_.at(id).set(order, times);
         }
     }
 }
@@ -315,4 +335,9 @@ Simulation default_simulation(const city_plan::CityPlan &city_plan) {
     return s;
 }
 
+Simulation adaptive_simulation(const city_plan::CityPlan &city_plan) {
+    Simulation s{city_plan};
+    s.adaptive_schedules();
+    return s;
+}
 }

@@ -25,6 +25,7 @@ public:
 
     // default means 1 second for every used street in the given order
     void default_schedules();
+    void adaptive_schedules();
 
     unsigned long score();
     void summary() const;
@@ -75,7 +76,8 @@ private:
 
 // factory function creating a simulation with default schedules
 Simulation default_simulation(const city_plan::CityPlan &city_plan);
-
+// factory function creating a simulation with adaptive schedules
+Simulation adaptive_simulation(const city_plan::CityPlan &city_plan);
 }
 
 #endif

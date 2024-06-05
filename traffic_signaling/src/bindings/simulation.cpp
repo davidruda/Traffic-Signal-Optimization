@@ -12,6 +12,34 @@ using namespace simulation;
 PYBIND11_MODULE(simulation, m) {
     m.doc() = "pybind11 simulation module";
 
+    py::class_<Schedule>(m, "Schedule")
+        //.def(
+        //    "set",
+        //    &Schedule::set,
+        //    py::arg("order"),
+        //    py::arg("times")
+        //)
+        //.def(
+        //    "get",
+        //    &Schedule::get
+        //)
+        .def_property_readonly(
+            "length",
+            &Schedule::length
+        )
+        .def_property_readonly(
+            "duration",
+            &Schedule::duration
+        )
+        .def_property_readonly(
+            "order",
+            &Schedule::order
+        )
+        .def_property_readonly(
+            "times",
+            &Schedule::times
+        );
+
     py::class_<Simulation>(m, "Simulation")
         .def(
             py::init<const city_plan::CityPlan &>(),
@@ -36,6 +64,11 @@ PYBIND11_MODULE(simulation, m) {
         .def(
             "default_schedules",
             &Simulation::default_schedules,
+            py::call_guard<py::gil_scoped_release>()
+        )
+        .def(
+            "adaptive_schedules",
+            &Simulation::adaptive_schedules,
             py::call_guard<py::gil_scoped_release>()
         )
         .def(
@@ -86,31 +119,9 @@ PYBIND11_MODULE(simulation, m) {
         //py::keep_alive<1, 2>()
     );
 
-    py::class_<Schedule>(m, "Schedule")
-        //.def(
-        //    "set",
-        //    &Schedule::set,
-        //    py::arg("order"),
-        //    py::arg("times")
-        //)
-        //.def(
-        //    "get",
-        //    &Schedule::get
-        //)
-        .def_property_readonly(
-            "length",
-            &Schedule::length
-        )
-        .def_property_readonly(
-            "duration",
-            &Schedule::duration
-        )
-        .def_property_readonly(
-            "order",
-            &Schedule::order
-        )
-        .def_property_readonly(
-            "times",
-            &Schedule::times
-        );
+    m.def(
+        "adaptive_simulation",
+        &adaptive_simulation,
+        py::arg("city_plan")
+    );
 }
