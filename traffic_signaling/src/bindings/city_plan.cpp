@@ -13,51 +13,6 @@ using namespace city_plan;
 PYBIND11_MODULE(city_plan, m) {
     m.doc() = "pybind11 city_plan module";
 
-    py::class_<CityPlan>(m, "CityPlan")
-        .def(
-            py::init<const std::string &>(),
-            py::arg("filename"),
-            py::call_guard<py::gil_scoped_release>()
-        )
-        .def_property_readonly(
-            "intersections",
-            &CityPlan::intersections
-        )
-        .def_property_readonly(
-            "streets",
-            &CityPlan::streets
-        )
-        .def_property_readonly(
-            "cars",
-            &CityPlan::cars
-        )
-        .def_property_readonly(
-            "duration",
-            &CityPlan::duration
-        )
-        .def_property_readonly(
-            "bonus",
-            &CityPlan::bonus
-        )
-        // Binding lambda functions
-        // https://pybind11.readthedocs.io/en/stable/classes.html?highlight=lambda#binding-lambda-functions
-        .def(
-            "used_intersections",
-            // necessary conversion because pybind doesn't support C++20 ranges/views
-            [](const CityPlan &cp) {
-                auto &&ui = cp.used_intersections();
-                return std::vector<std::reference_wrapper<const Intersection>>{ui.begin(), ui.end()};
-            }
-        )
-        .def(
-            "non_trivial_intersections",
-            // necessary conversion because pybind doesn't support C++20 ranges/views
-            [](const CityPlan &cp) {
-                auto &&nt = cp.non_trivial_intersections();
-                return std::vector<std::reference_wrapper<const Intersection>>{nt.begin(), nt.end()};
-            }
-        );
-
     py::class_<Car>(m, "Car")
         .def_property_readonly(
             "id",
@@ -122,5 +77,54 @@ PYBIND11_MODULE(city_plan, m) {
         .def_property_readonly(
             "total_cars",
             &Street::total_cars
+        );
+
+    py::class_<CityPlan>(m, "CityPlan")
+        .def(
+            py::init<const std::string &>(),
+            py::arg("filename"),
+            py::call_guard<py::gil_scoped_release>()
+        )
+        .def_property_readonly(
+            "intersections",
+            &CityPlan::intersections
+        )
+        .def_property_readonly(
+            "streets",
+            &CityPlan::streets
+        )
+        .def_property_readonly(
+            "cars",
+            &CityPlan::cars
+        )
+        .def_property_readonly(
+            "duration",
+            &CityPlan::duration
+        )
+        .def_property_readonly(
+            "bonus",
+            &CityPlan::bonus
+        )
+        // Binding lambda functions
+        // https://pybind11.readthedocs.io/en/stable/classes.html?highlight=lambda#binding-lambda-functions
+        .def(
+            "used_intersections",
+            // necessary conversion because pybind doesn't support C++20 ranges/views
+            [](const CityPlan &cp) {
+                auto &&ui = cp.used_intersections();
+                return std::vector<std::reference_wrapper<const Intersection>>{ui.begin(), ui.end()};
+            }
+        )
+        .def(
+            "non_trivial_intersections",
+            // necessary conversion because pybind doesn't support C++20 ranges/views
+            [](const CityPlan &cp) {
+                auto &&nt = cp.non_trivial_intersections();
+                return std::vector<std::reference_wrapper<const Intersection>>{nt.begin(), nt.end()};
+            }
+        )
+        .def(
+            "upper_bound",
+            &CityPlan::upper_bound
         );
 }

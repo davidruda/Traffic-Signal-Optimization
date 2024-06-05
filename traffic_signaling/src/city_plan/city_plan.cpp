@@ -1,6 +1,7 @@
 #include <stdexcept>
 #include <set>
 #include <functional>
+#include <numeric>
 
 #include "city_plan/city_plan.hpp"
 
@@ -32,6 +33,18 @@ CityPlan::CityPlan(std::ifstream &file) { // NOLINT(*-pro-type-member-init)
     }
     read_streets(file, number_of_streets);
     read_cars(file, number_of_cars);
+}
+
+unsigned long CityPlan::upper_bound() const {
+    auto car_score = [this](const Car &car) {
+        return bonus() + duration() - car.path_duration();
+    };
+    auto greater_than_zero = [](auto score) {
+        return score > 0;
+    };
+    auto score_view = cars() | std::ranges::views::transform(car_score)
+                             | std::ranges::views::filter(greater_than_zero);
+    return std::accumulate(score_view.begin(), score_view.end(), 0UL);
 }
 
 void CityPlan::read_streets(std::ifstream &file, unsigned long count) {

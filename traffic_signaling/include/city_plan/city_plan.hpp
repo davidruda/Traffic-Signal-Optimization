@@ -50,6 +50,9 @@ public:
         return street_mapping_.at(name);
     }
 
+    // Theoretical maximum score if none of the cars ever has to wait at a traffic light
+    unsigned long upper_bound() const;
+
 private:
     void read_streets(std::ifstream &file, unsigned long count);
     void read_cars(std::ifstream &file, unsigned long count);
