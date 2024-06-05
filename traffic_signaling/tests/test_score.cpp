@@ -3,17 +3,46 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <string_view>
 
 #include "simulation/simulation.hpp"
 
-std::unordered_map<std::string, unsigned long> DEFAULT_SCORE = {
-    {"a", 1001},
-    {"b", 4566576},
-    {"c", 1299357},
-    {"d", 1573100},
-    {"e", 684769},
-    {"f", 819083}
+using namespace std::string_literals; // for string operator""s
+
+static const std::unordered_map<std::string_view, unsigned long> DEFAULT_SCORE{
+    {"a", 1'001},
+    {"b", 4'566'576},
+    {"c", 1'299'357},
+    {"d", 1'573'100},
+    {"e", 684'769},
+    {"f", 819'083}
 };
+
+static const std::unordered_map<std::string_view, unsigned long> ADAPTIVE_SCORE{
+    {"a", 2'002},
+    {"b", 4'568'568},
+    {"c", 1'305'874},
+    {"d", 2'477'913},
+    {"e", 702'570},
+    {"f", 824'879}
+};
+
+// Theoretical maximum score if none of the cars ever has to wait at a traffic light.
+static const std::unordered_map<std::string_view, unsigned long> UPPER_BOUND{
+    {"a", 2'002},
+    {"b", 4'576'202},
+    {"c", 1'328'389},
+    {"d", 3'986'591},
+    {"e", 921'203},
+    {"f", 1'765'068}
+};
+
+void assert_equal(unsigned long a, unsigned long b, std::string_view msg = "") {
+    if (a != b) {
+        std::cout << msg << "\n";
+        throw std::runtime_error{msg.data()};
+    }
+}
 
 int main(int argc, char *argv[]) {
     std::vector<std::string> args{argv + 1, argv + argc};
@@ -27,25 +56,36 @@ int main(int argc, char *argv[]) {
 
     city_plan::CityPlan city_plan{input_file};
     simulation::Simulation simulation{city_plan};
-    simulation.default_schedules();
-    auto score = simulation.score();
-    std::cout
-        << "************************* default_schedules "
-           "**************************\n";
-    simulation.summary();
-
-    if (score != DEFAULT_SCORE[data]) {
-        auto &&msg =
-            "Score mismatch: " + std::to_string(score) + " != " +
-            std::to_string(DEFAULT_SCORE[data]);
-        std::cout << msg << "\n";
-        throw std::runtime_error{msg};
+    for (auto &&schedule_option: {"default"s, "adaptive"s}) {
+        unsigned long expected{};
+        if (schedule_option == "default") {
+            simulation.default_schedules();
+            expected = DEFAULT_SCORE.at(data);
+            std::cout
+                << "************************* default_schedules "
+                   "**************************\n";
+        }
+        else if (schedule_option == "adaptive") {
+            simulation.adaptive_schedules();
+            expected = ADAPTIVE_SCORE.at(data);
+            std::cout 
+                << "\n************************* adaptive_schedules "
+                   "*************************\n";
+        }
+        auto score = simulation.score();
+        simulation.summary();
+        assert_equal(
+            score, expected,
+            "[" + schedule_option + "] Score mismatch: " + std::to_string(score)
+            + " != " + std::to_string(expected)
+        );
     }
 
-    simulation.adaptive_schedules();
-    score = simulation.score();
-    std::cout 
-        << "\n************************* adaptive_schedules "
-           "*************************\n";
-    simulation.summary();
+    auto score = city_plan.upper_bound();
+    auto expected = UPPER_BOUND.at(data);
+    assert_equal(
+        score, expected,
+        "[upper_bound] Score mismatch: " + std::to_string(score)
+        + " != " + std::to_string(expected)
+    );
 }

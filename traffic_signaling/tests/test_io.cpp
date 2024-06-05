@@ -7,6 +7,13 @@
 
 using namespace std::string_literals; // for string operator""s
 
+void assert_equal(unsigned long a, unsigned long b, std::string_view msg = "") {
+    if (a != b) {
+        std::cout << msg << "\n";
+        throw std::runtime_error{msg.data()};
+    }
+}
+
 void test_io(const std::vector<std::string> &args, bool same_instance = false) {
     auto &&input_file = args[0];
     auto &&plan_file = args[1];
@@ -35,23 +42,17 @@ void test_io(const std::vector<std::string> &args, bool same_instance = false) {
             score_1 = simulation_1.score();
         }
 
-        if (score != score_1) {
-            std::cout
-                << "------------------------------- DATA "
-                // Ad hoc way to get the data name from the input file name.
-                << input_file.substr(input_file.find(".txt") - 1, 1)
-                << " -------------------------------\n";
-
-            std::string msg{
-                (same_instance ? "[test_io_same_instance] " : "[test_io] ") + "*"s + schedule_option + "* "
-                "Score mismatch: " + std::to_string(score) + " != " + std::to_string(score_1)
-            };
-            std::cout << msg << "\n";
-            throw std::runtime_error{msg};
-        }
+        assert_equal(
+            score, score_1,
+            "------------------------------- DATA "
+            // Ad hoc way to get the data name from the input file name.
+            + input_file.substr(input_file.find(".txt") - 1, 1)
+            + " -------------------------------\n"
+            + (same_instance ? "[test_io_same_instance] " : "[test_io] ") + "*"s + schedule_option + "* "
+            + "Score mismatch: " + std::to_string(score) + " != " + std::to_string(score_1)
+        );
     }
 }
-
 
 int main(int argc, char *argv[]) {
     std::vector<std::string> args{argv + 1, argv + argc};
