@@ -5,11 +5,6 @@
 # to PYTHONPATH
 
 try:
-    from traffic_signaling.data import *
-except ModuleNotFoundError:
-    from data import *
-
-try:
     from traffic_signaling.city_plan import *
 except ModuleNotFoundError:
     from city_plan import *
@@ -18,3 +13,8 @@ try:
     from traffic_signaling.simulation import *
 except ModuleNotFoundError:
     from simulation import *
+
+try:
+    from traffic_signaling.utils import *
+except ModuleNotFoundError:
+    from utils import *

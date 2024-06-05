@@ -48,7 +48,8 @@ class TestScore(unittest.TestCase):
         ('f')
     ])
     def test_upper_bound(self, data):
-        upper_bound = calculate_upper_bound(data)
+        plan = create_city_plan(data)
+        upper_bound = plan.upper_bound()
         self.assertEqual(upper_bound, UPPER_BOUND[data])
 
 if __name__ == '__main__':

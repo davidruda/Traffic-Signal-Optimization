@@ -58,14 +58,3 @@ def get_data_filename(data: str) -> str:
 # factory function creating a CityPlan object
 def create_city_plan(data: str) -> CityPlan:
     return CityPlan(get_data_filename(data))
-
-def calculate_upper_bound(data: str) -> int:
-    """
-    Theoretical maximum score if none of the cars
-    ever has to wait at a traffic light.
-    """ 
-    plan = CityPlan(get_data_filename(data))
-    car_score = lambda car: plan.bonus + plan.duration - car.path_duration()
-
-    upper_bound = sum(car_score(c) for c in plan.cars if car_score(c) > 0)
-    return upper_bound
