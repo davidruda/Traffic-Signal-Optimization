@@ -232,16 +232,12 @@ void Simulation::summary() const {
         << " points for early arrival times.\n\n"
         << cars_finished << " of " << city_plan_.cars().size()
         << " cars arrived before the deadline (";
-    auto finished_percentage =
-        static_cast<float>(cars_finished) /
-        static_cast<float>(city_plan_.cars().size()) * 100;
+    auto finished_percentage = static_cast<float>(cars_finished) / static_cast<float>(city_plan_.cars().size()) * 100;
     std::cout
         << std::fixed << std::setprecision(2) << finished_percentage << "%). ";
 
     if (earliest_car && latest_car) {
-        auto average_drive_time_ =
-            static_cast<float>(total_driving_time) /
-            static_cast<float>(cars_finished);
+        auto average_drive_time_ = static_cast<float>(total_driving_time) / static_cast<float>(cars_finished);
 
         std::cout
             << "The earliest car (ID " << earliest_car->get().id()
@@ -269,7 +265,11 @@ void Simulation::summary() const {
 // TODO: maybe rewrite this function specifically for python types
 // relative - whether the order is of indices relative to the intersection
 // or absolute street ids
-void Simulation::update_schedules(const std::vector<std::pair<std::vector<unsigned long>, std::vector<unsigned long>>> &schedules, bool relative) {
+void Simulation::set_schedules(
+    const std::vector<std::pair<std::vector<unsigned long>, std::vector<unsigned long>>> &schedules,
+    bool relative
+) {
+    //assert(intersection_ids.size() == schedules.size());
     size_t i = 0;
     for (auto &&intersection: city_plan_.non_trivial_intersections()) {
         auto id = intersection.id();
@@ -292,7 +292,7 @@ void Simulation::update_schedules(const std::vector<std::pair<std::vector<unsign
 // TODO: maybe rewrite this function specifically for python types
 // relative - whether the order is of indices relative to the intersection
 // or absolute street ids
-//void Simulation::update_schedules(const std::vector<size_t> &intersection_ids,
+//void Simulation::set_schedules(const std::vector<size_t> &intersection_ids,
 //    const std::vector<std::pair<std::vector<size_t>, std::vector<size_t>>> &schedules,
 //    bool relative) {
 //    assert(intersection_ids.size() == schedules.size());
@@ -318,7 +318,7 @@ void Simulation::update_schedules(const std::vector<std::pair<std::vector<unsign
 //    }
 //}
 
-//void Simulation::update_schedules(const std::vector<std::pair<std::vector<size_t>, std::vector<size_t>>> &schedules, bool relative) {
+//void Simulation::set_schedules(const std::vector<std::pair<std::vector<size_t>, std::vector<size_t>>> &schedules, bool relative) {
 //    std::vector<size_t> intersection_ids;
 //    intersection_ids.reserve(schedules.size());
 //    std::transform(schedules.begin(), schedules.end(), std::back_inserter(intersection_ids),
@@ -326,7 +326,7 @@ void Simulation::update_schedules(const std::vector<std::pair<std::vector<unsign
 //            return s.first[0];
 //        });
 //
-//    update_schedules(intersection_ids, schedules, relative);
+//    set_schedules(intersection_ids, schedules, relative);
 //}
 
 Simulation default_simulation(const city_plan::CityPlan &city_plan) {

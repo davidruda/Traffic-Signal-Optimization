@@ -34,13 +34,16 @@ public:
         return schedules_;
     }
 
-    void update_schedules(const std::vector<std::pair<std::vector<unsigned long>, std::vector<unsigned long>>> &schedules, bool relative = true);
+    void set_schedules(
+        const std::vector<std::pair<std::vector<unsigned long>, std::vector<unsigned long>>> &schedules,
+        bool relative = true
+    );
 
-    //void update_schedules(const std::vector<unsigned long> &intersection_ids,
+    //void set_schedules(const std::vector<unsigned long> &intersection_ids,
     //    const std::vector<std::pair<std::vector<unsigned long>, std::vector<unsigned long>>> &schedules,
     //    bool relative = true);
 
-    //std::vector<std::pair<unsigned long, std::pair<std::vector<unsigned long>, std::vector<unsigned long>>>> get_schedules() const;
+    std::vector<std::pair<std::vector<unsigned long>, std::vector<unsigned long>>> get_schedules() const;
 
 private:
     class ThousandSeparator : public std::numpunct<char> {
