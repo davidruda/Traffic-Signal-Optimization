@@ -18,7 +18,7 @@ public:
     explicit Schedule(const city_plan::Intersection &intersection, std::string_view option = "default");
     Schedule(
         const city_plan::Intersection &intersection,
-        std::vector<unsigned long> &&order, std::vector<unsigned long> &&times
+        std::vector<unsigned long> &&order, std::vector<unsigned long> &&times, bool relative_order = false
     );
 
     unsigned long length() const {
@@ -37,19 +37,23 @@ public:
         return times_;
     }
 
-    std::optional<unsigned long> next_green(unsigned long street_id, unsigned long time);
-
-    std::pair<std::vector<unsigned long>, std::vector<unsigned long>> get() const {
-        return std::make_pair(order_, times_);
+    // Note that this function is valid only if the schedule contains used streets 
+    auto relative_order() const {
+        return order_ | std::ranges::views::transform([&](unsigned long street_id) {
+            return intersection_.street_index(street_id);
+        });
     }
 
-    void set(const std::vector<unsigned long> &order, const std::vector<unsigned long> &times);
-    void set(std::vector<unsigned long> &&order, std::vector<unsigned long> &&times);
+    void set(
+        const std::vector<unsigned long> &order, const std::vector<unsigned long> &times, bool relative_order = false
+    );
+    void set(std::vector<unsigned long> &&order, std::vector<unsigned long> &&times, bool relative_order = false);
     void set_default();
     void set_adaptive();
 
     void reset();
     
+    std::optional<unsigned long> next_green(unsigned long street_id, unsigned long time);
     // helper function to fill in the missing streets when using adaptive schedule
     void fill_missing_streets();
 

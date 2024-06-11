@@ -13,16 +13,6 @@ PYBIND11_MODULE(simulation, m) {
     m.doc() = "pybind11 simulation module";
 
     py::class_<Schedule>(m, "Schedule")
-        //.def(
-        //    "set",
-        //    &Schedule::set,
-        //    py::arg("order"),
-        //    py::arg("times")
-        //)
-        //.def(
-        //    "get",
-        //    &Schedule::get
-        //)
         .def_property_readonly(
             "length",
             &Schedule::length
@@ -38,6 +28,35 @@ PYBIND11_MODULE(simulation, m) {
         .def_property_readonly(
             "times",
             &Schedule::times
+        )
+        .def(
+            "relative_order",
+            // necessary conversion because pybind doesn't support C++20 ranges/views
+            [](const Schedule &s) -> std::vector<unsigned long> {
+                auto &&ro_view = s.relative_order();
+                return {ro_view.begin(), ro_view.end()};
+            }
+        )
+        .def(
+            "set",
+            // necessary cast to choose the right overload
+            //static_cast<
+            //    void (Schedule::*)(const std::vector<unsigned long> &, const std::vector<unsigned long> &, bool)
+            //>(&Schedule::set),
+            static_cast<
+                void (Schedule::*)(std::vector<unsigned long> &&, std::vector<unsigned long> &&, bool)
+            >(&Schedule::set),
+            py::arg("order"),
+            py::arg("times"),
+            py::arg("relative_order") = false
+        )
+        .def(
+            "set_default",
+            &Schedule::set_default
+        )
+        .def(
+            "set_adaptive",
+            &Schedule::set_adaptive
         );
 
     py::class_<Simulation>(m, "Simulation")

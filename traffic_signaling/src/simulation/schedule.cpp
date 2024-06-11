@@ -1,5 +1,6 @@
 #include <cassert>
 #include <stdexcept>
+#include <algorithm>
 
 #include "simulation/schedule.hpp"
 #include "city_plan/street.hpp"
@@ -23,9 +24,9 @@ Schedule::Schedule(const city_plan::Intersection &intersection, std::string_view
 
 Schedule::Schedule(
     const city_plan::Intersection &intersection,
-    std::vector<unsigned long> &&order, std::vector<unsigned long> &&times
+    std::vector<unsigned long> &&order, std::vector<unsigned long> &&times, bool relative_order
 ) : intersection_(intersection) {
-    set(std::move(order), std::move(times));
+    set(std::move(order), std::move(times), relative_order);
 }
 
 std::optional<unsigned long> Schedule::next_green(unsigned long street_id, unsigned long time) {
@@ -82,17 +83,29 @@ void Schedule::add_street_adaptive(unsigned long street_id, unsigned long time) 
     throw std::runtime_error{"No unused slot found"};
 }
 
-void Schedule::set(const std::vector<unsigned long> &order, const std::vector<unsigned long> &times) {
+void Schedule::set(
+    const std::vector<unsigned long> &order, const std::vector<unsigned long> &times, bool relative_order
+) {
     assert(order.size() == times.size());
     reset();
+    if (relative_order) {
+        std::ranges::for_each(order, [&](unsigned long street_id) {
+            intersection_.street_index(street_id);
+        });
+    }
     for (size_t i = 0; i < order.size(); ++i) {
         add_street(order[i], times[i]);
     }
 }
 
-void Schedule::set(std::vector<unsigned long> &&order, std::vector<unsigned long> &&times) {
+void Schedule::set(std::vector<unsigned long> &&order, std::vector<unsigned long> &&times, bool relative_order) {
     assert(order.size() == times.size());
     reset();
+    if (relative_order) {
+        std::ranges::for_each(order, [&](unsigned long street_id) {
+            intersection_.street_index(street_id);
+        });
+    }
     for (size_t i = 0; i < order.size(); ++i) {
         green_lights_.try_emplace(order[i], total_duration_, total_duration_ + times[i]);
         total_duration_ += times[i];
