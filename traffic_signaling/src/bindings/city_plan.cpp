@@ -110,17 +110,17 @@ PYBIND11_MODULE(city_plan, m) {
         .def(
             "used_intersections",
             // necessary conversion because pybind doesn't support C++20 ranges/views
-            [](const CityPlan &cp) {
-                auto &&ui = cp.used_intersections();
-                return std::vector<std::reference_wrapper<const Intersection>>{ui.begin(), ui.end()};
+            [](const CityPlan &cp) -> std::vector<std::reference_wrapper<const Intersection>> {
+                auto &&ui_view = cp.used_intersections();
+                return {ui_view.begin(), ui_view.end()};
             }
         )
         .def(
             "non_trivial_intersections",
             // necessary conversion because pybind doesn't support C++20 ranges/views
-            [](const CityPlan &cp) {
-                auto &&nt = cp.non_trivial_intersections();
-                return std::vector<std::reference_wrapper<const Intersection>>{nt.begin(), nt.end()};
+            [](const CityPlan &cp) -> std::vector<std::reference_wrapper<const Intersection>> {
+                auto &&nt_view = cp.non_trivial_intersections();
+                return {nt_view.begin(), nt_view.end()};
             }
         )
         .def(
