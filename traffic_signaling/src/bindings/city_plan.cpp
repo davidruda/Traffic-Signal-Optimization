@@ -13,8 +13,13 @@ using namespace city_plan;
 PYBIND11_MODULE(city_plan, m) {
     m.doc() = "pybind11 city_plan module";
 
-    py::class_<Car>(m, "Car")
-        .def_property_readonly(
+    // Avoid C++ types in docstrings
+    // https://pybind11.readthedocs.io/en/latest/advanced/misc.html#avoiding-cpp-types-in-docstrings
+    auto py_Car = py::class_<Car>(m, "Car");
+    auto py_Intersection = py::class_<Intersection>(m, "Intersection");
+    auto py_Street = py::class_<Street>(m, "Street");
+
+        py_Car.def_property_readonly(
             "id",
             &Car::id
         )
@@ -27,8 +32,7 @@ PYBIND11_MODULE(city_plan, m) {
             &Car::path_duration
         );
 
-    py::class_<Intersection>(m, "Intersection")
-        .def_property_readonly(
+        py_Intersection.def_property_readonly(
             "id",
             &Intersection::id
         )
@@ -49,8 +53,7 @@ PYBIND11_MODULE(city_plan, m) {
             &Intersection::non_trivial
         );
 
-    py::class_<Street>(m, "Street")
-        .def_property_readonly(
+        py_Street.def_property_readonly(
             "id",
             &Street::id
         )
