@@ -82,7 +82,8 @@ void Simulation::save_schedules(const std::string &filename) const {
             auto &&schedule = schedules_.at(intersection.id());
             file << intersection.id() << "\n";
 
-            auto &&[street_ids, times] = schedule.get();
+            auto &&street_ids = schedule.order();
+            auto &&times = schedule.times();
             file << times.size() << "\n";
             for (size_t i = 0; i < times.size(); ++i) {
                 file << city_plan_.streets()[street_ids[i]].name() << " "
