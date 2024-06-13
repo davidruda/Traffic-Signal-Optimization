@@ -66,6 +66,8 @@ PYBIND11_MODULE(simulation, m) {
             // Not really sure if the keep_alive is necessary here (I tested it without it)
             // but it matches the second example in the reference and it's a safe bet
             // https://pybind11.readthedocs.io/en/stable/advanced/functions.html#keep-alive
+            //
+            // 1: this pointer (Simulation), 2 - first argument (CityPlan)
             py::keep_alive<1, 2>()
         )
         .def(
@@ -134,13 +136,16 @@ PYBIND11_MODULE(simulation, m) {
     m.def(
         "default_simulation",
         &default_simulation,
-        py::arg("city_plan")//,
-        //py::keep_alive<1, 2>()
+        py::arg("city_plan"),
+        // 0: return value (Simulation), 1 - first argument (CityPlan)
+        py::keep_alive<0, 1>()
     );
 
     m.def(
         "adaptive_simulation",
         &adaptive_simulation,
-        py::arg("city_plan")
+        py::arg("city_plan"),
+        // 0: return value (Simulation), 1 - first argument (CityPlan)
+        py::keep_alive<0, 1>()
     );
 }
