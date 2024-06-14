@@ -102,9 +102,12 @@ void Schedule::set(std::vector<unsigned long> &&order, std::vector<unsigned long
     assert(order.size() == times.size());
     reset();
     if (relative_order) {
-        std::ranges::for_each(order, [&](unsigned long street_id) {
-            intersection_.street_index(street_id);
-        });
+        auto street_index_to_street_id = [&](unsigned long &street_index) {
+            const city_plan::Street &street = intersection_.used_streets()[street_index];
+            street_index = street.id();
+        };
+        // convert order -street indices to street ids
+        std::ranges::for_each(order, street_index_to_street_id);
     }
     for (size_t i = 0; i < order.size(); ++i) {
         green_lights_.try_emplace(order[i], total_duration_, total_duration_ + times[i]);
