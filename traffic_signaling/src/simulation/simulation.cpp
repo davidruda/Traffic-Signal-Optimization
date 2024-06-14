@@ -2,9 +2,6 @@
 #include <iomanip>
 #include <ios>
 #include <iostream>
-#include <cassert>
-#include <algorithm>
-#include <iterator>
 #include <optional>
 #include <ranges>
 
@@ -280,7 +277,7 @@ void Simulation::set_non_trivial_schedules(
     std::vector<std::pair<std::vector<unsigned long>, std::vector<unsigned long>>> &&schedules,
     bool relative_order
 ) {
-    assert(intersection_ids.size() == schedules.size());
+    // IMPORTANT: Note that schedules must have the same order and size as non_trivial_intersections
     size_t i = 0;
     for (auto &&intersection: city_plan_.non_trivial_intersections()) {
         auto id = intersection.id();
