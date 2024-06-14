@@ -77,7 +77,7 @@ set(OUT_DIR "${CMAKE_BINARY_DIR}/out")
 
 function(test_cpp target arg result)
     file(MAKE_DIRECTORY "${OUT_DIR}")
-    add_test(NAME "${target} ${arg}" COMMAND "${target}" "${DATA_DIR}/${arg}.txt" "${OUT_DIR}/${arg}.txt")
+    add_test(NAME "${target} ${arg}" COMMAND "${target}" "${DATA_DIR}/${arg}.txt" "${OUT_DIR}/${arg}.out")
     set_tests_properties("${target} ${arg}" PROPERTIES PASS_REGULAR_EXPRESSION ${result})
 endfunction()
 
