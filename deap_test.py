@@ -1,4 +1,3 @@
-# time py deap_test.py --data d --generations 10 --threads 16 --init_times default
 import argparse
 from array import array
 from collections import defaultdict
@@ -15,11 +14,8 @@ import numpy as np
 import scipy.stats
 from scipy.stats import rv_discrete, truncnorm
 
-from traffic_signaling.city_plan import *
-from traffic_signaling.data import *
-from traffic_signaling.simulation import *
+from traffic_signaling import *
 
-#from operators import fill_with, crossover, mutation
 from operators import eaSimple, crossover, mutation
 
 parser = argparse.ArgumentParser()
@@ -30,7 +26,7 @@ parser.add_argument('--crossover', default=0.5, type=float, help='Crossover prob
 parser.add_argument('--mutation', default=0.2, type=float, help='Mutation probability.')
 parser.add_argument('--indpb', default=0.05, type=float, help='Probability of mutating each bit.')
 parser.add_argument('--tournsize', default=3, type=int, help='Tournament size for selection.')
-parser.add_argument('--threads', default=os.cpu_count(), type=int, help='Number of threads for parallel evaluation.')
+parser.add_argument('--threads', default=None, type=int, help='Number of threads for parallel evaluation.')
 parser.add_argument('--seed', default=42, type=int, help='Random seed.')
 parser.add_argument('--init_times', default='default', choices=['scaled', 'default'], help='Way of initializing green times.')
 
@@ -101,15 +97,13 @@ def save_statistics(args, logdir, logbook, show_plot=False):
 
 def save_schedules(logdir, plan, individual):
     simulation = default_simulation(plan)
-    simulation.update_schedules(individual)
-    #simulation.update_schedules(non_trivial_ids, individual)
+    simulation.set_non_trivial_schedules(individual, relative_order=True)
     os.makedirs(logdir, exist_ok=True)
     simulation.save_schedules(os.path.join(logdir, f'{args.data}.txt'))
 
 def evaluate(individual, simulations: dict[int, Simulation]):
     simulation = simulations[threading.get_ident()]
-    simulation.update_schedules(individual)
-    #simulation.update_schedules(non_trivial_ids, individual)
+    simulation.set_non_trivial_schedules(individual, relative_order=True)
     fitness = simulation.score()
     return fitness, 
 
@@ -117,15 +111,16 @@ def times_distribution(distribution, n):
     times = np.round(distribution.rvs(size=n)).astype(int, copy=False)
     return array('L', times)
 
-def normalized_times(car_counts):
+def normalized_times(car_counts, min, max):
     times = car_counts + scipy.stats.norm().rvs(len(car_counts))
-    times = np.clip(np.round(times), green_min, green_max).astype(int, copy=False)
+    times = np.clip(np.round(times), min, max).astype(int, copy=False)
     return array('L', times)
 
 def scaled_times_squared(car_counts):
     #times = np.sqrt(car_counts).astype(int)
     #times = np.round(np.sqrt(car_counts / np.gcd.reduce(car_counts))).astype(int, copy=False)
     times = np.round(0.51 * np.sqrt(car_counts / np.min(car_counts))).astype(int, copy=False)
+    #times = np.clip(np.round(0.51 * np.sqrt(car_counts / np.min(car_counts))).astype(int, copy=False), a_min=1, a_max=None)
     return array('L', times)
     
 def scaled_times(car_counts):
@@ -157,7 +152,7 @@ def default_times(length):
 #    ]
 #    return individual
 
-def create_individual():
+def create_individual(non_trivial_intersections, total_cars):
     individual = [
         (
             # order
@@ -176,9 +171,11 @@ def create_individual():
     return individual
 
 def main(args):
+    random.seed(args.seed)
+    np.random.seed(args.seed)
     toolbox = base.Toolbox()
 
-    if args.threads and args.threads > 0:
+    if args.threads:
         import concurrent.futures
         pool = concurrent.futures.ThreadPoolExecutor(max_workers=args.threads)
         toolbox.register('map', pool.map)
@@ -189,13 +186,30 @@ def main(args):
         ','.join(('{}={}'.format(re.sub('(.)[^_]*_?', r'\1', k), v) for k, v in sorted(vars(args).items())))
     ))
 
+    plan = create_city_plan(args.data)
+    default_sim = partial(default_simulation, city_plan=plan)
+    simulations = defaultdict(default_sim)
+
+    cars = plan.cars
+    streets = plan.streets
+    intersections = plan.intersections
+    non_trivial_intersections = plan.non_trivial_intersections()
+
     green_max = plan.duration
     green_min = 0
+
+    total_cars = [
+        np.array([street.total_cars for street in intersection.used_streets])
+        for intersection in non_trivial_intersections
+    ]
 
     creator.create('FitnessMax', base.Fitness, weights=(1.0,))
     creator.create('Individual', list, fitness=creator.FitnessMax)
 
-    toolbox.register('individual', tools.initIterate, creator.Individual, create_individual)
+    toolbox.register(
+        'individual', tools.initIterate, creator.Individual,
+        partial(create_individual, non_trivial_intersections=non_trivial_intersections, total_cars=total_cars)
+    )
     toolbox.register('population', tools.initRepeat, list, toolbox.individual)
 
     toolbox.register('evaluate', evaluate, simulations=simulations)
@@ -241,18 +255,6 @@ def main(args):
 if __name__ == '__main__':
     args = parser.parse_args()
 
-    random.seed(args.seed)
-    np.random.seed(args.seed)
-
-    plan = create_city_plan(args.data)
-    default_sim = partial(default_simulation, city_plan=plan)
-    simulations = defaultdict(default_sim)
-
-    cars = plan.cars
-    streets = plan.streets
-    intersections = plan.intersections
-    non_trivial_intersections = plan.non_trivial_intersections()
-
     #start = time.time()
     #time_distributions = np.empty(len(non_trivial_intersections), dtype=object)
     #for i, intersection in enumerate(non_trivial_intersections):
@@ -297,10 +299,6 @@ if __name__ == '__main__':
     #    values, counts = np.unique(counts_normalized, return_counts=True)
     #    probabilities = counts / counts.sum()
     #    car_counts_distribution = rv_discrete(values=(values, probabilities))
-    total_cars = [
-        np.array([street.total_cars for street in intersection.used_streets])
-        for intersection in non_trivial_intersections
-    ]
     
     #start = time.time()
     #normal = scipy.stats.norm()

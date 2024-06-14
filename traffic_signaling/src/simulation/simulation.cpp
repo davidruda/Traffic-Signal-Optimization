@@ -254,81 +254,50 @@ void Simulation::summary() const {
     std::cout << "\n";
 }
 
-//std::vector<std::pair<size_t, std::pair<std::vector<size_t>, std::vector<size_t>>>> Simulation::get_schedules() const {
-//    std::vector<std::pair<size_t, std::pair<std::vector<size_t>, std::vector<size_t>>>> schedules;
-//    schedules.reserve(schedules_.size());
-//    for (auto &&[id, schedule]: schedules_) {
-//        schedules.emplace_back(id, schedule.get());
-//    }
-//    return schedules;
-//}
+std::vector<std::pair<std::vector<unsigned long>, std::vector<unsigned long>>> Simulation::non_trivial_schedules(
+    bool relative_order
+) const {
+    auto &&non_trivial_schedules_view = city_plan_.non_trivial_intersections()
+        | std::views::transform(&city_plan::Intersection::id)
+        | std::views::transform([&](unsigned long intersection_id) {
+            return schedules_.at(intersection_id);
+        })
+        | std::views::transform([&](const Schedule &schedule) {
+            if (relative_order) {
+                auto &&rl_view = schedule.relative_order();
+                auto &&rl = std::vector(rl_view.begin(), rl_view.end());
+                return std::pair{rl, schedule.times()};
+            }
+            return std::pair{schedule.order(), schedule.times()};
+        });
+        return {non_trivial_schedules_view.begin(), non_trivial_schedules_view.end()};
+}
 
 // TODO: maybe rewrite this function specifically for python types
-// relative - whether the order is of indices relative to the intersection
+// relative_order - whether the order is of indices relative to the intersection
 // or absolute street ids
-void Simulation::set_schedules(
-    const std::vector<std::pair<std::vector<unsigned long>, std::vector<unsigned long>>> &schedules,
-    bool relative
+void Simulation::set_non_trivial_schedules(
+    std::vector<std::pair<std::vector<unsigned long>, std::vector<unsigned long>>> &&schedules,
+    bool relative_order
 ) {
-    //assert(intersection_ids.size() == schedules.size());
+    assert(intersection_ids.size() == schedules.size());
     size_t i = 0;
     for (auto &&intersection: city_plan_.non_trivial_intersections()) {
         auto id = intersection.id();
         auto &&[order, times] = schedules[i++];
 
         // TODO: maybe solve the relative/absolute street id problem differently
-        if (relative) {
+        if (relative_order) {
             auto &&used_streets = city_plan_.intersections()[id].used_streets();
-            auto street_ids = order | std::ranges::views::transform([&](unsigned long street_index) {
+            auto street_ids = order | std::views::transform([&](unsigned long street_index) {
                 return static_cast<const city_plan::Street &>(used_streets[street_index]).id();
             });
-            schedules_.at(id).set({street_ids.begin(), street_ids.end()}, times);
+            schedules_.at(id).set({street_ids.begin(), street_ids.end()}, std::move(times));
+            continue;
         }
-        else {
-            schedules_.at(id).set(order, times);
-        }
+        schedules_.at(id).set(std::move(order), std::move(times));
     }
 }
-
-// TODO: maybe rewrite this function specifically for python types
-// relative - whether the order is of indices relative to the intersection
-// or absolute street ids
-//void Simulation::set_schedules(const std::vector<size_t> &intersection_ids,
-//    const std::vector<std::pair<std::vector<size_t>, std::vector<size_t>>> &schedules,
-//    bool relative) {
-//    assert(intersection_ids.size() == schedules.size());
-//    for (size_t i = 0; i < intersection_ids.size(); ++i) {
-//        auto id = intersection_ids[i];
-//        auto &&[order, times] = schedules[i];
-//
-//        // TODO: maybe solve the relative/absolute street id problem differently
-//        if (relative) {
-//            std::vector<size_t> street_ids;
-//            street_ids.reserve(order.size());
-//            auto &&streets = city_plan_.intersections()[id].used_streets();
-//
-//            std::transform(order.begin(), order.end(), std::back_inserter(street_ids),
-//                [&streets](size_t street_index) {
-//                    return streets[street_index];
-//                });
-//            schedules_[id].set(street_ids, times);
-//        }
-//        else {
-//            schedules_[id].set(order, times);
-//        }
-//    }
-//}
-
-//void Simulation::set_schedules(const std::vector<std::pair<std::vector<size_t>, std::vector<size_t>>> &schedules, bool relative) {
-//    std::vector<size_t> intersection_ids;
-//    intersection_ids.reserve(schedules.size());
-//    std::transform(schedules.begin(), schedules.end(), std::back_inserter(intersection_ids),
-//        [](const auto &s) {
-//            return s.first[0];
-//        });
-//
-//    set_schedules(intersection_ids, schedules, relative);
-//}
 
 Simulation default_simulation(const city_plan::CityPlan &city_plan) {
     Simulation s{city_plan};

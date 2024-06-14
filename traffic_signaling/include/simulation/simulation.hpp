@@ -4,6 +4,7 @@
 #include <functional>
 #include <locale>
 #include <queue>
+#include <ranges>
 #include <string>
 #include <unordered_map>
 #include <utility>
@@ -34,16 +35,14 @@ public:
         return schedules_;
     }
 
-    void set_schedules(
-        const std::vector<std::pair<std::vector<unsigned long>, std::vector<unsigned long>>> &schedules,
-        bool relative = true
+    std::vector<std::pair<std::vector<unsigned long>, std::vector<unsigned long>>> non_trivial_schedules(
+        bool relative_order = false
+    ) const;
+
+    void set_non_trivial_schedules(
+        std::vector<std::pair<std::vector<unsigned long>, std::vector<unsigned long>>> &&schedules,
+        bool relative_order = false
     );
-
-    //void set_schedules(const std::vector<unsigned long> &intersection_ids,
-    //    const std::vector<std::pair<std::vector<unsigned long>, std::vector<unsigned long>>> &schedules,
-    //    bool relative = true);
-
-    std::vector<std::pair<std::vector<unsigned long>, std::vector<unsigned long>>> get_schedules() const;
 
 private:
     class ThousandSeparator : public std::numpunct<char> {

@@ -40,23 +40,11 @@ PYBIND11_MODULE(simulation, m) {
         .def(
             "set",
             // necessary cast to choose the right overload
-            //static_cast<
-            //    void (Schedule::*)(const std::vector<unsigned long> &, const std::vector<unsigned long> &, bool)
-            //>(&Schedule::set),
-            static_cast<
-                void (Schedule::*)(std::vector<unsigned long> &&, std::vector<unsigned long> &&, bool)
-            >(&Schedule::set),
+            // https://pybind11.readthedocs.io/en/stable/classes.html#overloaded-methods
+            py::overload_cast<std::vector<unsigned long> &&, std::vector<unsigned long> &&, bool>(&Schedule::set),
             py::arg("order"),
             py::arg("times"),
             py::arg("relative_order") = false
-        )
-        .def(
-            "set_default",
-            &Schedule::set_default
-        )
-        .def(
-            "set_adaptive",
-            &Schedule::set_adaptive
         );
 
     py::class_<Simulation>(m, "Simulation")
@@ -93,18 +81,17 @@ PYBIND11_MODULE(simulation, m) {
             py::call_guard<py::gil_scoped_release>()
         )
         .def(
-            "update_schedules",
-            &Simulation::update_schedules,
+            "non_trivial_schedules",
+            &Simulation::non_trivial_schedules,
+            py::arg("relative_order") = false
+        )
+        .def(
+            "set_non_trivial_schedules",
+            &Simulation::set_non_trivial_schedules,
             py::arg("schedules"),
-            py::arg("relative") = true,
+            py::arg("relative_order") = false,
             py::call_guard<py::gil_scoped_release>()
         )
-        //.def(
-        //    "update_schedules",
-        //    [](const Simulation &s, const std::vector<std::pair<std::vector<size_t>, std::vector<size_t>>> &schedules) {
-        //        s.c
-        //    }
-        //)
         .def(
             "score",
             &Simulation::score,
@@ -121,11 +108,6 @@ PYBIND11_MODULE(simulation, m) {
             // https://pybind11.readthedocs.io/en/stable/advanced/pycpp/utilities.html#capturing-standard-output-from-ostream
             py::call_guard<py::scoped_ostream_redirect>()
         )
-        //.def_property(
-        //    "schedules",
-        //    &Simulation::schedules,
-        //    &Simulation::set_schedules
-        //)
         .def_property_readonly(
             "schedules",
             &Simulation::schedules
