@@ -39,7 +39,7 @@ public:
 
     // Note that this function is valid only if the schedule contains used streets 
     auto relative_order() const {
-        return order_ | std::ranges::views::transform([&](unsigned long street_id) {
+        return order_ | std::views::transform([&](unsigned long street_id) {
             return intersection_.street_index(street_id);
         });
     }

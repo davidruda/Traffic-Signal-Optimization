@@ -42,8 +42,8 @@ unsigned long CityPlan::upper_bound() const {
     auto greater_than_zero = [](auto score) {
         return score > 0;
     };
-    auto score_view = cars() | std::ranges::views::transform(car_score)
-                             | std::ranges::views::filter(greater_than_zero);
+    auto score_view = cars() | std::views::transform(car_score)
+                             | std::views::filter(greater_than_zero);
     return std::accumulate(score_view.begin(), score_view.end(), 0UL);
 }
 
