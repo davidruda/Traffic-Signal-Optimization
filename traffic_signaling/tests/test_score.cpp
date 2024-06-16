@@ -56,7 +56,7 @@ int main(int argc, char *argv[]) {
 
     city_plan::CityPlan city_plan{input_file};
     simulation::Simulation simulation{city_plan};
-    for (auto &&schedule_option: {"default"s, "adaptive"s}) {
+    for (auto &&schedule_option: {"default"s, "adaptive"s, "random"s}) {
         unsigned long expected{};
         if (schedule_option == "default") {
             simulation.default_schedules();
@@ -71,6 +71,16 @@ int main(int argc, char *argv[]) {
             std::cout 
                 << "\n************************* adaptive_schedules "
                    "*************************\n";
+        }
+        else if (schedule_option == "random") {
+            simulation::set_seed(42);
+            simulation.random_schedules();
+            expected = simulation.score();
+            simulation::set_seed(42);
+            simulation.random_schedules();
+            std::cout
+                << "\n************************** random_schedules "
+                   "**************************\n";
         }
         auto score = simulation.score();
         simulation.summary();

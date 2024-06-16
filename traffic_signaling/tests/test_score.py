@@ -33,11 +33,21 @@ class TestScore(unittest.TestCase):
         print(' default_schedules '.center(70, '*'))
         simulation.summary()
         self.assertEqual(score, DEFAULT_SCORE[data])
+
         simulation.adaptive_schedules()
         score = simulation.score()
         print('\n' + ' adaptive_schedules '.center(70, '*'))
         simulation.summary()
         self.assertEqual(score, ADAPTIVE_SCORE[data])
+
+        set_seed(42)
+        simulation.random_schedules()
+        score = simulation.score()
+        print('\n' + ' random_schedules '.center(70, '*'))
+        simulation.summary()
+        set_seed(42)
+        simulation.random_schedules()
+        self.assertEqual(score, simulation.score())
 
     @parameterized.expand([
         ('a'),

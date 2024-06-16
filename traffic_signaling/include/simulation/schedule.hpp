@@ -50,6 +50,7 @@ public:
     void set(std::vector<unsigned long> &&order, std::vector<unsigned long> &&times, bool relative_order = false);
     void set_default();
     void set_adaptive();
+    void set_random();
 
     void reset();
     
@@ -75,6 +76,8 @@ private:
 
     static constexpr auto UNUSED = std::numeric_limits<unsigned long>::max();
 };
+
+void set_seed(unsigned long seed);
 }
 
 #endif

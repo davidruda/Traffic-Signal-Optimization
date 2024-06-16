@@ -117,6 +117,17 @@ void Simulation::adaptive_schedules() {
     }
 }
 
+void Simulation::random_schedules() {
+    reset_schedules();
+    for (auto &&intersection: city_plan_.used_intersections()) {
+        if (schedules_.contains(intersection.id())) {
+            schedules_.at(intersection.id()).set_random();
+            continue;
+        }
+        schedules_.try_emplace(intersection.id(), intersection, "random");
+    }
+}
+
 void Simulation::initialize_run() {
     for (auto &&car: cars_) {
         add_event(car, 0);

@@ -1,6 +1,7 @@
-#include <cassert>
-#include <stdexcept>
 #include <algorithm>
+#include <cassert>
+#include <random>
+#include <stdexcept>
 
 #include "simulation/schedule.hpp"
 #include "city_plan/street.hpp"
@@ -8,6 +9,14 @@
 // TODO: add comments with explanations of the complicated parts
 
 namespace simulation {
+
+namespace {
+     std::mt19937_64 random_engine{42};
+}
+
+void set_seed(unsigned long seed) {
+    random_engine.seed(seed);
+}
 
 Schedule::Schedule(const city_plan::Intersection &intersection, std::string_view option)
     : intersection_(intersection) {
@@ -17,6 +26,10 @@ Schedule::Schedule(const city_plan::Intersection &intersection, std::string_view
     }
     if (option == "adaptive") {
         set_adaptive();
+        return;
+    }
+    if (option == "random") {
+        set_random();
         return;
     }
     throw std::runtime_error{"Invalid option for Schedule"};
@@ -133,6 +146,18 @@ void Schedule::set_adaptive() {
     // initialize times with 1 second for every street
     times_.resize(total_duration_, 1);
     green_lights_.reserve(total_duration_);
+}
+
+void Schedule::set_random() {
+    reset();
+    auto &&street_ids = intersection_.used_streets() | std::views::transform(&city_plan::Street::id);
+    // Create a random order of the streets
+    std::vector<unsigned long> random_order(street_ids.begin(), street_ids.end());
+    std::ranges::shuffle(random_order, random_engine);
+
+    for (auto street_id: random_order) {
+        add_street(street_id, 1);
+    }
 }
 
 void Schedule::reset() {

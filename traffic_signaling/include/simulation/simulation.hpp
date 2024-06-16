@@ -4,7 +4,6 @@
 #include <functional>
 #include <locale>
 #include <queue>
-#include <ranges>
 #include <string>
 #include <unordered_map>
 #include <utility>
@@ -27,6 +26,7 @@ public:
     // default means 1 second for every used street in the given order
     void default_schedules();
     void adaptive_schedules();
+    void random_schedules();
 
     unsigned long score();
     void summary() const;

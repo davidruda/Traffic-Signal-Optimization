@@ -63,5 +63,13 @@ class TestTime(unittest.TestCase):
         simulation.score()
         print(f'score: {time.time() - start:.4f}s')
 
+        start = time.time()
+        simulation.random_schedules()
+        print(f'random_schedules: {time.time() - start:.4f}s')
+
+        start = time.time()
+        simulation.score()
+        print(f'score: {time.time() - start:.4f}s')
+
 if __name__ == '__main__':
     unittest.main()

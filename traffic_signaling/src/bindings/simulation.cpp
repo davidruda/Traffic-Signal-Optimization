@@ -47,6 +47,12 @@ PYBIND11_MODULE(simulation, m) {
             py::arg("relative_order") = false
         );
 
+    m.def(
+        "set_seed",
+        &set_seed,
+        py::arg("seed")
+    );
+
     py::class_<Simulation>(m, "Simulation")
         .def(
             py::init<const city_plan::CityPlan &>(),
@@ -78,6 +84,11 @@ PYBIND11_MODULE(simulation, m) {
         .def(
             "adaptive_schedules",
             &Simulation::adaptive_schedules,
+            py::call_guard<py::gil_scoped_release>()
+        )
+        .def(
+            "random_schedules",
+            &Simulation::random_schedules,
             py::call_guard<py::gil_scoped_release>()
         )
         .def(

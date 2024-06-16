@@ -34,8 +34,12 @@ int main(int argc, char *argv[]) {
     TIME(simulation.load_schedules(plan_file), "load_schedules")
     TIME(auto score = simulation.score(), "score")
     std::cout << score << "\n";
+
     TIME(simulation.adaptive_schedules(), "adaptive_schedules")
     TIME(score = simulation.score(), "score")
     std::cout << score << "\n";
 
+    TIME(simulation.random_schedules(), "random_schedules")
+    TIME(score = simulation.score(), "score")
+    std::cout << score << "\n";
 }
