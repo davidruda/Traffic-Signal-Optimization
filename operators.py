@@ -7,12 +7,12 @@ import cython
 from deap.base import Toolbox
 from deap.tools import Logbook, Statistics, HallOfFame
 
-IND_TYPE = list[tuple[array, array]]
+Individual = list[tuple[array, array]]
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
 @cython.initializedcheck(False)
-def _fill_with(ind1: IND_TYPE, ind2: IND_TYPE) -> None:
+def _fill_with(ind1: Individual, ind2: Individual) -> None:
     """
     Fill `ind1` with values from `ind2`.
     """
@@ -120,7 +120,9 @@ def _mutShuffleIndexes(individual: cython.ulong[:], indpb: cython.float):
     return individual,
 
 #def varAnd(population, toolbox, cxpb, mutpb):
-def _varAnd(population: list[IND_TYPE], pop2: list[IND_TYPE], toolbox: Toolbox, cxpb: float, mutpb: float) -> list[IND_TYPE]:
+def _varAnd(
+    population: list[Individual], pop2: list[Individual], toolbox: Toolbox, cxpb: float, mutpb: float
+) -> list[Individual]:
     #offspring = [toolbox.clone(ind) for ind in population]
     for new, old in zip(pop2, population):
         _fill_with(new, old)
@@ -141,9 +143,10 @@ def _varAnd(population: list[IND_TYPE], pop2: list[IND_TYPE], toolbox: Toolbox, 
 
     return offspring
 
-def _eaSimple(population: list[IND_TYPE], toolbox: Toolbox, cxpb: float, 
-              mutpb: float, ngen: int, stats: Statistics | None = None,
-              halloffame: HallOfFame | None = None, verbose: bool | None = __debug__) -> tuple[list[IND_TYPE], Logbook]:
+def _eaSimple(
+    population: list[Individual], toolbox: Toolbox, cxpb: float, mutpb: float, ngen: int,
+    stats: Statistics | None = None, halloffame: HallOfFame | None = None, verbose: bool | None = __debug__
+) -> tuple[list[Individual], Logbook]:
     logbook = Logbook()
     logbook.header = ['gen', 'nevals'] + (stats.fields if stats else [])
 
@@ -216,16 +219,23 @@ else:
     from deap.algorithms import eaSimple as eaSimple_deap
     eaSimple = eaSimple_deap
 
-def crossover(ind1: IND_TYPE, ind2: IND_TYPE) -> tuple[IND_TYPE, IND_TYPE]:
+def crossover(ind1: Individual, ind2: Individual) -> tuple[Individual, Individual]:
     for (order1, times1), (order2, times2) in zip(ind1, ind2):
-        cxOrdered(order1, order2)
-        cxTwoPoint(times1, times2)
+        # crossover only order, or only times, or both
+        choice = random.randint(1, 3)
+        if choice & 0b01:
+            cxOrdered(order1, order2)
+        if choice & 0b10:
+            cxTwoPoint(times1, times2)
 
     return ind1, ind2
 
-def mutation(individual: IND_TYPE, indpb: float, low: int, up: int) -> tuple[IND_TYPE]:
+def mutation(individual: Individual, indpb: float, low: int, up: int) -> tuple[Individual]:
     for order, times in individual:
-        mutShuffleIndexes(order, indpb)
-        #tools.mutUniformInt(times, low, up, indpb)
-        mutation_change_by_one(times, indpb, low, up)
+        # mutation only order, or only times, or both
+        choice = random.randint(1, 3)
+        if choice & 0b01:
+            mutShuffleIndexes(order, indpb)
+        if choice & 0b10:
+            mutation_change_by_one(times, indpb, low, up)
     return individual,
