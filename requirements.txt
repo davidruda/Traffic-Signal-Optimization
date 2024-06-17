@@ -6,5 +6,4 @@ ipykernel
 deap
 matplotlib
 pandas
-scipy
 Cython

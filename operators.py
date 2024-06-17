@@ -119,7 +119,6 @@ def _mutShuffleIndexes(individual: cython.ulong[:], indpb: cython.float):
 
     return individual,
 
-#def varAnd(population, toolbox, cxpb, mutpb):
 def _varAnd(
     population: list[Individual], pop2: list[Individual], toolbox: Toolbox, cxpb: float, mutpb: float
 ) -> list[Individual]:

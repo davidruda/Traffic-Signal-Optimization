@@ -11,8 +11,6 @@ import threading
 
 from deap import base, creator, tools
 import numpy as np
-import scipy.stats
-from scipy.stats import rv_discrete, truncnorm
 
 from traffic_signaling import *
 
@@ -25,10 +23,10 @@ parser.add_argument('--generations', default=100, type=int, help='Number of gene
 parser.add_argument('--crossover', default=0.5, type=float, help='Crossover probability.')
 parser.add_argument('--mutation', default=0.2, type=float, help='Mutation probability.')
 parser.add_argument('--indpb', default=0.05, type=float, help='Probability of mutating each bit.')
-parser.add_argument('--tournsize', default=3, type=int, help='Tournament size for selection.')
 parser.add_argument('--threads', default=None, type=int, help='Number of threads for parallel evaluation.')
 parser.add_argument('--seed', default=42, type=int, help='Random seed.')
-parser.add_argument('--init_times', default='default', choices=['scaled', 'default'], help='Way of initializing green times.')
+parser.add_argument('--order_init', default='random', choices=['adaptive', 'random'], help='Way of initializing order of streets.')
+parser.add_argument('--times_init', default='default', choices=['scaled', 'default'], help='Way of initializing green times.')
 
 def normalize(x, min, max):
     """
@@ -99,80 +97,52 @@ def save_schedules(logdir, plan, individual):
     simulation = default_simulation(plan)
     simulation.set_non_trivial_schedules(individual, relative_order=True)
     os.makedirs(logdir, exist_ok=True)
-    simulation.save_schedules(os.path.join(logdir, f'{args.data}.txt'))
+    simulation.save_schedules(os.path.join(logdir, f'{args.data}.out'))
 
 def evaluate(individual, simulations: dict[int, Simulation]):
     simulation = simulations[threading.get_ident()]
     simulation.set_non_trivial_schedules(individual, relative_order=True)
     fitness = simulation.score()
-    return fitness, 
+    return fitness,
 
-def times_distribution(distribution, n):
-    times = np.round(distribution.rvs(size=n)).astype(int, copy=False)
+#def scaled_times_squared(car_counts):
+#    #times = np.sqrt(car_counts).astype(int)
+#    #times = np.round(np.sqrt(car_counts / np.gcd.reduce(car_counts))).astype(int, copy=False)
+#    times = np.round(0.51 * np.sqrt(car_counts / np.min(car_counts))).astype(int, copy=False)
+#    #times = np.clip(np.round(0.51 * np.sqrt(car_counts / np.min(car_counts))).astype(int, copy=False), a_min=1, a_max=None)
+#    return array('L', times)
+#    
+#def scaled_times(car_counts):
+#    # scaling
+#    #car_counts -= np.min(car_counts) - 1
+#    times = np.round(car_counts / np.min(car_counts)).astype(int, copy=False)
+
+def scaled_times(car_counts, divisor):
+    times = np.clip(np.round(car_counts / divisor).astype(int, copy=False), a_min=1, a_max=None)
     return array('L', times)
 
-def normalized_times(car_counts, min, max):
-    times = car_counts + scipy.stats.norm().rvs(len(car_counts))
-    times = np.clip(np.round(times), min, max).astype(int, copy=False)
-    return array('L', times)
-
-def scaled_times_squared(car_counts):
-    #times = np.sqrt(car_counts).astype(int)
-    #times = np.round(np.sqrt(car_counts / np.gcd.reduce(car_counts))).astype(int, copy=False)
-    times = np.round(0.51 * np.sqrt(car_counts / np.min(car_counts))).astype(int, copy=False)
-    #times = np.clip(np.round(0.51 * np.sqrt(car_counts / np.min(car_counts))).astype(int, copy=False), a_min=1, a_max=None)
-    return array('L', times)
-    
-def scaled_times(car_counts):
-    # scaling
-    #car_counts -= np.min(car_counts) - 1
-    times = np.round(car_counts / np.min(car_counts)).astype(int, copy=False)
-    return array('L', times)
-
-def random_times(length, min, max, weights=None):
-    return array('L', random.choices(range(min, max + 1), weights, k=length))
-    #return array('L', length * [random.randrange(min, max + 1)])
-
-def random_order(length):
-    return array('L', np.random.permutation(length))
-
-def default_times(length):
-    return array('L', length * [1])
-
-#def create_individual():
-#    individual = [
-#        (
-#            random_order(len(car_counts)),
-#            times_distribution(len(car_counts))
-#            #scaled_times_squared(car_counts) # scaled_times(car_counts) 
-#            if args.init_times == 'scaled'
-#            else default_times(len(car_counts))
-#        )
-#        for car_counts in non_trivial_intersections
-#    ]
-#    return individual
-
-def create_individual(non_trivial_intersections, total_cars):
+def create_individual(args, simulation: Simulation, total_cars):
+    if args.order_init == "random":
+        simulation.random_schedules()
+    schedules = simulation.non_trivial_schedules(relative_order=True)
     individual = [
         (
             # order
-            random_order(len(intersection.used_streets)),
+            array('L', order),
             # times
-            default_times(len(intersection.used_streets))
-            if args.init_times == 'default' else
-            #times_distribution(time_distributions[i], len(intersection.used_streets))
-            #array('L', next(times_generators[i]))
-            #normalized_times(total_cars[i])
-            #array('L', total_cars[i])
-            scaled_times_squared(total_cars[i])
+            scaled_times(total_cars[i], divisor=330)
+            if args.times_init == 'scaled' else
+            array('L', times)
         )
-        for i, intersection in enumerate(non_trivial_intersections)
+        for i, (order, times) in enumerate(schedules)
     ]
     return individual
 
 def main(args):
     random.seed(args.seed)
-    np.random.seed(args.seed)
+    # also set seed for the simulation module
+    set_seed(args.seed)
+
     toolbox = base.Toolbox()
 
     if args.threads:
@@ -206,16 +176,21 @@ def main(args):
     creator.create('FitnessMax', base.Fitness, weights=(1.0,))
     creator.create('Individual', list, fitness=creator.FitnessMax)
 
+    if args.order_init == 'adaptive':
+        sim = adaptive_simulation(plan)
+    elif args.order_init == 'random':
+        sim = Simulation(plan)
+
     toolbox.register(
         'individual', tools.initIterate, creator.Individual,
-        partial(create_individual, non_trivial_intersections=non_trivial_intersections, total_cars=total_cars)
+        partial(create_individual, args=args, simulation=sim, total_cars=total_cars)
     )
     toolbox.register('population', tools.initRepeat, list, toolbox.individual)
 
     toolbox.register('evaluate', evaluate, simulations=simulations)
     toolbox.register('mate', crossover)
     toolbox.register('mutate', mutation, indpb=args.indpb, low=green_min, up=green_max)
-    toolbox.register('select', tools.selTournament, tournsize=args.tournsize)
+    toolbox.register('select', tools.selTournament, tournsize=3)
 
     stats = tools.Statistics(lambda individual: individual.fitness.values)
 
@@ -254,62 +229,4 @@ def main(args):
 
 if __name__ == '__main__':
     args = parser.parse_args()
-
-    #start = time.time()
-    #time_distributions = np.empty(len(non_trivial_intersections), dtype=object)
-    #for i, intersection in enumerate(non_trivial_intersections):
-    #    car_stats = [street.total_cars for street in intersection.used_streets]
-    #    loc = np.mean(car_stats)
-    #    # Avoid division by zero
-    #    scale = 1 if (scale := np.std(car_stats)) == 0 else scale
-    #
-    #    a, b = (green_min - loc) / scale, (green_max - loc) / scale
-    #    time_distributions[i] = truncnorm(a, b, loc=loc, scale=scale)#, seed=args.seed)
-    #    #distr = truncnorm(a, b, loc=loc, scale=scale)
-    #    #x = np.linspace(green_min, green_max, 100)
-    #    #x = np.linspace(distr.ppf(0.01), distr.ppf(0.99), 100)
-    #    #import matplotlib.pyplot as plt
-    #    #plt.plot(x, distr.pdf(x), lw=2, label='truncnorm')
-    #    #start, stop = np.floor(x[0]), np.ceil(x[-1])
-    #    #bins = np.clip(np.arange(start - 0.5, (stop + 1) + 0.5, 1), start, stop)
-    #    ##plt.hist(distr.rvs(1000), density=True, bins='auto', alpha=0.2)
-    #    #plt.hist(distr.rvs(10000), density=True, bins=bins, alpha=0.2)
-    #    #plt.show()
-
-    #print(f'Times created: {time.time() - start:.4f}s')
-    #start = time.time()
-    #times_generators = []
-    #for i, intersection in enumerate(non_trivial_intersections):
-    #    shape = args.population, len(intersection.used_streets)        
-    #    batch = np.round(time_distributions[i].rvs(size=shape)).astype(int, copy=False)
-    #    # normalized times test
-    #    #batch = time_distributions[i].rvs(size=shape)
-    #    #batch = np.round(np.sqrt(0.1 * batch / np.min(batch, axis=1).reshape(-1, 1))).astype(int, copy=False)
-    #    times_generators.append(iter(batch))
-    #print(f'Test x100: {time.time() - start:.4f}s')
-    #start = time.time()
-    #for _ in range(100):
-    #    for i, intersection in enumerate(non_trivial_intersections):
-    #        times_distribution(time_distributions[i], len(intersection.used_streets))            
-    #print(f'Individual Times created: {time.time() - start:.4f}s')
-
-
-    #if args.init_times == 'scaled':
-    #    counts_normalized = np.sqrt(car_counts / np.min(car_counts)).astype(int)
-    #    values, counts = np.unique(counts_normalized, return_counts=True)
-    #    probabilities = counts / counts.sum()
-    #    car_counts_distribution = rv_discrete(values=(values, probabilities))
-    
-    #start = time.time()
-    #normal = scipy.stats.norm()
-    #distributions = {}
-    #times_generators = []
-    #for car_counts in total_cars:
-    #    shape = args.population, len(car_counts)
-    #    batched_times = car_counts + normal.rvs(size=shape)
-    #    #batched_times = np.clip(np.round(batched_times), green_min, green_max).astype(int, copy=False)
-    #    print(np.min(batched_times), np.max(batched_times), np.mean(batched_times), np.std(batched_times))
-    #    times_generators.append(iter(batched_times))
-    #print(f'Test norm: {time.time() - start:.4f}s')
-
     main(args)
