@@ -48,6 +48,10 @@ UPPER_BOUND = {
     'f': 1_765_068
 }
 
+def normalized_score(score: int, data: str) -> float:
+    score_norm = (score - DEFAULT_SCORE[data]) / (MAX_KNOWN_SCORE[data] - DEFAULT_SCORE[data])
+    return round(score_norm, ndigits=2)
+
 def get_data_filename(data: str) -> str:
     data = data.lower()
     if data not in TEST_DATA:

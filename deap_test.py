@@ -28,13 +28,6 @@ parser.add_argument('--seed', default=42, type=int, help='Random seed.')
 parser.add_argument('--order_init', default='random', choices=['adaptive', 'random'], help='Way of initializing order of streets.')
 parser.add_argument('--times_init', default='default', choices=['scaled', 'default'], help='Way of initializing green times.')
 
-def normalize(x, min, max):
-    """
-    Normalize `x` to the range [0, 1] and round to 2 decimal places.
-    """
-    x_norm = (x - min) / (max - min)
-    return np.round(x_norm, decimals=2)
-
 def save_statistics(args, logdir, logbook, show_plot=False):
     import matplotlib.pyplot as plt
     import matplotlib.ticker as ticker
@@ -195,7 +188,7 @@ def main(args):
     stats = tools.Statistics(lambda individual: individual.fitness.values)
 
 
-    norm_score = partial(normalize, min=DEFAULT_SCORE[args.data], max=MAX_KNOWN_SCORE[args.data])
+    norm_score = partial(normalized_score, data=args.data)
     stats.register('norm_max', lambda x: norm_score(np.max(x)))
     # This weird manipulation is necessary in order to avoid scientific notation
     # and use thousands separator when printing statistics with tools.Statistics
