@@ -44,9 +44,6 @@ public:
         });
     }
 
-    void set(
-        const std::vector<unsigned long> &order, const std::vector<unsigned long> &times, bool relative_order = false
-    );
     void set(std::vector<unsigned long> &&order, std::vector<unsigned long> &&times, bool relative_order = false);
     void set_default();
     void set_adaptive();
