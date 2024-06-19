@@ -15,7 +15,7 @@
 namespace simulation {
 class Schedule {
 public:
-    explicit Schedule(const city_plan::Intersection &intersection, std::string_view option = "default");
+    explicit Schedule(const city_plan::Intersection &intersection) : intersection_(intersection) {}
     Schedule(
         const city_plan::Intersection &intersection,
         std::vector<unsigned long> &&order, std::vector<unsigned long> &&times, bool relative_order = false
