@@ -17,7 +17,7 @@ public:
     bool operator<(const Event &other) const;
     bool operator>(const Event &other) const;
 
-    enum Type {
+    enum class Type {
         STREET_EVENT_TYPE
     };
 
@@ -37,7 +37,7 @@ public:
         : Event(time), street_(street) {}
 
     Type event_type() const override {
-        return Event::STREET_EVENT_TYPE;
+        return Type::STREET_EVENT_TYPE;
     }
 
     Street &street() const {
