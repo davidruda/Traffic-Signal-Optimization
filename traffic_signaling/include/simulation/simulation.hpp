@@ -23,10 +23,24 @@ public:
     void load_schedules(const std::string &filename);
     void save_schedules(const std::string &filename) const;
 
+    void create_schedules(std::string order, std::string times, unsigned long divisor = Schedule::DEFAULT_DIVISOR);
+
     // default means 1 second for every used street in the given order
-    void default_schedules();
-    void adaptive_schedules();
-    void random_schedules();
+    void default_schedules() {
+        create_schedules("default", "default");
+    }
+
+    void adaptive_schedules() {
+        create_schedules("adaptive", "default");
+    }
+
+    void random_schedules() {
+        create_schedules("random", "default");
+    }
+
+    void scaled_schedules(unsigned long divisor = Schedule::DEFAULT_DIVISOR) {
+        create_schedules("default", "scaled", divisor);
+    }
 
     unsigned long score();
     void summary() const;
@@ -61,6 +75,8 @@ private:
     void run();
     void reset_run();
     void reset_schedules();
+    void assign_schedules(Schedule::Order order_type, Schedule::Times times_type);
+    void finalize_schedules(Schedule::Order order_type, Schedule::Times times_type);
     void add_event(Car &car, unsigned long current_time);
     void initialize_run();
     void process_event();

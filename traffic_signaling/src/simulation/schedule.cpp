@@ -11,8 +11,10 @@
 namespace simulation {
 
 namespace {
-     std::mt19937_64 random_engine{42};
+    std::mt19937_64 random_engine{42};
 }
+
+unsigned long Schedule::divisor_ = DEFAULT_DIVISOR;
 
 void set_seed(unsigned long seed) {
     random_engine.seed(seed);
@@ -58,13 +60,6 @@ void Schedule::fill_missing_streets() {
     }
 }
 
-void Schedule::add_street(unsigned long street_id, unsigned long green_light_duration) {
-    order_.push_back(street_id);
-    times_.push_back(green_light_duration);
-    green_lights_.try_emplace(street_id, total_duration_, total_duration_ + green_light_duration);
-    total_duration_ += green_light_duration;
-}
-
 void Schedule::add_street_adaptive(unsigned long street_id, unsigned long time) {
     time %= total_duration_;
     for (auto i = 0UL; i < total_duration_; ++i) {
@@ -98,11 +93,37 @@ void Schedule::set(std::vector<unsigned long> &&order, std::vector<unsigned long
     times_ = std::move(times);
 }
 
-void Schedule::set_default() {
-    reset();
-    for (const city_plan::Street &street: intersection_.used_streets()) {
-        add_street(street.id(), 1);
+void Schedule::set(Order order_type, Times times_type) {
+    // adaptive schedules must be handled separately
+    if (order_type == Order::ADAPTIVE) {
+        set_adaptive();
+        return;
     }
+
+    std::vector<unsigned long> order, times;
+    auto &&street_ids = intersection_.used_streets() | std::views::transform(&city_plan::Street::id);
+    // DEFAULT order is the order of the streets in the intersection
+    order.assign(street_ids.begin(), street_ids.end());
+
+    if (order_type == Order::RANDOM) {
+        std::ranges::shuffle(order, random_engine);
+    }
+
+    if (times_type == Times::DEFAULT) {
+        times.assign(order.size(), 1UL);
+    }
+    else if (times_type == Times::SCALED) {
+        auto &&car_counts = order | std::views::transform([&](unsigned long street_id) {
+            return intersection_.used_streets()[intersection_.street_index(street_id)].get().total_cars();
+        });
+        auto scale = [](unsigned long car_count) {
+            return std::max(car_count / divisor_, 1UL);
+        };
+        auto &&scaled_car_counts = car_counts | std::views::transform(scale);
+        times.assign(scaled_car_counts.begin(), scaled_car_counts.end());
+    }
+
+    set(std::move(order), std::move(times));
 }
 
 void Schedule::set_adaptive() {
@@ -114,18 +135,6 @@ void Schedule::set_adaptive() {
     // initialize times with 1 second for every street
     times_.resize(total_duration_, 1);
     green_lights_.reserve(total_duration_);
-}
-
-void Schedule::set_random() {
-    reset();
-    auto &&street_ids = intersection_.used_streets() | std::views::transform(&city_plan::Street::id);
-    // Create a random order of the streets
-    std::vector<unsigned long> random_order(street_ids.begin(), street_ids.end());
-    std::ranges::shuffle(random_order, random_engine);
-
-    for (auto street_id: random_order) {
-        add_street(street_id, 1);
-    }
 }
 
 void Schedule::reset() {

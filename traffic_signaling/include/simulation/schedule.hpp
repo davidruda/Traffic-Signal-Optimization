@@ -6,7 +6,6 @@
 #include <vector>
 #include <ranges>
 #include <limits>
-#include <string_view>
 
 #include "city_plan/intersection.hpp"
 
@@ -44,21 +43,38 @@ public:
         });
     }
 
+    enum class Order {
+        DEFAULT,
+        ADAPTIVE,
+        RANDOM,
+        CUSTOM,
+    };
+
+    enum class Times {
+        DEFAULT,
+        SCALED,
+        CUSTOM,
+    };
+
     void set(std::vector<unsigned long> &&order, std::vector<unsigned long> &&times, bool relative_order = false);
-    void set_default();
-    void set_adaptive();
-    void set_random();
+    void set(Order order_type = Order::DEFAULT, Times times_type = Times::DEFAULT);
 
     void reset();
+
+    static void set_divisor(unsigned long divisor) {
+        divisor_ = divisor;
+    }
     
     std::optional<unsigned long> next_green(unsigned long street_id, unsigned long time);
     // helper function to fill in the missing streets when using adaptive schedule
     void fill_missing_streets();
 
+    static constexpr auto DEFAULT_DIVISOR = 20UL;
+
 private:
     using TimeInterval = std::ranges::iota_view<unsigned long, unsigned long>;
 
-    void add_street(unsigned long street_id, unsigned long green_light_duration);
+    void set_adaptive();
     void add_street_adaptive(unsigned long street_id, unsigned long time);
 
     const city_plan::Intersection &intersection_;
@@ -71,6 +87,7 @@ private:
     // green light intervals indexed by street_id 
     std::unordered_map<unsigned long, TimeInterval> green_lights_;
 
+    static unsigned long divisor_;
     static constexpr auto UNUSED = std::numeric_limits<unsigned long>::max();
 };
 

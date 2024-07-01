@@ -1,3 +1,5 @@
+#include <algorithm>
+#include <cctype>
 #include <fstream>
 #include <iomanip>
 #include <ios>
@@ -90,42 +92,63 @@ void Simulation::save_schedules(const std::string &filename) const {
     }
 }
 
-void Simulation::default_schedules() {
+void Simulation::assign_schedules(Schedule::Order order_type, Schedule::Times times_type) {
     reset_schedules();
     for (auto &&intersection: city_plan_.used_intersections()) {
-        if (schedules_.contains(intersection.id())) {
-            schedules_.at(intersection.id()).set_default();
-            continue;
-        }
-        schedules_.try_emplace(intersection.id(), intersection, "default");
+        auto &&[iter, _] = schedules_.try_emplace(intersection.id(), intersection);
+        auto &&[id, schedule] = *iter;
+        schedule.set(order_type, times_type);
     }
 }
 
-void Simulation::adaptive_schedules() {
-    reset_schedules();
-    for (auto &&intersection: city_plan_.used_intersections()) {
-        if (schedules_.contains(intersection.id())) {
-            schedules_.at(intersection.id()).set_adaptive();
-            continue;
+void Simulation::finalize_schedules(Schedule::Order order_type, Schedule::Times) {
+    if (order_type == Schedule::Order::ADAPTIVE) {
+        // When using adaptive schedules, the schedules are assigned while running the simulation
+        // and the missing streets are filled in after the simulation is done
+        run();
+        reset_run();
+        for (auto &&intersection: city_plan_.used_intersections()) {
+            schedules_.at(intersection.id()).fill_missing_streets();
         }
-        schedules_.try_emplace(intersection.id(), intersection, "adaptive");
-    }
-    run();
-    reset_run();
-    for (auto &&intersection: city_plan_.used_intersections()) {
-        schedules_.at(intersection.id()).fill_missing_streets();
     }
 }
 
-void Simulation::random_schedules() {
-    reset_schedules();
-    for (auto &&intersection: city_plan_.used_intersections()) {
-        if (schedules_.contains(intersection.id())) {
-            schedules_.at(intersection.id()).set_random();
-            continue;
-        }
-        schedules_.try_emplace(intersection.id(), intersection, "random");
+void Simulation::create_schedules(std::string order, std::string times, unsigned long divisor) {
+    auto to_lower = [](auto c) {
+        return static_cast<char>(std::tolower(c));
+    };
+
+    std::ranges::transform(order, order.begin(), to_lower);
+    std::ranges::transform(times, times.begin(), to_lower);
+
+    Schedule::Order order_type;
+    Schedule::Times times_type;
+    if (order == "default") {
+        order_type = Schedule::Order::DEFAULT;
     }
+    else if (order == "adaptive") {
+        order_type = Schedule::Order::ADAPTIVE;
+    }
+    else if (order == "random") {
+        order_type = Schedule::Order::RANDOM;
+    }
+    else {
+        throw std::invalid_argument("Invalid order option");
+    }
+
+    if (times == "default") {
+        times_type = Schedule::Times::DEFAULT;
+    }
+    else if (times == "scaled") {
+        times_type = Schedule::Times::SCALED;
+    }
+    else {
+        throw std::invalid_argument("Invalid times option");
+    }
+
+    Schedule::set_divisor(divisor);
+    assign_schedules(order_type, times_type);
+    finalize_schedules(order_type, times_type);
 }
 
 void Simulation::initialize_run() {
@@ -291,19 +314,17 @@ void Simulation::set_non_trivial_schedules(
     // IMPORTANT: Note that schedules must have the same order and size as non_trivial_intersections
     size_t i = 0;
     for (auto &&intersection: city_plan_.non_trivial_intersections()) {
-        auto id = intersection.id();
         auto &&[order, times] = schedules[i++];
 
         // TODO: maybe solve the relative/absolute street id problem differently
         if (relative_order) {
-            auto &&used_streets = city_plan_.intersections()[id].used_streets();
+            auto &&used_streets = intersection.used_streets();
             auto street_ids = order | std::views::transform([&](unsigned long street_index) {
                 return static_cast<const city_plan::Street &>(used_streets[street_index]).id();
             });
-            schedules_.at(id).set({street_ids.begin(), street_ids.end()}, std::move(times));
-            continue;
+            order = {street_ids.begin(), street_ids.end()};
         }
-        schedules_.at(id).set(std::move(order), std::move(times));
+        schedules_.at(intersection.id()).set(std::move(order), std::move(times));
     }
 }
 

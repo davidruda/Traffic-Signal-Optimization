@@ -1,5 +1,6 @@
 #include <pybind11/iostream.h>
 #include <pybind11/pybind11.h>
+#include <pybind11/pytypes.h>
 #include <pybind11/stl.h>
 
 #include "city_plan/city_plan.hpp"
@@ -12,8 +13,10 @@ using namespace simulation;
 PYBIND11_MODULE(simulation, m) {
     m.doc() = "pybind11 simulation module";
 
-    py::class_<Schedule>(m, "Schedule")
-        .def_property_readonly(
+    auto py_Schedule = py::class_<Schedule>(m, "Schedule");
+    auto py_Simulation = py::class_<Simulation>(m, "Simulation");
+
+        py_Schedule.def_property_readonly(
             "length",
             &Schedule::length
         )
@@ -45,6 +48,13 @@ PYBIND11_MODULE(simulation, m) {
             py::arg("order"),
             py::arg("times"),
             py::arg("relative_order") = false
+        )
+        .def_property_readonly_static(
+            "DEFAULT_DIVISOR",
+            // https://pybind11.readthedocs.io/en/stable/advanced/classes.html#static-properties
+            [](py::object /* self */) {
+                return Schedule::DEFAULT_DIVISOR;
+            }
         );
 
     m.def(
@@ -53,12 +63,9 @@ PYBIND11_MODULE(simulation, m) {
         py::arg("seed")
     );
 
-    py::class_<Simulation>(m, "Simulation")
-        .def(
+        py_Simulation.def(
             py::init<const city_plan::CityPlan &>(),
             py::arg("city_plan"),
-            // Not really sure if the keep_alive is necessary here (I tested it without it)
-            // but it matches the second example in the reference and it's a safe bet
             // https://pybind11.readthedocs.io/en/stable/advanced/functions.html#keep-alive
             //
             // 1: this pointer (Simulation), 2 - first argument (CityPlan)
@@ -77,6 +84,14 @@ PYBIND11_MODULE(simulation, m) {
             py::call_guard<py::gil_scoped_release>()
         )
         .def(
+            "create_schedules",
+            &Simulation::create_schedules,
+            py::arg("order"),
+            py::arg("times"),
+            py::arg("divisor") = Schedule::DEFAULT_DIVISOR,
+            py::call_guard<py::gil_scoped_release>()
+        )
+        .def(
             "default_schedules",
             &Simulation::default_schedules,
             py::call_guard<py::gil_scoped_release>()
@@ -92,9 +107,10 @@ PYBIND11_MODULE(simulation, m) {
             py::call_guard<py::gil_scoped_release>()
         )
         .def(
-            "non_trivial_schedules",
-            &Simulation::non_trivial_schedules,
-            py::arg("relative_order") = false
+            "scaled_schedules",
+            &Simulation::scaled_schedules,
+            py::arg("divisor") = Schedule::DEFAULT_DIVISOR,
+            py::call_guard<py::gil_scoped_release>()
         )
         .def(
             "set_non_trivial_schedules",
@@ -102,6 +118,11 @@ PYBIND11_MODULE(simulation, m) {
             py::arg("schedules"),
             py::arg("relative_order") = false,
             py::call_guard<py::gil_scoped_release>()
+        )
+        .def(
+            "non_trivial_schedules",
+            &Simulation::non_trivial_schedules,
+            py::arg("relative_order") = false
         )
         .def(
             "score",
