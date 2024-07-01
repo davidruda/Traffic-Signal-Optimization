@@ -29,7 +29,7 @@ class TestIO(unittest.TestCase):
         output = f'{self.output_dir}/{data}.txt'
 
         plan = create_city_plan(data)
-        for schedule_option in ['default', 'adaptive']:
+        for schedule_option in ['default', 'adaptive', 'random', 'scaled']:
             simulation = Simulation(plan)
             getattr(simulation, f'{schedule_option}_schedules')()
 
@@ -52,7 +52,7 @@ class TestIO(unittest.TestCase):
         output = f'{self.output_dir}/{data}.txt'
 
         plan = create_city_plan(data)
-        for schedule_option in ['default', 'adaptive']:
+        for schedule_option in ['default', 'adaptive', 'random']:
             simulation = Simulation(plan)
             getattr(simulation, f'{schedule_option}_schedules')()
 

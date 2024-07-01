@@ -20,12 +20,15 @@ void test_io(const std::vector<std::string> &args, bool same_instance = false) {
 
     city_plan::CityPlan city_plan{input_file};
     simulation::Simulation simulation{city_plan};
-    for (auto &&schedule_option: {"default"s, "adaptive"s}) {
+    for (auto &&schedule_option: {"default"s, "adaptive"s, "random"s}) {
         if (schedule_option == "default") {
             simulation.default_schedules();
         }
         else if (schedule_option == "adaptive") {
             simulation.adaptive_schedules();
+        }
+        else if (schedule_option == "random") {
+            simulation.random_schedules();
         }
 
         simulation.save_schedules(plan_file);

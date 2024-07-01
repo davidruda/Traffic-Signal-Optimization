@@ -56,23 +56,24 @@ int main(int argc, char *argv[]) {
 
     city_plan::CityPlan city_plan{input_file};
     simulation::Simulation simulation{city_plan};
-    for (auto &&schedule_option: {"default"s, "adaptive"s, "random"s}) {
+    auto &&schedule_option = {"default"s, "adaptive"s, "random"s, "scaled"s};
+    for (auto &&option: schedule_option) {
         unsigned long expected{};
-        if (schedule_option == "default") {
+        if (option == "default") {
             simulation.default_schedules();
             expected = DEFAULT_SCORE.at(data);
             std::cout
                 << "************************* default_schedules "
                    "**************************\n";
         }
-        else if (schedule_option == "adaptive") {
+        else if (option == "adaptive") {
             simulation.adaptive_schedules();
             expected = ADAPTIVE_SCORE.at(data);
             std::cout 
                 << "\n************************* adaptive_schedules "
                    "*************************\n";
         }
-        else if (schedule_option == "random") {
+        else if (option == "random") {
             simulation::set_seed(42);
             simulation.random_schedules();
             expected = simulation.score();
@@ -82,11 +83,19 @@ int main(int argc, char *argv[]) {
                 << "\n************************** random_schedules "
                    "**************************\n";
         }
+        else if (option == "scaled") {
+            simulation.scaled_schedules(27);
+            expected = simulation.score();
+            std::cout
+                << "\n************************** scaled_schedules "
+                   "**************************\n";
+        }
+
         auto score = simulation.score();
         simulation.summary();
         assert_equal(
             score, expected,
-            "[" + schedule_option + "] Score mismatch: " + std::to_string(score)
+            "[" + option + "] Score mismatch: " + std::to_string(score)
             + " != " + std::to_string(expected)
         );
     }

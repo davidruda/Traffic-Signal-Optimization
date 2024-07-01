@@ -49,6 +49,12 @@ class TestScore(unittest.TestCase):
         simulation.random_schedules()
         self.assertEqual(score, simulation.score())
 
+        simulation.scaled_schedules(divisor=27)
+        score = simulation.score()
+        print('\n' + ' scaled_schedules '.center(70, '*'))
+        simulation.summary()
+        self.assertEqual(score, simulation.score())
+
     @parameterized.expand([
         ('a'),
         ('b'),

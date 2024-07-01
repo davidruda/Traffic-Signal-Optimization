@@ -58,7 +58,6 @@ class TestTime(unittest.TestCase):
         start = time.time()
         simulation.adaptive_schedules()
         print(f'adaptive_schedules: {time.time() - start:.4f}s')
-
         start = time.time()
         simulation.score()
         print(f'score: {time.time() - start:.4f}s')
@@ -66,7 +65,13 @@ class TestTime(unittest.TestCase):
         start = time.time()
         simulation.random_schedules()
         print(f'random_schedules: {time.time() - start:.4f}s')
+        start = time.time()
+        simulation.score()
+        print(f'score: {time.time() - start:.4f}s')
 
+        start = time.time()
+        simulation.scaled_schedules()
+        print(f'scaled_schedules: {time.time() - start:.4f}s')
         start = time.time()
         simulation.score()
         print(f'score: {time.time() - start:.4f}s')

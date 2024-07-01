@@ -42,4 +42,8 @@ int main(int argc, char *argv[]) {
     TIME(simulation.random_schedules(), "random_schedules")
     TIME(score = simulation.score(), "score")
     std::cout << score << "\n";
+
+    TIME(simulation.scaled_schedules(), "scaled_schedules")
+    TIME(score = simulation.score(), "score")
+    std::cout << score << "\n";
 }
