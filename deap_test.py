@@ -25,7 +25,7 @@ parser.add_argument('--mutation', default=0.2, type=float, help='Mutation probab
 parser.add_argument('--indpb', default=0.05, type=float, help='Probability of mutating each bit.')
 parser.add_argument('--threads', default=None, type=int, help='Number of threads for parallel evaluation.')
 parser.add_argument('--seed', default=42, type=int, help='Random seed.')
-parser.add_argument('--order_init', default='random', choices=['adaptive', 'random'], help='Way of initializing order of streets.')
+parser.add_argument('--order_init', default='random', choices=['adaptive', 'random', 'default'], help='Way of initializing order of streets.')
 parser.add_argument('--times_init', default='default', choices=['scaled', 'default'], help='Way of initializing green times.')
 
 def save_statistics(args, logdir, logbook, show_plot=False):
@@ -59,7 +59,8 @@ def save_statistics(args, logdir, logbook, show_plot=False):
     y_max = np.max([1, np.max(norm_max)])
     ax1.set_ylim(y_min, y_max)
     ax1.legend(framealpha=0.5)
-    ax1.set_title(f'Best score: {np.max(max):,}')
+    best_fitness = np.max(max)
+    ax1.set_title(f'Best score: {best_fitness:,} ({100 * normalized_score(best_fitness, args.data):.2f} %)')
 
     baseline = DEFAULT_SCORE[args.data]
     best_known = MAX_KNOWN_SCORE[args.data]
@@ -92,47 +93,36 @@ def save_schedules(logdir, plan, individual):
     os.makedirs(logdir, exist_ok=True)
     simulation.save_schedules(os.path.join(logdir, f'{args.data}.out'))
 
+def save_info(args, logdir, elapsed_time, best_fitness):
+    os.makedirs(logdir, exist_ok=True)
+    with open(os.path.join(logdir, 'info.txt'), 'w') as f:
+        f.write(f'Best fitness: {int(best_fitness):,} ({100 * normalized_score(best_fitness, args.data):.2f} %)\n\n')
+        for k, v in args.__dict__.items():
+            f.write(f'{k}={v}\n')
+        f.write(f'\nElapsed time: {elapsed_time}\n')
+
 def evaluate(individual, simulations: dict[int, Simulation]):
+    # Keep reusing the same simulation object for the same thread
     simulation = simulations[threading.get_ident()]
     simulation.set_non_trivial_schedules(individual, relative_order=True)
     fitness = simulation.score()
     return fitness,
 
-#def scaled_times_squared(car_counts):
-#    #times = np.sqrt(car_counts).astype(int)
-#    #times = np.round(np.sqrt(car_counts / np.gcd.reduce(car_counts))).astype(int, copy=False)
-#    times = np.round(0.51 * np.sqrt(car_counts / np.min(car_counts))).astype(int, copy=False)
-#    #times = np.clip(np.round(0.51 * np.sqrt(car_counts / np.min(car_counts))).astype(int, copy=False), a_min=1, a_max=None)
-#    return array('L', times)
-#    
-#def scaled_times(car_counts):
-#    # scaling
-#    #car_counts -= np.min(car_counts) - 1
-#    times = np.round(car_counts / np.min(car_counts)).astype(int, copy=False)
-
-def scaled_times(car_counts, divisor):
-    times = np.clip(np.round(car_counts / divisor).astype(int, copy=False), a_min=1, a_max=None)
-    return array('L', times)
-
-def create_individual(args, simulation: Simulation, total_cars):
+def create_individual(args, simulation: Simulation):
     if args.order_init == "random":
-        simulation.random_schedules()
+        # For random order initialization, we need to create new schedules each time
+        simulation.create_schedules(order=args.order_init, times=args.times_init)
     schedules = simulation.non_trivial_schedules(relative_order=True)
+
+    # Convert schedules from lists to array.arrays to speed up the optimization
     individual = [
-        (
-            # order
-            array('L', order),
-            # times
-            scaled_times(total_cars[i], divisor=330)
-            if args.times_init == 'scaled' else
-            array('L', times)
-        )
-        for i, (order, times) in enumerate(schedules)
+        (array('L', order), array('L', times)) for order, times in schedules
     ]
     return individual
 
 def main(args):
     random.seed(args.seed)
+    np.random.seed(args.seed)
     # also set seed for the simulation module
     set_seed(args.seed)
 
@@ -153,30 +143,18 @@ def main(args):
     default_sim = partial(default_simulation, city_plan=plan)
     simulations = defaultdict(default_sim)
 
-    cars = plan.cars
-    streets = plan.streets
-    intersections = plan.intersections
-    non_trivial_intersections = plan.non_trivial_intersections()
-
     green_max = plan.duration
     green_min = 0
-
-    total_cars = [
-        np.array([street.total_cars for street in intersection.used_streets])
-        for intersection in non_trivial_intersections
-    ]
 
     creator.create('FitnessMax', base.Fitness, weights=(1.0,))
     creator.create('Individual', list, fitness=creator.FitnessMax)
 
-    if args.order_init == 'adaptive':
-        sim = adaptive_simulation(plan)
-    elif args.order_init == 'random':
-        sim = Simulation(plan)
+    sim = Simulation(plan)
+    sim.create_schedules(order=args.order_init, times=args.times_init)
 
     toolbox.register(
         'individual', tools.initIterate, creator.Individual,
-        partial(create_individual, args=args, simulation=sim, total_cars=total_cars)
+        partial(create_individual, args=args, simulation=sim)
     )
     toolbox.register('population', tools.initRepeat, list, toolbox.individual)
 
@@ -187,11 +165,10 @@ def main(args):
 
     stats = tools.Statistics(lambda individual: individual.fitness.values)
 
-
     norm_score = partial(normalized_score, data=args.data)
     stats.register('norm_max', lambda x: norm_score(np.max(x)))
     # This weird manipulation is necessary in order to avoid scientific notation
-    # and use thousands separator when printing statistics with tools.Statistics
+    # and use thousand separator when printing statistics with tools.Statistics
     stats.register('max', lambda x: f'{int(np.max(x)):,}')
     stats.register('norm_avg', lambda x: norm_score(np.mean(x)))
     stats.register('avg', lambda x: f'{int(np.mean(x)):,}')
@@ -206,19 +183,16 @@ def main(args):
         population, toolbox, cxpb=args.crossover, mutpb=args.mutation,
         ngen=args.generations, stats=stats, halloffame=hof, verbose=True
     )
-    os.makedirs(logdir, exist_ok=True)
-    with open(os.path.join(logdir, 'info.txt'), 'w') as f:
-        for k, v in args.__dict__.items():
-            f.write(f'{k}={v}\n')
-        elapsed_time = datetime.timedelta(seconds=int(time.time() - start))
-        f.write(f'\nElapsed time: {elapsed_time}\n')
+    elapsed_time = datetime.timedelta(seconds=int(time.time() - start))
+    print(f'Elapsed time: {elapsed_time}')
 
     best_individual = hof.items[0]
     best_fitness = hof.keys[0].values[0]
-    print(f'Best fitness: {int(best_fitness):,}')
+    print(f'Best fitness: {int(best_fitness):,} ({100 * normalized_score(best_fitness, args.data):.2f} %)')
 
     save_statistics(args, logdir, logbook, show_plot=False)
     save_schedules(logdir, plan, best_individual)
+    save_info(args, logdir, elapsed_time, best_fitness)
 
 if __name__ == '__main__':
     args = parser.parse_args()
