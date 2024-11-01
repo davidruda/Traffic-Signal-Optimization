@@ -19,7 +19,7 @@
   - You can check the location of the headers by running `python3 -c "import sysconfig; print(sysconfig.get_path('include'))"`
   - If not available, install them; e.g. `sudo apt install python3-dev` on Ubuntu
 
-- Run `pip install traffic_signaling` (preferably in a virtual environment)
+- Run `pip install ./traffic_signaling` (preferably in a virtual environment)
 
 - Optionally, verify the package by running tests:
 
