@@ -250,7 +250,7 @@ def mutation(individual: Individual, indpb: float, low: int, up: int) -> tuple[I
             mutation_change_by_one(times, indpb, low, up)
     return individual,
 
-## First-choice hill climbing
+# First-choice hill climbing
 def hill_climbing(
     individual: Individual, toolbox: Toolbox, ngen: int, stats: Statistics | None = None,
     halloffame: HallOfFame | None = None, verbose: bool | None = __debug__
