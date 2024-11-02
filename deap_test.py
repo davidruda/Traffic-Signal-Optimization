@@ -14,21 +14,23 @@ import numpy as np
 
 from traffic_signaling import *
 
-from operators import eaSimple, crossover, mutation
+from operators import eaSimple, hill_climbing, simulated_annealing, crossover, mutation
 
 parser = argparse.ArgumentParser()
+parser.add_argument('--algorithm', required=True, choices=['ga', 'hc', 'sa'], help='Algorithm to use for optimization - Genetic Algorithm, Hill Climbing, Simulated Annealing.')
 parser.add_argument('--data', default='d', type=str, help='Input data.')
 parser.add_argument('--population', default=100, type=int, help='Number of individuals in a population.')
 parser.add_argument('--generations', default=100, type=int, help='Number of generations.')
 parser.add_argument('--crossover', default=0.5, type=float, help='Crossover probability.')
 parser.add_argument('--mutation', default=0.2, type=float, help='Mutation probability.')
 parser.add_argument('--indpb', default=0.05, type=float, help='Probability of mutating each bit.')
-parser.add_argument('--threads', default=None, type=int, help='Number of threads for parallel evaluation.')
-parser.add_argument('--seed', default=42, type=int, help='Random seed.')
 parser.add_argument('--order_init', default='random', choices=['adaptive', 'random', 'default'], help='Way of initializing order of streets.')
 parser.add_argument('--times_init', default='default', choices=['scaled', 'default'], help='Way of initializing green times.')
+parser.add_argument('--threads', default=None, type=int, help='Number of threads for parallel evaluation.')
+parser.add_argument('--seed', default=42, type=int, help='Random seed.')
+parser.add_argument('--no-save', default=False, action='store_true', help='Do not save results and plots.')
 
-def save_statistics(args, logdir, logbook, show_plot=False):
+def save_data_plots(args, logdir, logbook, show_plot=False):
     import matplotlib.pyplot as plt
     import matplotlib.ticker as ticker
     import pandas as pd
@@ -89,6 +91,7 @@ def save_statistics(args, logdir, logbook, show_plot=False):
 
 def save_schedules(logdir, plan, individual):
     simulation = default_simulation(plan)
+    # Individual is in the relative_order format
     simulation.set_non_trivial_schedules(individual, relative_order=True)
     os.makedirs(logdir, exist_ok=True)
     simulation.save_schedules(os.path.join(logdir, f'{args.data}.out'))
@@ -104,14 +107,16 @@ def save_info(args, logdir, elapsed_time, best_fitness):
 def evaluate(individual, simulations: dict[int, Simulation]):
     # Keep reusing the same simulation object for the same thread
     simulation = simulations[threading.get_ident()]
+    # Individual is in the relative_order format
     simulation.set_non_trivial_schedules(individual, relative_order=True)
     fitness = simulation.score()
     return fitness,
 
-def create_individual(args, simulation: Simulation):
+def create_individual(args: argparse.Namespace, simulation: Simulation):
     if args.order_init == "random":
         # For random order initialization, we need to create new schedules each time
         simulation.create_schedules(order=args.order_init, times=args.times_init)
+    # Relative order is required for the operators (order crossover) to work correctly
     schedules = simulation.non_trivial_schedules(relative_order=True)
 
     # Convert schedules from lists to array.arrays to speed up the optimization
@@ -176,13 +181,23 @@ def main(args):
     hof = tools.HallOfFame(1)
 
     start = time.time()
-    population = toolbox.population(n=args.population)
-    print(f'Population created: {time.time() - start:.4f}s')
 
-    population, logbook = eaSimple(
-        population, toolbox, cxpb=args.crossover, mutpb=args.mutation,
-        ngen=args.generations, stats=stats, halloffame=hof, verbose=True
-    )
+    if args.algorithm == 'ga':
+        population = toolbox.population(n=args.population)
+        print(f'Population created: {time.time() - start:.4f}s')
+
+        _, logbook = eaSimple(
+            population, toolbox, cxpb=args.crossover, mutpb=args.mutation,
+            ngen=args.generations, stats=stats, halloffame=hof, verbose=True
+        )
+    elif args.algorithm == 'hc':
+        _, logbook = hill_climbing(
+            toolbox.individual(), toolbox, ngen=args.generations, stats=stats, halloffame=hof, verbose=True
+        )
+    elif args.algorithm == 'sa':
+        _, logbook = simulated_annealing(
+            toolbox.individual(), toolbox, ngen=args.generations, stats=stats, halloffame=hof, verbose=True
+        )
     elapsed_time = datetime.timedelta(seconds=int(time.time() - start))
     print(f'Elapsed time: {elapsed_time}')
 
@@ -190,9 +205,10 @@ def main(args):
     best_fitness = hof.keys[0].values[0]
     print(f'Best fitness: {int(best_fitness):,} ({100 * normalized_score(best_fitness, args.data):.2f} %)')
 
-    save_statistics(args, logdir, logbook, show_plot=False)
-    save_schedules(logdir, plan, best_individual)
-    save_info(args, logdir, elapsed_time, best_fitness)
+    if not args.no_save:
+        save_data_plots(args, logdir, logbook, show_plot=False)
+        save_schedules(logdir, plan, best_individual)
+        save_info(args, logdir, elapsed_time, best_fitness)
 
 if __name__ == '__main__':
     args = parser.parse_args()
