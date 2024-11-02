@@ -1,9 +1,13 @@
-# Build and install the simulation for use in Python
+# Build and install the traffic-signaling python package
 ./traffic_signaling
 
 numpy
-ipykernel
 deap
 matplotlib
 pandas
+
 Cython
+# In python>=3.12, `cythonize` crashes without setuptools
+setuptools
+
+ipykernel
