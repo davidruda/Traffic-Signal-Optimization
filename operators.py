@@ -1,4 +1,5 @@
 from array import array
+import math
 import random
 import time
 
@@ -7,20 +8,24 @@ import cython
 from deap.base import Toolbox
 from deap.tools import Logbook, Statistics, HallOfFame
 
+# Compile this file with Cython to speed up the optimization
+# cythonize -3ai operators.py
+
 Individual = list[tuple[array, array]]
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
 @cython.initializedcheck(False)
-def _fill_with(ind1: Individual, ind2: Individual) -> None:
+def _fill_with(destination: Individual, source: Individual) -> None:
     """
-    Fill `ind1` with values from `ind2`.
+    Fill `destination` with values from `source`.
     """
     order1: cython.ulong[:]
     times1: cython.ulong[:]
     order2: cython.ulong[:]
     times2: cython.ulong[:]
-    for (order1, times1), (order2, times2) in zip(ind1, ind2):
+
+    for (order1, times1), (order2, times2) in zip(destination, source):
         for i in range(len(order1)):
             order1[i] = order2[i]
             times1[i] = times2[i]
@@ -122,6 +127,8 @@ def _mutShuffleIndexes(individual: cython.ulong[:], indpb: cython.float):
 def _varAnd(
     population: list[Individual], pop2: list[Individual], toolbox: Toolbox, cxpb: float, mutpb: float
 ) -> list[Individual]:
+    i: cython.Py_ssize_t
+
     #offspring = [toolbox.clone(ind) for ind in population]
     for new, old in zip(pop2, population):
         _fill_with(new, old)
@@ -212,13 +219,15 @@ if cython.compiled:
     cxTwoPoint = _cxTwoPoint
     cxOrdered = _cxOrdered
     mutShuffleIndexes = _mutShuffleIndexes
-    eaSimple = _eaSimple
+    genetic_algorithm = _eaSimple
 else:
     from deap.tools import cxTwoPoint, cxOrdered, mutShuffleIndexes
     from deap.algorithms import eaSimple as eaSimple_deap
-    eaSimple = eaSimple_deap
+    genetic_algorithm = eaSimple_deap
 
 def crossover(ind1: Individual, ind2: Individual) -> tuple[Individual, Individual]:
+    choice: cython.Py_ssize_t    
+
     for (order1, times1), (order2, times2) in zip(ind1, ind2):
         # crossover only order, or only times, or both
         choice = random.randint(1, 3)
@@ -230,6 +239,8 @@ def crossover(ind1: Individual, ind2: Individual) -> tuple[Individual, Individua
     return ind1, ind2
 
 def mutation(individual: Individual, indpb: float, low: int, up: int) -> tuple[Individual]:
+    choice: cython.Py_ssize_t
+
     for order, times in individual:
         # mutation only order, or only times, or both
         choice = random.randint(1, 3)
@@ -238,3 +249,99 @@ def mutation(individual: Individual, indpb: float, low: int, up: int) -> tuple[I
         if choice & 0b10:
             mutation_change_by_one(times, indpb, low, up)
     return individual,
+
+## First-choice hill climbing
+def hill_climbing(
+    individual: Individual, toolbox: Toolbox, ngen: int, stats: Statistics | None = None,
+    halloffame: HallOfFame | None = None, verbose: bool | None = __debug__
+) -> tuple[Individual, Logbook]:
+    logbook = Logbook()
+    logbook.header = ['gen', 'nevals'] + (stats.fields if stats else [])
+
+    individual.fitness.values = toolbox.evaluate(individual)
+
+    if halloffame is not None:
+        halloffame.update([individual])
+
+    record = stats.compile([individual]) if stats else {}
+    logbook.record(gen=0, nevals=1, **record)
+    if verbose:
+        print(logbook.stream)
+
+    new_individual = toolbox.clone(individual)
+
+    # Begin the generational process
+    for gen in range(1, ngen + 1):
+        nevals = 0
+        start = time.time()
+        _fill_with(new_individual, individual)
+
+        new_individual = toolbox.mutate(new_individual)[0]
+
+        new_individual.fitness.values = toolbox.evaluate(new_individual)
+
+        if new_individual.fitness > individual.fitness:
+            individual, new_individual = new_individual, individual
+            nevals = 1
+
+        # Update the hall of fame with the generated individuals
+        if halloffame is not None:
+            halloffame.update([individual])
+
+        # Append the current generation statistics to the logbook
+        record = stats.compile([individual]) if stats else {}
+        logbook.record(gen=gen, nevals=nevals, **record)
+        if verbose:
+            print(logbook.stream)
+
+        print(f'Generation {gen}: {time.time() - start:.4f}s')
+
+    return individual, logbook
+
+def simulated_annealing(
+    individual: Individual, toolbox: Toolbox, ngen: int, schedule, stats: Statistics | None = None,
+    halloffame: HallOfFame | None = None, verbose: bool | None = __debug__
+) -> tuple[Individual, Logbook]:
+    logbook = Logbook()
+    logbook.header = ['gen', 'nevals'] + (stats.fields if stats else [])
+
+    individual.fitness.values = toolbox.evaluate(individual)
+
+    if halloffame is not None:
+        halloffame.update([individual])
+
+    record = stats.compile([individual]) if stats else {}
+    logbook.record(gen=0, nevals=1, **record)
+    if verbose:
+        print(logbook.stream)
+
+    new_individual = toolbox.clone(individual)
+
+    # Begin the generational process
+    for gen in range(1, ngen + 1):
+        nevals = 0
+        start = time.time()
+        _fill_with(new_individual, individual)
+
+        new_individual = toolbox.mutate(new_individual)[0]
+
+        new_individual.fitness.values = toolbox.evaluate(new_individual)
+
+        delta = new_individual.fitness - individual.fitness
+        if delta > 0 or random.random() < math.exp(delta / schedule(gen)):
+            individual, new_individual = new_individual, individual
+            nevals = 1
+
+        # Update the hall of fame with the generated individuals
+        if halloffame is not None:
+            halloffame.update([individual])
+
+        # Append the current generation statistics to the logbook
+        record = stats.compile([individual]) if stats else {}
+        logbook.record(gen=gen, nevals=nevals, **record)
+        if verbose:
+            print(logbook.stream)
+
+        print(f'Generation {gen}: {time.time() - start:.4f}s')
+
+    return individual, logbook
