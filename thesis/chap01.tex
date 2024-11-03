@@ -1,29 +1,17 @@
 \chapter{Problem statement}
 
-%V této kapitole detailně popíšeme zadání problému, kterým se v této práci %zabýváme. Tento problém byl originálně zadán v kvalifikačním kole Google Hash %Code \cite{google_coding_competitions} 2021. Google Hash Code byla globální %týmová programovací soutěž, fungující mezi lety 2014--2022, kde týmy 2--4 %soutěžících řešily optimalizační úlohu s cílem dosáhnout co nejlepšího skóre v %omezeném čase 4 hodin.
-
 In this chapter, we describe in detail the optimization problem that we address in this thesis. This problem was originally assigned in the qualifying round of Google Hash Code 2021. Google Hash Code was a global team programming competition, running between 2014--2022, where teams of 2--4 competitors solved an optimization problem with the goal of achieving the best score in a limited time of 4 hours.
-
-%Klasický postup řešení vypadal následovně: načtění vstupních dat, vytvoření triviálního řešení a jeho zapsání do výstupního souboru v zadaném formátu, a nahrání řešení do vyhodnocovacího systému, kde bylo vidět nejen celkové skóre, ale také pár informačních statistik jako např. počet aut, které dorazily do cíle před deadlinem. U některých datasetů byla k dispozici i interaktivní vizualizace průběhu simulace, ze které bylo mimo jiné možné zjistit, jaká je struktura konkrétního datasetu. K odevzdání řešení tedy nebyl potřeba vlastní lokální simulátor, avšak ruční nahrávání řešení do vyhodnocovacího systému bylo pomalé a tedy nepoužitelné pro použití efektivních optimalizačních algoritmů.
 
 The standard solution procedure was as follows: Read the input data, create a trivial solution and write it to the output file in the specified format, and upload the solution to the evaluation system, where you could see not only the total score, but also some informative statistics, such as the number of cars that reached the finish before the deadline. For some datasets, an interactive visualization of the simulation process was also available, allowing to see the structure of a particular dataset. Although the local simulator was not needed to solve the problem, the manual upload of the solution to the evaluation system was slow and cumbersome and therefore not suitable for the use of efficient optimization algorithms.
 
-%Většina týmů zvládla vytvořit triviální řešení, které se následně snažila náhodnými změnami hodnot zlepšovat. Ti nejlepší však dokázali napsat i vlástní simulátor a s jeho použitím  pustit více heuristik, díky kterým dosáhli lepšího skóre. I tak ale nebyl čas na nic lepšího než velmi jednoduché lokální prohledávání.
-
 Most teams were able to construct trivial solutions, which they then tried to improve by randomly changing the values. However, the best teams were able to write their own local simulator and use it to run multiple heuristics to get a better total score. Still, there was no time for anything more complex than a simple local search.
-
-%Celkové skóre bylo součtem skór všech 6 datasetů ($a - f$). První dataset (a) sloužil jako "toy problem" --- byl dostatečně malý a dal se vyřešit na papíře. Je tedy třeba říct, že v každém datasetu \textit{nešlo} získat stejně bodů, a proto se soutěžící většinou zaměřili na datasety s největším možným ziskem bodů (d, f).
 
 The total score is the sum of the scores of all 6 datasets \textbf{(a - f)}. The first dataset \textbf{(a)} serves as a "toy problem" mainly for debugging purposes, but the rest of the datasetes are large enough for the optimization. It should be noted that the distribution of points among the datasets is uneven, so the contestants mostly focused on the datasets with the highest possible score \textbf{(d, f)} and pragmatically skipped optimizing the rest \textbf{(b, c, e)}.
 
 \section{Problem description}
 
-%Nyní uvedeme detaily řešeného problému --- jeho kompletní zadání ze soutěže je dostupné v Google Coding Competitions archivu \footnote{\url{https://github.com/google/coding-competitions-archive/blob/main/hashcode/hashcode_2021_qualification_round.pdf}}. Ve zkratce, úloha zní takto: \textit{Mějme daný plán města, který popisuje ulice a křižovatky, a auta s přesně naplánovanými cestami městem. Cílem je nastavit semafory na křižovatkách tak, abychom minimalizovali celkový čas aut strávený při jízdě městem a aby co nejvíce aut dorazilo do cíle včas před zadaným deadlinem.}
-
 The full problem statement\footnote{\url{https://github.com/google/coding-competitions-archive/blob/main/hashcode/hashcode_2021_qualification_round.pdf}} is available in the Google Coding Competitions archive~\cite{google_coding_competitions}. Here we describe only important details for the reader.
 In short, the task is as follows: \textit{Given a city plan describing intersections and streets and cars with planned paths through the city, optimize the schedule of traffic lights to minimize the total amount of time spent in traffic, and help as many cars as possible reach their destination before a specified deadline.}
-
-%Řečeno teorií grafů, plán města je \textit{orientovaný graf}, kde křižovatky jsou \textit{vrcholy} a ulice jsou \textit{orientované hrany} (See Figure~\ref{fig:hashcode_city_plan}). Naplánovaná cesta pro každé auto je opravdu \textit{cesta} v tomto grafu --- má různý začátek a konec a žádná křižovatka se v ní neopakuje.
 
 In terms of graph theory, the city plan is \textit{a directed graph}. The intersections are \textit{vertices} and the streets are \textit{directed edges} (See Figure~\ref{fig:hashcode_city_plan}). The planned path for each car is indeed a \textit{path} in this graph because it has a different start and end, and no intersection is repeated.
 
@@ -40,13 +28,6 @@ In terms of graph theory, the city plan is \textit{a directed graph}. The inters
 \subsection{Streets and intersections}
 %\paragraph{Streets and intersections}
 
-%Ve městě máme množinu křižovatek
-%$I$, kde $2 \leq \abs{I} \leq 10^5$,
-%a množinu ulic 
-%$S \subseteq \{(u, v) | u,v \in I \land u \neq v\}$, where $2 \leq \abs{S} \leq 10^5$.
-%Každá ulice $s \in S$ je tedy unikátní jednosměrné spojení mezi dvěma různými křižovatkami $u$, $v$; dvě samostatné ulice v opačných směrech mezi stejnými dvěma křižovatkami $(u, v)$, $(v, u)$ jsou povoleny. Každá ulice $s \in S$ má fixní čas $l(s) \in \mathbb{N}_+$, který trvá autu projet ulicí od začátku do konce, nezávisle na ostatních autech na ulici.
-%Každá křižovatka $i \in I$ má množinu příchozích ulic $S_i^+ \subset S$, kde $|S_i^+| \geq 1$, a množinu odchozích ulic $S_i^- \subset S$, kde $|S_i^-| \geq 1$; tedy každá křižovatka má alespoň jednu příchozí ulici a alespoň jednu odchozí ulici.
-
 In the city, we have a set of intersections
 $I$, where $2 \leq \abs{I} \leq 10^5$,
 and a set of streets
@@ -56,15 +37,9 @@ Each intersection $i \in I$ has a set of incoming streets $S_i^+ \subset S$, whe
 
 \subsection{Traffic lights and schedules}
 
-%V každé křižovatce $i \in I$ je na konci každé \textit{příchozí} ulice $s^+ \in S_i^+$ semafor, který má dva stavy --- zelenou a červenou. Zelená znamená, že auta z této ulice mohou projet křižovatkou a pokračovat jakkouliv \textit{odchozí} ulicí $s^- \in S_i^-$ ve své cestě. Červená znamená, že auta musí stát, dokud nepadne zelená. V daný čas může být nejvýše jeden semafor na každé křižovatce zelený.
-
 In each intersection $i \in I$, there is a traffic light at the end of each \textit{incoming} street $s^+ \in S_i^+$. The traffic light has two states --- green and red. Green means the cars from this street can pass through the intersection and continue to any \textit{outgoing} street $s^- \in S_i^-$ in their path. Red means the cars must stop until the light turns green again. At most one traffic light can be green at each intersection at any time.
 
-%Když je na semaforu červená, auta přijíždějící na konec ulice tvoří frontu a čekají na zelenou (fronta nezabírá žádné místo a nijak nemění vzdálenost, kterou musí auta přejet). Když je na semaforu zelená, může křižovatkou projet každou sekundu jedno auto. Projetí křižovatky, tj.\ přesun z konce příchozí ulice na začátek odchozí ulice, netrvá žádný čas.
-
 When the light is red, cars arriving at the end of a street queue up and wait for the light to turn green. The queue does not take up any space and does not change the distance cars have to travel. When the light is green, one car can pass through an intersection every second. Passing through an intersection, i.e. moving from the end of an incoming street to the beginning of an outgoing street, takes no additional time.
-
-%Pro každou křižovatku $i \in I$ můžeme nastavit plán semaforů. Tento plán určuje, v jakém pořadí budou mít ulice zelenou a na jak dlouho. Plán se periodicky opakuje až do konce simulace. Každá ulice může být v plánu nejvýše jednou. Pokud ulice není v plánu, bude mít celou dobu červenou a případná auta na ní zůstanou zablokována. Defaultně křižovatky nemají žádný plán a všechny ulice na nich mají červenou. See Figure~\ref{fig:hashcode_traffic_lights} for an example of a traffic light schedule.
 
 For each intersection $i \in I$, we can set a traffic light schedule. This schedule determines the order and duration of green light for the incoming streets of the intersection. The schedule repeats in a cycle until the end of the simulation (See Figure~\ref{fig:hashcode_traffic_lights}). Each street can appear at most once in the schedule. If a street is not included in the schedule, it is red the whole time, and any waiting cars are blocked. By default, intersections have no schedule and all streets are red.
 
@@ -86,11 +61,7 @@ For each intersection $i \in I$, we can set a traffic light schedule. This sched
 
 \subsection{Cars}
 
-%Dále máme množinu aut $C$, kde $1 \leq \abs{C} \leq 10^3$. Každé auto $c \in C$ má svou danou cestu městem, což je posloupnost ulic, kterými musí auto projet. Počet ulic v cestě je omezen --- $\forall c \in C \;\; 2 \leq \abs{\bm{p_c}} \leq 10^3$. V cestě se žádná křižovatka (tedy ani ulice) neopakuje.
-
 Furthermore, we have a set of cars $C$, where $1 \leq \abs{C} \leq 10^3$. Each car $c \in C$ has a given path through the city. The path is a sequence of streets the car has to drive through. The number of streets in the path is limited: $\forall c \in C \;\; 2 \leq \abs{\bm{p_c}} \leq 10^3$. No intersection or street can be repeated in the path.
-
-%Na začátku simulace se všechna auta nacházejí na konci první ulice své cesty, kde buď čekají na zelenou, nebo jsou připravena vyjet. Pokud se na konci nějaké ulice nachází více aut, jsou seřazena ve frontě v předem daném jednoznačném pořadí (See Figure~\ref{fig:hashcode_street}). Jakmile auto dorazí na konec poslední ulice své cesty, nečeká na zelenou ani se neřadí do fronty, ale je okamžitě odstraněno z ulice.
 
 At the beginning of the simulation, all cars are at the end of the first street in their path. They either wait if the light is red or are ready to move if the light is green. If more cars start at the end of the same street, they queue up in a predetermined order (See Figure~\ref{fig:hashcode_street}). When a car reaches the end of the last street in its path, it is immediately removed from the street.
 
@@ -112,22 +83,18 @@ At the beginning of the simulation, all cars are at the end of the first street 
 
 \subsection{Score}
 
-%Skóre konkrétního nastavení plánů semaforů je určeno následovně: Máme danou délku trvání simulace $\mathrm{D}$ v sekundách, kde $1 \leq \mathrm{D} \leq 10^4$, a fixní bonus za dojetí auta do cílové destinace před koncem simulace $\mathrm{F}$, kde $1 \leq \mathrm{F} \leq 10^3$. Buď $t(c) \in \mathbb{N}$ čas, kdy auto $c \in C$ dorazí do cíle. Skóre auta $score(c)$ je definováno jako
-
-The score of a solution is determined as follows: Let $\theta$ denote the traffic light schedule. Given a duration of the simulation $\mathrm{D}$ in seconds, where $1 \leq \mathrm{D} \leq 10^4$, and a fixed bonus for reaching the destination $\mathrm{F}$, where $1 \leq \mathrm{F} \leq 10^3$, let $t(c; \theta) \in \mathbb{N}$ be the time a car $c \in C$ reaches the destination. The $score$ of a car $c$ is defined as
+The score of a solution is determined as follows: Let $\bm{\theta}$ denote the traffic light schedule. Given a duration of the simulation $\mathrm{D}$ in seconds, where $1 \leq \mathrm{D} \leq 10^4$, and a fixed bonus for reaching the destination $\mathrm{F}$, where $1 \leq \mathrm{F} \leq 10^3$, let $t(c; \bm{\theta}) \in \mathbb{N}$ be the time a car $c \in C$ reaches the destination. The $score$ of a car $c$ is defined as
 
 \begin{equation}
-    score(c; \theta) =
+    score(c; \bm{\theta}) =
     \begin{cases}
-        \mathrm{F} + (\mathrm{D} - t(c; \theta)), & \text{if $t(c; \theta) \leq \mathrm{D}$}, \\
+        \mathrm{F} + (\mathrm{D} - t(c; \bm{\theta}), & \text{if $t(c; \bm{\theta}) \leq \mathrm{D}$}, \\
         0, & \text{otherwise}.
     \end{cases}
 \end{equation}
 
-%Pak celkové skóre řešení je definováno jako
-
-The $SCORE$ of a solution $\theta$ is defined as
+The $SCORE$ of a solution $\bm{\theta}$ is defined as
 
 \begin{equation}
-    SCORE(\theta) = \sum_{c \in C} score(c; \theta).
+    SCORE(\bm{\theta}) = \sum_{c \in C} score(c; \bm{\theta}).
 \end{equation}
