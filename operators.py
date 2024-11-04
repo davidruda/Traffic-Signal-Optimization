@@ -156,13 +156,13 @@ def _eaSimple(
     logbook = Logbook()
     logbook.header = ['gen', 'nevals'] + (stats.fields if stats else [])
 
-    start_evaluate = time.perf_counter()
+    start_evaluate = time.time()
     # Evaluate the individuals with an invalid fitness
     invalid_ind = [ind for ind in population if not ind.fitness.valid]
     fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
     for ind, fit in zip(invalid_ind, fitnesses):
         ind.fitness.values = fit
-    print(f'Evaluation: {time.perf_counter() - start_evaluate:.4f}s')
+    print(f'Evaluation: {time.time() - start_evaluate:.4f}s')
 
     if halloffame is not None:
         halloffame.update(population)
@@ -176,25 +176,25 @@ def _eaSimple(
 
     # Begin the generational process
     for gen in range(1, ngen + 1):
-        start = time.perf_counter()
+        start = time.time()
 
         # Select the next generation individuals
         offspring = toolbox.select(population, len(population))
 
-        start_mutate = time.perf_counter()
+        start_mutate = time.time()
         # Vary the pool of individuals
         offspring = _varAnd(offspring, pop2, toolbox, cxpb, mutpb)
         #offspring = varAnd(offspring, toolbox, cxpb, mutpb)
-        print(f'Cross+Mut: {time.perf_counter() - start_mutate:.4f}s')
+        print(f'Cross+Mut: {time.time() - start_mutate:.4f}s')
 
-        start_evaluate = time.perf_counter()
+        start_evaluate = time.time()
         # Evaluate the individuals with an invalid fitness
         invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
 
         fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
         for ind, fit in zip(invalid_ind, fitnesses):
             ind.fitness.values = fit
-        print(f'Evaluation: {time.perf_counter() - start_evaluate:.4f}s')
+        print(f'Evaluation: {time.time() - start_evaluate:.4f}s')
 
         # Update the hall of fame with the generated individuals
         if halloffame is not None:
@@ -211,7 +211,7 @@ def _eaSimple(
         if verbose:
             print(logbook.stream)
 
-        print(f'Generation {gen}: {time.perf_counter() - start:.4f}s')
+        print(f'Generation {gen}: {time.time() - start:.4f}s')
 
     return population, logbook
 
@@ -273,7 +273,7 @@ def hill_climbing(
     # Begin the generational process
     for gen in range(1, ngen + 1):
         nevals = 0
-        start = time.perf_counter()
+        start = time.time()
         _fill_with(new_individual, individual)
 
         new_individual = toolbox.mutate(new_individual)[0]
@@ -294,7 +294,7 @@ def hill_climbing(
         if verbose:
             print(logbook.stream)
 
-        print(f'Generation {gen}: {time.perf_counter() - start:.4f}s')
+        print(f'Generation {gen}: {time.time() - start:.4f}s')
 
     return individual, logbook
 
@@ -320,7 +320,7 @@ def simulated_annealing(
     # Begin the generational process
     for gen in range(1, ngen + 1):
         nevals = 0
-        start = time.perf_counter()
+        start = time.time()
         _fill_with(new_individual, individual)
 
         new_individual = toolbox.mutate(new_individual)[0]
@@ -342,6 +342,6 @@ def simulated_annealing(
         if verbose:
             print(logbook.stream)
 
-        print(f'Generation {gen}: {time.perf_counter() - start:.4f}s')
+        print(f'Generation {gen}: {time.time() - start:.4f}s')
 
     return individual, logbook

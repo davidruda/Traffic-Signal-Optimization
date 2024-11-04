@@ -191,7 +191,7 @@ class Optimizer:
         self._save_info(logdir)
 
     def run(self):
-        start = time.perf_counter()
+        start = time.time()
         kwargs = {
             'stats': self._stats,
             'halloffame': self._hof,
@@ -199,7 +199,7 @@ class Optimizer:
         }
         if self._args.algorithm == 'ga':
             population = self._toolbox.population(n=self._args.population)
-            print(f'Population created: {time.perf_counter() - start:.4f}s')
+            print(f'Population created: {time.time() - start:.4f}s')
 
             _, self._logbook = genetic_algorithm(
                 population, self._toolbox, self._args.crossover, self._args.mutation, self._args.generations, **kwargs
@@ -212,7 +212,7 @@ class Optimizer:
             _, self._logbook = simulated_annealing(
                 self._toolbox.individual(), self._toolbox, self._args.generations, **kwargs
             )
-        self._elapsed_time = datetime.timedelta(seconds=int(time.perf_counter() - start))
+        self._elapsed_time = datetime.timedelta(seconds=int(time.time() - start))
         print(f'Elapsed time: {self._elapsed_time}')
 
         best_fitness = int(self._hof.keys[0].values[0])
