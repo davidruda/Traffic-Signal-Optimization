@@ -175,7 +175,7 @@ class Optimizer:
                 f.write(f'{k}={v}\n')
             f.write(f'\nElapsed time: {self._elapsed_time}\n')
 
-    def save_statistics(self, show_plot=False):
+    def _save_statistics(self, show_plot=False):
         if self._logbook is None:
             print('Run the optimizer first!')
             return
@@ -190,7 +190,7 @@ class Optimizer:
         self._save_best_schedules(logdir)
         self._save_info(logdir)
 
-    def run(self):
+    def run(self, save_statistics=True):
         start = time.time()
         kwargs = {
             'stats': self._stats,
@@ -218,10 +218,11 @@ class Optimizer:
         best_fitness = int(self._hof.keys[0].values[0])
         print(f'Best fitness: {best_fitness:,} ({100 * normalized_score(best_fitness, self._args.data):.2f} %)')
 
+        if save_statistics:
+            self._save_statistics()
+
 
 if __name__ == '__main__':
     args = parser.parse_args()
     optimizer = Optimizer(args)
-    optimizer.run()
-    if not args.no_save:
-        optimizer.save_statistics()
+    optimizer.run(save_statistics=not args.no_save)

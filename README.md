@@ -23,7 +23,7 @@
 
 - Optionally, verify the package by running tests:
 
-  - `pip install -r traffic_signaling/requirements-test.txt`
+  - `pip install -r requirements-test.txt`
   - `python3 -m unittest discover -s traffic_signaling/tests`
 
 
