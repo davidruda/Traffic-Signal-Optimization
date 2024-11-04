@@ -24,9 +24,24 @@ build_test_package_python:
         - pip install ./traffic_signaling
         - python3 -m unittest discover -s traffic_signaling/tests
 
+
 test_optimizer:
     allow_failure: true
     script:
         - pip install -r requirements.txt
         - cythonize -3a operators.py
         - python3 -m unittest discover -s tests
+
+
+thesis_pdf:
+    image: aergus/latex
+    before_script:
+        - cd thesis
+    script:
+        make all
+    artifacts:
+        paths:
+            - thesis/thesis.pdf
+            - thesis/abstract-cs.pdf
+            - thesis/abstract-en.pdf
+        expire_in: "7 days"
