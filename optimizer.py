@@ -82,7 +82,7 @@ class Optimizer:
         self._stats.register('avg', lambda x: f'{int(np.mean(x)):,}')
 
     def _create_individual(self, simulation):
-        if self._args.order_init == "random":
+        if self._args.order_init == 'random':
             # For random order initialization, we need to create new schedules each time
             simulation.create_schedules(order=self._args.order_init, times=self._args.times_init)
         # Relative order is required for the operators (order crossover) to work correctly
@@ -168,9 +168,9 @@ class Optimizer:
         simulation.save_schedules(os.path.join(logdir, f'{self._args.data}.out'))
 
     def _save_info(self, logdir):
-        best_fitness = self._hof.keys[0].values[0]
+        best_fitness = int(self._hof.keys[0].values[0])
         with open(os.path.join(logdir, 'info.txt'), 'w') as f:
-            f.write(f'Best fitness: {int(best_fitness):,} ({100 * normalized_score(best_fitness, self._args.data):.2f} %)\n\n')
+            f.write(f'Best fitness: {best_fitness:,} ({100 * normalized_score(best_fitness, self._args.data):.2f} %)\n\n')
             for k, v in self._args.__dict__.items():
                 f.write(f'{k}={v}\n')
             f.write(f'\nElapsed time: {self._elapsed_time}\n')
@@ -191,7 +191,7 @@ class Optimizer:
         self._save_info(logdir)
 
     def run(self):
-        start = time.time()
+        start = time.perf_counter()
         kwargs = {
             'stats': self._stats,
             'halloffame': self._hof,
@@ -199,7 +199,7 @@ class Optimizer:
         }
         if self._args.algorithm == 'ga':
             population = self._toolbox.population(n=self._args.population)
-            print(f'Population created: {time.time() - start:.4f}s')
+            print(f'Population created: {time.perf_counter() - start:.4f}s')
 
             _, self._logbook = genetic_algorithm(
                 population, self._toolbox, self._args.crossover, self._args.mutation, self._args.generations, **kwargs
@@ -212,11 +212,11 @@ class Optimizer:
             _, self._logbook = simulated_annealing(
                 self._toolbox.individual(), self._toolbox, self._args.generations, **kwargs
             )
-        self._elapsed_time = datetime.timedelta(seconds=int(time.time() - start))
+        self._elapsed_time = datetime.timedelta(seconds=int(time.perf_counter() - start))
         print(f'Elapsed time: {self._elapsed_time}')
 
-        best_fitness = self._hof.keys[0].values[0]
-        print(f'Best fitness: {int(best_fitness):,} ({100 * normalized_score(best_fitness, self._args.data):.2f} %)')
+        best_fitness = int(self._hof.keys[0].values[0])
+        print(f'Best fitness: {best_fitness:,} ({100 * normalized_score(best_fitness, self._args.data):.2f} %)')
 
 
 if __name__ == '__main__':
