@@ -1,3 +1,26 @@
+# https://packaging.python.org/en/latest/guides/writing-pyproject-toml/
+# https://setuptools.pypa.io/en/latest/userguide/pyproject_config.html
+
 [build-system]
 requires = ["setuptools>=42", "wheel", "pybind11~=2.11.1"]
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "traffic-signaling"
+authors = [
+    {name = "David Ruda"},
+]
+description = "Package for the Traffic signaling problem from Google Hash Code 2021"
+dynamic = ["version"]
+requires-python = ">=3.9"
+#readme = "README.md
+#license = {file = "LICENSE"}
+
+[project.optional-dependencies]
+test = ["parameterized"]
+
+[tool.setuptools]
+packages = ["traffic_signaling"]
+
+[tool.setuptools.package-data]
+traffic_signaling = ["*.pyi", "py.typed", "data/*.txt"]

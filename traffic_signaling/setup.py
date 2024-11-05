@@ -17,7 +17,8 @@ ext_modules = [
             f'src/bindings/{CITY_PLAN_MODULE_NAME}.cpp'
         ]),
         include_dirs=['include'],
-        cxx_std=20
+        cxx_std=20,
+        extra_compile_args=['-O3']
     ),
     Pybind11Extension(
         f'{PACKAGE_NAME}.{SIMULATION_MODULE_NAME}',
@@ -27,19 +28,13 @@ ext_modules = [
             f'src/bindings/{SIMULATION_MODULE_NAME}.cpp'
         ]),
         include_dirs=['include'],
-        cxx_std=20
+        cxx_std=20,
+        extra_compile_args=['-O3']
     )
 ]
 
 setup(
-    name=PACKAGE_NAME,
     version=__version__,
-    author='David Ruda',
     ext_modules=ext_modules,
     cmdclass={'build_ext': build_ext},
-    packages=[PACKAGE_NAME],
-    package_data={
-        PACKAGE_NAME: ['*.pyi', 'py.typed', 'data/*.txt']
-    },
-    python_requires='>=3.7'
 )

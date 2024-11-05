@@ -1,9 +1,11 @@
-import os
+from importlib.resources import files
 
 try:
     from .city_plan import CityPlan
+    anchor_str = 'traffic_signaling.data'
 except ImportError:
     from city_plan import CityPlan
+    anchor_str = 'data'
 
 
 TEST_DATA = ['a', 'b', 'c', 'd', 'e', 'f']
@@ -57,7 +59,8 @@ def get_data_filename(data: str) -> str:
     if data not in TEST_DATA:
         msg = f'Invalid data! Possible values are {", ".join(TEST_DATA)}'
         raise ValueError(msg)
-    return os.path.join(os.path.dirname(__file__), 'data', f'{data}.txt')
+    # https://setuptools.pypa.io/en/latest/userguide/datafiles.html#accessing-data-files-at-runtime
+    return str(files(anchor_str).joinpath(f'{data}.txt'))
 
 # factory function creating a CityPlan object
 def create_city_plan(data: str) -> CityPlan:
