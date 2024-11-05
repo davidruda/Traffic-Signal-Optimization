@@ -18,12 +18,12 @@ else # Linux
 	COMPILED_OPERATORS=operators.%.so
 endif
 
-all: test
+all: test_package_cmake test
 
 .PHONY: all clean test test_package_cmake test_package_python test_optimizer
 
 clean:
-	rm -rf $(CMAKE_BUILD_DIR) operators*.{c,pyd,so}
+	rm -rf $(VENV) $(CMAKE_BUILD_DIR) operators*.{c,pyd,so}
 
 $(VENV): requirements-test.txt requirements.txt
 	$(PYTHON) -m venv $(VENV)
@@ -49,4 +49,4 @@ $(COMPILED_OPERATORS): operators.py
 test_optimizer: $(VENV) $(COMPILED_OPERATORS)
 	$(VENV_BIN)/$(PYTHON) -m unittest discover -s tests
 
-test: test_package_cmake test_package_python test_optimizer
+test: test_package_python test_optimizer

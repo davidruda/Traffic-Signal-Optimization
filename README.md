@@ -10,9 +10,10 @@
 [Kaggle competition with additional data](https://www.kaggle.com/competitions/hashcode-2021-oqr-extension/
 overview)
 -->
+## Easy setup
+  - ### Run `make test` to set up the environment and run all tests
 
-
-## How to build and install the `traffic_signaling` package for use in Python
+### How to build and install the `traffic_signaling` package for use in Python
 
 - C++20 code - `gcc 11`, `clang 16` or `MSVC 19.29` (or later) is required to build the package
 
