@@ -122,7 +122,8 @@ if(BUILD_PYBIND_MODULES)
     message("PYTHONPATH: ${PYTHONPATH}")
 
     add_test(NAME test_python_unittest
-        COMMAND "${CMAKE_COMMAND}" -E env PYTHONPATH=${PYTHONPATH}
-        "${Python_EXECUTABLE}" -m unittest discover -s "${PYTHON_TEST_DIR}"
+        COMMAND "${Python_EXECUTABLE}" -m unittest discover -s "${PYTHON_TEST_DIR}"
     )
+    # https://discourse.cmake.org/t/using-set-tests-properties-for-setting-or-unsetting-multiple-variables/1612/2
+    set_tests_properties(test_python_unittest PROPERTIES ENVIRONMENT "PYTHONPATH=${PYTHONPATH}")
 endif()

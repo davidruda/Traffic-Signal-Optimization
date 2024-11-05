@@ -1,47 +1,47 @@
 default:
     image: ubuntu:latest
     before_script:
+        # https://askubuntu.com/questions/990823/apt-gives-unstable-cli-interface-warning
+        # `apt` is for the terminal and gives beautiful output while `apt-get` and `apt-cache` are for scripts and give stable, parsable output. 
         - apt-get update -y && apt-get upgrade -y
+        # `git` is required to by `FetchContent` in `CMakelists.txt``
         - apt-get install -y build-essential git python3-venv python3-dev python3-pip
-        - python3 -m venv venv
-        - source venv/bin/activate
+        - python3 -m venv .venv
+        - source .venv/bin/activate
         - pip install -r requirements-test.txt
 
 
-build_test_package_cpp:
+build_test_package_cmake:
     allow_failure: true
     script:
         - pip install cmake
-        - mkdir build && cd build
-        - cmake ../traffic_signaling -DBUILD_PYBIND_MODULES=ON
-        - cmake --build . --config Release -j 16
-        - ctest -C Release -V --output-on-failure
+        - make test_package_cmake
 
 
 build_test_package_python:
     allow_failure: true
     script:
         - pip install ./traffic_signaling
-        - python3 -m unittest discover -s traffic_signaling/tests
+        - make test_package_python
 
 
 test_optimizer:
     allow_failure: true
     script:
         - pip install -r requirements.txt
-        - cythonize -3a operators.py
-        - python3 -m unittest discover -s tests
+        - make test_optimizer
 
 
 thesis_pdf:
     image: aergus/latex
+    allow_failure: true
     before_script:
         - cd thesis
     script:
-        make all
+        - make all
     artifacts:
         paths:
             - thesis/thesis.pdf
             - thesis/abstract-cs.pdf
             - thesis/abstract-en.pdf
-        expire_in: "7 days"
+        expire_in: 7 days
