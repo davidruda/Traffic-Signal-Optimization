@@ -1,5 +1,7 @@
 # Traffic signaling
 
+## *Get the latest thesis pdf artifact [HERE](https://gitlab.mff.cuni.cz/teaching/nprg045/fink/david_ruda/-/artifacts)*
+
 ## Links
 
 ### [Problem description](https://storage.googleapis.com/coding-competitions.appspot.com/HC/2021/hashcode_2021_online_qualification_round.pdf)

@@ -75,7 +75,7 @@ class Optimizer:
 
         norm_score = partial(normalized_score, data=self._args.data)
         self._stats.register('norm_max', lambda x: norm_score(np.max(x)))
-        # This weird manipulation is necessary in order to avoid scientific notation
+        # This weird manipulation is necessary to avoid scientific notation
         # and use thousand separator when printing statistics with tools.Statistics
         self._stats.register('max', lambda x: f'{int(np.max(x)):,}')
         self._stats.register('norm_avg', lambda x: norm_score(np.mean(x)))
