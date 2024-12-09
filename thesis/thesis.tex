@@ -80,8 +80,14 @@
 \hypersetup{breaklinks=true}
 
 % Packages for computer science theses
-\usepackage{algpseudocode}  % part of algorithmicx package
-\usepackage{algorithm}
+% https://tex.stackexchange.com/questions/145760/how-may-i-remove-endif-and-endfor-in-algorithmicx/145764#145764
+%\usepackage{algpseudocode}  % part of algorithmicx package
+\usepackage[noend]{algpseudocode}  % use noend to not disaply endif, endfor, etc.
+
+% https://latex.org/forum/viewtopic.php?t=15388
+%\usepackage{algorithm}
+\usepackage[plain]{algorithm} % use plain to remove horizontal lines in algorithm
+
 \usepackage{fancyvrb}       % improved verbatim environment
 \usepackage{listings}       % pretty-printer of source code
 
