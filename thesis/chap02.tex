@@ -1,9 +1,157 @@
-\chapter{Theoretical background of used optimization methods}
+\chapter{Theoretical Background of Optimization Methods}
 
-\section{Local search}
+In this chapter, we cover the theory of the methods we use to optimize the traffic signalling problem. Specifically, we describe \textit{hill climbing} (Section~\ref{sec:hill_climbing}), \textit{simulated annealing} (Section~\ref{sec:simulated_annealing}) and \textit{genetic algorithm} (Section~\ref{sec:genetic_algorithm}). In Section~\ref{sec:initialization} and Section~\ref{sec:parallelization} we discuss common methods for initializing and parallelizing the algorithms.
 
-\subsection{Hill climbing}
+In optimization, the goal is to find the best state\footnote{Note that we use \textit{state} and \textit{solution} interchangeably.} according to an \textit{objective function}\footnote{Also called a \textit{fitness function}.}. In other words, the objective function is a problem-specific function that defines how well a solution solves a particular problem.
+Because the state space of optimized problems can be very large or even infinite, systematic search methods are often unsuitable. Instead, we can use the so-called \textit{heuristic algorithms}. These algorithms do not guarantee to find
+%the~optimal
+the~best
+solution but are frequently used in practice because they can find good solutions in reasonable time. Our three chosen methods are all examples of heuristic algorithms.
 
-\subsection{Simulated annealing}
+\section{Hill Climbing} \label{sec:hill_climbing}
 
-\section{Genetic algorithm}
+Hill climbing \cite{russell2020artificial, luke2013essentials} is one of the simplest local search algorithms. It keeps track of the current state and on each iteration moves to the neighboring state with the highest value, i.e., it moves in the direction that provides the biggest improvement. If there are no neighboring states with a higher value, the algorithm terminates. The greedy nature of hill climbing is both its strength and its weakness. It can make rapid progress towards a solution but once it gets stuck in a local optimum it cannot escape it.
+
+A lot of variants of this algorithm exist. In our experiments, we use a version called \textit{first-choice hill climbing} (See Algorithm~\ref{alg:first_choice_hill_climbing}). This version randomly generates next states until it finds one with a higher value than the current state and then moves to this state. This is a good strategy when there are many neighboring states, which is exactly our case.
+
+% \xxx{\textbf{- mention parallel hill climbing (if i'll use it)}}
+
+\begin{algorithm}
+% https://tex.stackexchange.com/questions/150184/how-to-avoid-uppercase-function-name-while-using-function
+%\algrenewcommand\textproc{} % disable uppercase function name
+
+\begin{algorithmic}
+\caption{First-choice hill climbing} \label{alg:first_choice_hill_climbing}
+\Function{First-Choice-Hill-Climbing}{$problem$}
+\State $current \gets problem$.I\textsc{nitial}
+\For{$t = 1$ \textbf{to} M\textsc{ax\_iterations}}
+    \State $next \gets$ a randomly generated next state
+    \If{$\Call{Value}{next} > \Call{Value}{current}$}
+        \State $current \gets next$
+    \EndIf
+\EndFor
+\State \Return $current$
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\section{Simulated Annealing} \label{sec:simulated_annealing}
+
+Simulated annealing \cite{russell2020artificial, luke2013essentials} builds up on the idea of hill climbing and solves the problem of getting stuck in local optima (See Algorithm~\ref{alg:simulated_annealing}). In each iteration, it randomly generates a next state. If the state is better, it is always accepted. Otherwise, the worse state is accepted with some probability. The probability decreases exponentially with how much worse the state is and with the current value of the ``cooling'' schedule. By allowing moves to worse states, the algorithm can escape local optima and therefore find better solutions.
+
+The idea of the cooling schedule is inpired by the process of annealing in metallurgy, where metals are heated to a high temperature and then slowly cooled down to reach a strong, crystalline structure. Analogously, we want to allow worse moves more often at the beginning during the exploration phase and then gradually decrease that chance to hopefully converge to the best solution. Obviously, the choice of the schedule is absolutely crucial for the performance of the algorithm and has to be tuned specifically for each problem.
+
+% \xxx{\textbf{- can be run in parallel the same way as hill climbing}}
+
+\begin{algorithm}
+    % https://tex.stackexchange.com/questions/150184/how-to-avoid-uppercase-function-name-while-using-function
+    %\algrenewcommand\textproc{} % disable uppercase function name
+    
+    \begin{algorithmic}
+    \caption{Simulated annealing} \label{alg:simulated_annealing}
+    \Function{Simulated-Annealing}{$problem$, $schedule$}
+    \State $current \gets problem$.I\textsc{nitial}
+    \For{$t = 1$ \textbf{to} M\textsc{ax\_iterations}}
+        \State $T \gets$ \Call{$schedule$}{$t$}
+        \State $next \gets$ a randomly generated next state
+        \State $\Delta E \gets \Call{Value}{next} - \Call{Value}{current}$
+        \If{$\Delta E > 0$}
+            \State $current \gets next$
+        \Else
+            \State $current \gets next$ with probability $e^{\Delta E / T}$
+        \EndIf
+    \EndFor
+    \State \Return $current$
+    \EndFunction
+    \end{algorithmic}
+\end{algorithm}
+
+\section{Genetic Algorithm} \label{sec:genetic_algorithm}
+
+% https://martinpilat.com/en/nature-inspired-algorithms/evolutionary-algorithms-introduction
+% https://martinpilat.com/en/nature-inspired-algorithms/evolutionary-algorithms-continuous-and-combinatorial-optimization
+
+Initially proposed by Holland \cite{holland1975adaptation} and Goldberg \cite{goldberg1989genetic}, genetic algorithm \cite{russell2020artificial,vanneschi2023lectures} belongs to the group of \textit{evolutionary algorithms}. Those algorithms are inpired by the seminal Darwin's theory of evolution, particularly by the idea of \textit{natural selection} \cite{darwin1859origin}. It states that the individuals with better traits suited to their environment are more likely to adapt, survive and reproduce. Over successive generations, these advantageous traits become more common in the population, leading to the emergence of new species.
+
+This biological motivation is translated into the context of evolutionary algorithms in the following way. We work with a set of individuals called a \textit{population}. Each individual in this population represents a solution to a given problem. The algorithm runs in iterations called \textit{generations}. In each generation, it selects some individuals, modifies them using the so-called \textit{genetic operators} and then selects which individuals survive to the next generation. The selection process prefers individuals that are better at solving the problem, i.e., individuals with higher fitness.
+There are many different evolutionary algorithms with even more variations that follow the previous description. Let us now focus specifically on the genetic algorithm (See Algorithm~\ref{alg:genetic_algorithm}).
+
+\begin{algorithm}
+    % https://tex.stackexchange.com/questions/150184/how-to-avoid-uppercase-function-name-while-using-function
+    %\algrenewcommand\textproc{} % disable uppercase function name
+    
+    \begin{algorithmic}
+    \caption{Genetic algorithm} \label{alg:genetic_algorithm}
+    \Function{Genetic-Algorithm}{$population$}
+    \State $population \gets \Call{Initialize}{population}$
+    \For{$t = 1$ \textbf{to} M\textsc{ax\_iterations}}
+    \State $population \gets \Call{Evaluate}{population}$
+    \State $selected \gets \Call{Select}{population}$
+    % Bad formatting of ff in math mode
+    % https://tex.stackexchange.com/questions/6046/bad-formating-of-ff-in-math-mode
+    \State $\mathit{offspring} \gets \Call{Reproduce}{selected}$
+    \State $population \gets \mathit{offspring}$
+    \EndFor
+    \State \Return $population$
+    \EndFunction
+    \\
+    \Function{Reproduce}{$selected$}
+    \State $\mathit{offspring} \gets$ empty list
+    \For{$parent1$, $parent2$ \textbf{in} $selected$}
+    \State $child1$, $child2 \gets$ \Call{Crossover}{$parent1$, $parent2$}
+    % algorithmic: one line if
+    % https://tex.stackexchange.com/questions/624457/algorithmic-put-if-else-and-endif-into-the-same-line
+    % \State\algorithmicif\ small probability \algorithmicthen\ $child1 \gets \Call{Mutate}{child1}$
+    % \State\algorithmicif\ small random probability \algorithmicthen\ $child2 \gets \Call{Mutate}{child2}$
+    \If{small random probability}
+    \State $child1 \gets \Call{Mutation}{child1}$
+    \EndIf
+    \If{small random probability}
+    \State $child2 \gets \Call{Mutation}{child2}$
+    \EndIf
+    \State add $child1$, $child2$ to $\mathit{offspring}$
+    \EndFor
+    \State \Return $\mathit{offspring}$
+    \EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Selection}
+
+For the selection of parents for the next generation, common methods include the \textit{roulette wheel selection} and the \textit{tournament selection} \cite{vanneschi2023lectures}. Roulette wheel selection selects individuals with a probability directly proportional to their fitness. Its downside is that it does not work for negative fitness and can be sensitive to changes is fitness values. Tournament selection works by repeatedly sampling a few individuals and selecting the best one among them. Thus, it is not dependent on specific values and can be used with any fitness function.
+
+\subsection{Crossover and Mutation}
+
+The offspring is created from the selected parents using genetic operators \textit{crossover} and \textit{mutation}. Crossover combines two parents to produce two new children. There are many different ways to perform crossover, the most common being the \textit{one-point crossover}. Since individuals are usually represented as strings or arrays of numbers, one-point crossover simply picks a point in the individual and creates two new individuals by copying the first part from one parent and the second part from the other parent and vice versa. This can be extended to the \textit{two-point crossover} or the \textit{k-point crossover} in general. Other examples of crossover, e.g., if an individual represents a permutation and simple swapping of parts cannot be used, include the \textit{order crossover (OX)} or the \textit{partially mapped crossover\footnote{Also called \textit{partially matched crossover}.} (PMX)} \cite{vanneschi2023lectures}.
+
+Mutation is a small random change in an individual. It is used to introduce variability into the population and to prevent the algorithm from getting stuck in local optima. Mutation is usually more problem-specific than crossover and is often customized to the problem at hand. Some common examples are the \textit{bit-flip mutation} for binary strings, the \textit{uniform} and the \textit{gaussian} mutations, i.e., a mutation replacing a value with a number drawn from one of these distributions, or the \textit{index shuffle} mutation for permutations.
+
+\bigskip
+
+%\paragraph{next gen}
+The created offspring directly replaces the old population and the process repeats. Unfortunately, this mechanism does not guarantee that the best individual will be preserved in the next generation. To prevent this, a technique called \textit{elitism} can be used. Elitism always transfers a few of the best parents to the next generation, ensuring that the best solution found so far is not lost. The rest of the population is then filled with the offspring as previously mentioned.
+
+% \xxx{\textbf{- also mention parallel solution, I run in parallel the evaluations of the fitness function on individuals}}
+
+\section{Initialization} \label{sec:initialization}
+
+In all of the previously mentioned algorithms, we start with some initial state or population of initial states. The simplest and most straightforward way is to generate the initial state randomly. This is often good enough, but if the state space is large or the problem is complex, the algorithm can be very inefficient. Instead, we can try to come up with some smarter heuristic method to start in a more promising region of the search space. This is especially beneficial if we have some prior knowledge about the problem because we can help the algorithm skip exploring irrelevant parts of the search space, effectively reducing the number of iterations needed to find a good solution. An example of such a heuristic initialization is the \textit{nearest neighbors} initialization for the \textit{Traveling Salesman Problem (TSP)}, where the next node in the sequence is chosen as the closest unvisited node instead of generating the sequence randomly.
+
+However, using heuristics for initialization can be a double-edged sword as it can lead to \textit{premature convergence} \cite{vanneschi2023lectures}. This means losing the diversity of solutions too early and getting stuck in a local optimum.
+When using optimization algorithms, it is always important to balance the trade-off between \textit{exploration} and \textit{exploitation} \cite{luke2013essentials}. Exploration is a process of searching the search space for new solutions, while exploitation is a process of refining the current solutions.
+
+\section{Parallelization} \label{sec:parallelization}
+
+As hinted in the previous sections, heuristic algorithms can run for a long time. It is not uncommon to compute hundrets of thousands of fitness evaluations --- imagine a genetic algorithm with a population size of 200, run for 1000 generations. And the evaluations can take a while, especially if they are simulations, games, neural network training, or similar. As a result, we may want to use parallelization to speed up this process and fully utilize our computational resources.
+
+Single-state methods like hill climbing and simulated annealing are inherently sequential and thus difficult to parallelize. But we can at least run multiple independent instances of the algorithm in parallel, each with a different initial state. Note that this different from methods like \textit{beam search}, where useful information is shared between the instances.
+
+For population methods like genetic algorithm, parallelization makes much more sense. The most common way is to run the fitness evaluations of individuals in parallel. This is great because the evaluations are completely independent of each other and the fitness computation is often the biggest bottleneck of the whole algorithm. Other parts, such as mutation and crossover, can also be parallelized across individuals, but these are usually much faster than the evaluation and may not provide much speedup, if any.
+
+% The algorithm starts by initializing a fixed size population of individuals. An individual is usually a string or an array of numbers encoding a solution but the algorithm can be adjusted to any representation of an individual if suitable for the problem. The initialization can either be done randomly or with some smarter heuristic method. Using heuristics can be especially beneficial if we have some prior knowledge about our solved problem because we can help the algorithm start in an already better part of the search space, effectively reducing the number of iterations to find a good solution.
+% 
+% After initialization, the algorithm runs for a given number of iterations or until some other stop condition is met. In each iteration, it first evaluates the fitness of each individual. Then, individuals are selected based on their fitness to be parents for the next generation. The selection is done with repetition, meaning individuals with good fitness can be selected multiple times while individuals with bad fitness may not be selected at all. 
+% Potentially describe the selection methods in detail.
+% There are several methods of selection, the most common being the \textit{roulette wheel} selection and the \textit{tournament} selection \cite{vanneschi2023lectures}.
+% 
+% Next, the selected parents are modified using genetic operators to produce offspring. First, two parents are combined with a \textit{crossover} operator, producing two new individuals called children.
