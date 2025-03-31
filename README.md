@@ -1,6 +1,8 @@
 # Traffic signaling
 
-## *Get the latest thesis pdf artifact [HERE](https://gitlab.mff.cuni.cz/teaching/nprg045/fink/david_ruda/-/artifacts)*
+<!-- https://docs.gitlab.com/ci/jobs/job_artifacts/#from-a-url -->
+## *Get the latest [**📄thesis.pdf**](https://gitlab.mff.cuni.cz/api/v4/projects/6869/jobs/artifacts/master/raw/thesis/thesis.pdf?job=thesis_pdf) artifact*
+<!-- ## *Get the latest thesis pdf artifact [HERE](https://gitlab.mff.cuni.cz/teaching/nprg045/fink/david_ruda/-/artifacts)* -->
 
 ## Links
 
