@@ -14,3 +14,6 @@ tmp/
 *.toc
 *.xmpdata
 *.xmpi
+
+# Folder with pdfs of the references
+papers/
