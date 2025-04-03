@@ -1,10 +1,6 @@
-import argparse
 import os
-import time
 import unittest
 import warnings
-
-from parameterized import parameterized
 
 from optimizer import Optimizer, parser
 
@@ -12,11 +8,21 @@ class TestOptimizer(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.args = [
-            '--algorithm=ga',
-            '--generations=10',
+            '--data=c',
+            '--indpb=0.0005',
             f'--threads={max(2, os.cpu_count())}',
-            '--no-save'
+            '--no-save',
         ]
+        cls.algorithm_args = {
+            'hc': ['--generations=100'],
+            'sa': ['--generations=100'],
+            'ga': ['--generations=10'],
+        }
+        cls.algorithm = {
+            'hc': 'Hill Climbing',
+            'sa': 'Simulated Annealing',
+            'ga': 'Genetic Algorithm',
+        }
         # Don't show warnings from DEAP about redefining classes
         warnings.filterwarnings(
             'ignore',
@@ -27,19 +33,24 @@ class TestOptimizer(unittest.TestCase):
     def setUp(self):
         ...
 
-    @parameterized.expand([
-        ('a'),
-        ('b'),
-        ('c'),
-        ('d'),
-        ('e'),
-        ('f')
-    ])
-    def test_genetic_algorithm(self, data):
-        print('\n' + f' DATA {data} '.center(70, '-'))
-        args = parser.parse_args(self.args + [f'--data={data}'])
+    def _run_algorithm(self, alg):
+        print('\n' + f' {self.algorithm[alg]} '.center(70, '-'))
+        args = parser.parse_args([
+            *self.args,
+            *self.algorithm_args[alg],
+            f'--algorithm={alg}'
+        ])
         optimizer = Optimizer(args)
         optimizer.run(save_statistics=False)
+
+    def test_hill_climbing(self):
+        self._run_algorithm('hc')
+
+    def test_simulated_annealing(self):
+        self._run_algorithm('sa')
+
+    def test_genetic_algorithm(self):
+        self._run_algorithm('ga')
 
 
 if __name__ == '__main__':
