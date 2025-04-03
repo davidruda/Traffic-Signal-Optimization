@@ -50,6 +50,20 @@ UPPER_BOUND = {
     'f': 1_765_068
 }
 
+# Number of parameters for each dataset to optimize.
+#
+# Computed as twice the sum of used streets in all non-trivial intersections.
+# Unused and trivial intersections are not counted because they don't need to be optimized.
+# The factor of 2 is used because each street has two parameters - order and time (duration).
+PARAMETERS = {
+    'a': 4,
+    'b': 5_974,
+    'c': 14_008,
+    'd': 167_748,
+    'e': 1_386,
+    'f': 10_002
+}
+
 def normalized_score(score: int, data: str) -> float:
     score_norm = (score - DEFAULT_SCORE[data]) / (MAX_KNOWN_SCORE[data] - DEFAULT_SCORE[data])
     return round(score_norm, ndigits=2)
