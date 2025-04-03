@@ -36,7 +36,7 @@ $(CMAKE_BUILD_DIR):
 # Use Python_ROOT_DIR to ensure that Python from the venv is used
 	cd $(CMAKE_BUILD_DIR) && \
 	cmake ../../traffic_signaling -DBUILD_PYBIND_MODULES=ON -DPython_ROOT_DIR=$(VENV_ABS_PATH) -DCMAKE_BUILD_TYPE=$(BUILD_TYPE) $(EXTRA_FLAGS) && \
-	cmake --build . --config $(BUILD_TYPE) -j 16
+	cmake --build . --config $(BUILD_TYPE) -j 4
 
 test_package_cmake: $(VENV) $(CMAKE_BUILD_DIR)
 	cd $(CMAKE_BUILD_DIR) && \
