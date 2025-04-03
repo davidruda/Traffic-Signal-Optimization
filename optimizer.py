@@ -212,8 +212,14 @@ class Optimizer:
                 self._toolbox.individual(), self._toolbox, self._args.generations, **kwargs
             )
         elif self._args.algorithm == 'sa':
+            # TODO: cooling schedule settings
+
+            def schedule(t):
+                T_0 = 100
+                return T_0 * (1 - (t / (self._args.generations + 1)))
+
             _, self._logbook = simulated_annealing(
-                self._toolbox.individual(), self._toolbox, self._args.generations, **kwargs
+                self._toolbox.individual(), self._toolbox, self._args.generations, schedule, **kwargs
             )
         self._elapsed_time = datetime.timedelta(seconds=int(time.time() - start))
         print(f'Elapsed time: {self._elapsed_time}')
