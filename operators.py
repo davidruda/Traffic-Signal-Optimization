@@ -111,7 +111,7 @@ def mutation_change_by_one(individual: cython.ulong[:], indpb: cython.float, low
 @cython.wraparound(False)
 @cython.initializedcheck(False)
 def _mutShuffleIndexes(individual: cython.ulong[:], indpb: cython.float):
-    swap_indx: cython.Py_ssize_t
+    swap_indx: cython.int
     size: cython.Py_ssize_t = len(individual)
 
     for i in range(size):
@@ -127,7 +127,7 @@ def _mutShuffleIndexes(individual: cython.ulong[:], indpb: cython.float):
 def _varAnd(
     population: list[Individual], pop2: list[Individual], toolbox: Toolbox, cxpb: float, mutpb: float
 ) -> list[Individual]:
-    i: cython.Py_ssize_t
+    i: cython.int
 
     #offspring = [toolbox.clone(ind) for ind in population]
     for new, old in zip(pop2, population):
@@ -171,7 +171,7 @@ def _eaSimple(
     logbook.record(gen=0, nevals=len(invalid_ind), **record)
     if verbose:
         print(logbook.stream)
-        
+
     pop2 = [toolbox.clone(ind) for ind in population]
 
     # Begin the generational process
@@ -226,7 +226,7 @@ else:
     genetic_algorithm = eaSimple_deap
 
 def crossover(ind1: Individual, ind2: Individual) -> tuple[Individual, Individual]:
-    choice: cython.Py_ssize_t    
+    choice: cython.int
 
     for (order1, times1), (order2, times2) in zip(ind1, ind2):
         # crossover only order, or only times, or both
@@ -239,7 +239,7 @@ def crossover(ind1: Individual, ind2: Individual) -> tuple[Individual, Individua
     return ind1, ind2
 
 def mutation(individual: Individual, indpb: float, low: int, up: int) -> tuple[Individual]:
-    choice: cython.Py_ssize_t
+    choice: cython.int
 
     for order, times in individual:
         # mutation only order, or only times, or both
@@ -272,17 +272,17 @@ def hill_climbing(
 
     # Begin the generational process
     for gen in range(1, ngen + 1):
-        nevals = 0
+        nevals: int = 0
         start = time.time()
         _fill_with(new_individual, individual)
 
-        new_individual = toolbox.mutate(new_individual)[0]
+        new_individual, = toolbox.mutate(new_individual)
 
         new_individual.fitness.values = toolbox.evaluate(new_individual)
 
-        if new_individual.fitness > individual.fitness:
+        if new_individual.fitness.values[0] > individual.fitness.values[0]:
             individual, new_individual = new_individual, individual
-            nevals = 1
+            nevals += 1
 
         # Update the hall of fame with the generated individuals
         if halloffame is not None:
@@ -297,6 +297,75 @@ def hill_climbing(
         print(f'Generation {gen}: {time.time() - start:.4f}s')
 
     return individual, logbook
+
+# def hill_climbing_para(
+#     population: list[Individual], toolbox: Toolbox, ngen: int, stats: Statistics | None = None,
+#     halloffame: HallOfFame | None = None, verbose: bool | None = __debug__
+# ) -> tuple[Individual, Logbook]:
+#     logbook = Logbook()
+#     logbook.header = ['gen', 'nevals'] + (stats.fields if stats else [])
+
+#     start_evaluate = time.time()
+#     # Evaluate the individuals with an invalid fitness
+#     fitnesses = toolbox.map(toolbox.evaluate, population)
+#     for ind, fit in zip(population, fitnesses):
+#         ind.fitness.values = fit
+#     print(f'Evaluation: {time.time() - start_evaluate:.4f}s')
+
+#     if halloffame is not None:
+#         halloffame.update(population)
+
+#     record = stats.compile(population) if stats else {}
+#     logbook.record(gen=0, nevals=len(population), **record)
+#     if verbose:
+#         print(logbook.stream)
+
+#     #new_individual = toolbox.clone(individual)
+#     pop2 = [toolbox.clone(ind) for ind in population]
+
+#     # Begin the generational process
+#     for gen in range(1, ngen + 1):
+#         nevals: int = 0
+#         start = time.time()
+#         # _fill_with(new_individual, individual)
+#         for new, old in zip(pop2, population):
+#             _fill_with(new, old)
+#             # new.fitness.values = old.fitness.values
+
+#         # new_individual = toolbox.mutate(new_individual)[0]
+#         for i in range(len(pop2)):
+#             pop2[i], = toolbox.mutate(pop2[i])
+#             # del offspring[i].fitness.values
+
+#         # new_individual.fitness.values = toolbox.evaluate(new_individual)
+#         fitnesses = toolbox.map(toolbox.evaluate, pop2)
+#         for ind, fit in zip(pop2, fitnesses):
+#             ind.fitness.values = fit
+
+#         # if new_individual.fitness.values > individual.fitness.values:
+#         #     individual, new_individual = new_individual, individual
+#         #     nevals += 1
+#         for i in range(len(pop2)):
+#             if pop2[i].fitness.values[0] > population[i].fitness.values[0]:
+#                 population[i], pop2[i] = pop2[i], population[i]
+#                 nevals += 1
+
+#         # Update the hall of fame with the generated individuals
+#         if halloffame is not None:
+#             # halloffame.update([individual])
+#             halloffame.update(population)
+
+#         # Append the current generation statistics to the logbook
+#         # record = stats.compile([individual]) if stats else {}
+#         record = stats.compile(population) if stats else {}
+#         logbook.record(gen=gen, nevals=nevals, **record)
+#         if verbose:
+#             print(logbook.stream)
+
+#         print(f'Generation {gen}: {time.time() - start:.4f}s')
+
+#     # return individual, logbook
+#     return population, logbook
 
 def simulated_annealing(
     individual: Individual, toolbox: Toolbox, ngen: int, schedule, stats: Statistics | None = None,
@@ -319,18 +388,20 @@ def simulated_annealing(
 
     # Begin the generational process
     for gen in range(1, ngen + 1):
-        nevals = 0
+        nevals: int = 0
         start = time.time()
         _fill_with(new_individual, individual)
 
-        new_individual = toolbox.mutate(new_individual)[0]
+        new_individual, = toolbox.mutate(new_individual)
 
         new_individual.fitness.values = toolbox.evaluate(new_individual)
 
-        delta = new_individual.fitness - individual.fitness
+        delta = new_individual.fitness.values[0] - individual.fitness.values[0]
         if delta > 0 or random.random() < math.exp(delta / schedule(gen)):
+            if delta <= 0:
+                print(f'Accepting worse solution with p={math.exp(delta / schedule(gen))}')
             individual, new_individual = new_individual, individual
-            nevals = 1
+            nevals += 1
 
         # Update the hall of fame with the generated individuals
         if halloffame is not None:
