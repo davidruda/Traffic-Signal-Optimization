@@ -68,7 +68,7 @@ class Optimizer:
         self._toolbox.register('select', tools.selTournament, tournsize=3)
         self._toolbox.register('evaluate', self._evaluate)
         self._toolbox.register('mate', crossover)
-        
+
         green_min = 0
         green_max = self.plan.duration
         self._toolbox.register('mutate', mutation, indpb=self._args.indpb, low=green_min, up=green_max)
@@ -92,7 +92,7 @@ class Optimizer:
         individual = [
             (array('L', order), array('L', times)) for order, times in schedules
         ]
-        return individual   
+        return individual
 
     def _evaluate(self, individual):
         # Keep reusing the same simulation object for the same thread
@@ -106,15 +106,16 @@ class Optimizer:
         import matplotlib.pyplot as plt
         import matplotlib.ticker as ticker
         import pandas as pd
-        gen, norm_max, max, norm_avg, avg = self._logbook.select(
-            'gen', 'norm_max', 'max', 'norm_avg', 'avg'
+        gen, new_vals, norm_max, max, norm_avg, avg = self._logbook.select(
+            'gen', 'nevals', 'norm_max', 'max', 'norm_avg', 'avg'
         )
 
-        to_int = lambda x: int(x.replace(',', ''))
+        def to_int(x):
+            return int(x.replace(',', ''))
         max, avg = (list(map(to_int, stat)) for stat in [max, avg])
 
         df = pd.DataFrame({
-            'gen': gen, 'norm_max': norm_max, 'max': max, 'norm_avg': norm_avg,
+            'gen': gen, 'new_vals': new_vals, 'norm_max': norm_max, 'max': max, 'norm_avg': norm_avg,
             'avg': avg
         })
         df.to_csv(os.path.join(logdir, f'{self._args.data}.csv'), index=False)
@@ -170,7 +171,9 @@ class Optimizer:
     def _save_info(self, logdir):
         best_fitness = int(self._hof.keys[0].values[0])
         with open(os.path.join(logdir, 'info.txt'), 'w') as f:
-            f.write(f'Best fitness: {best_fitness:,} ({100 * normalized_score(best_fitness, self._args.data):.2f} %)\n\n')
+            f.write(f'Best fitness: {best_fitness:,} ({100 * normalized_score(best_fitness, self._args.data):.2f} %)\n')
+            f.write(f'Total evaluations: {sum(self._logbook.select('nevals')):,}\n')
+            f.write('\n')
             for k, v in self._args.__dict__.items():
                 f.write(f'{k}={v}\n')
             f.write(f'\nElapsed time: {self._elapsed_time}\n')
