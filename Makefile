@@ -4,6 +4,7 @@ BUILD_TYPE=Release
 EXTRA_FLAGS=
 
 VENV=.venv
+VENV_ABS_PATH=$(abspath $(VENV))
 
 # https://stackoverflow.com/questions/70675848/makefile-throws-an-error-for-checking-the-os
 # https://venthur.de/2021-03-31-python-makefiles.html
@@ -32,8 +33,9 @@ $(VENV): requirements-test.txt requirements.txt
 
 $(CMAKE_BUILD_DIR):
 	mkdir -p $(CMAKE_BUILD_DIR)
+# Use Python_ROOT_DIR to ensure that Python from the venv is used
 	cd $(CMAKE_BUILD_DIR) && \
-	cmake ../../traffic_signaling -DBUILD_PYBIND_MODULES=ON -DCMAKE_BUILD_TYPE=$(BUILD_TYPE) $(EXTRA_FLAGS) && \
+	cmake ../../traffic_signaling -DBUILD_PYBIND_MODULES=ON -DPython_ROOT_DIR=$(VENV_ABS_PATH) -DCMAKE_BUILD_TYPE=$(BUILD_TYPE) $(EXTRA_FLAGS) && \
 	cmake --build . --config $(BUILD_TYPE) -j 16
 
 test_package_cmake: $(VENV) $(CMAKE_BUILD_DIR)

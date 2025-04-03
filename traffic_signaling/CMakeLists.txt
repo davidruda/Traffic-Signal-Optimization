@@ -56,7 +56,7 @@ if(BUILD_PYBIND_MODULES)
         FIND_PACKAGE_ARGS
     )
     FetchContent_MakeAvailable(pybind11)
-        
+
     # If there are issues with building pybind11 modules (e.g. on WSL, cmake
     # keeps including the pybind sources from Windows), try to build and install
     # pybind from sources as described here:
@@ -104,6 +104,13 @@ test_cpp(test_time f ".*")
 
 if(BUILD_PYBIND_MODULES)
     find_package(Python COMPONENTS Interpreter REQUIRED)
+
+    message("Python executable: ${Python_EXECUTABLE}")
+
+    # If CMake doesn't use the Python you want, try to set Python_ROOT_DIR
+    # e.g. for venv -DPython_ROOT_DIR=/absolute/path/to/venv
+    message("Python root directory: ${Python_ROOT_DIR}")
+
     set(PYTHON_TEST_DIR "${CMAKE_SOURCE_DIR}/tests")
 
     set(PYTHONPATH
