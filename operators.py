@@ -1,4 +1,5 @@
 from array import array
+from functools import partial
 import math
 import random
 import time
@@ -221,6 +222,7 @@ if cython.compiled:
     mutShuffleIndexes = _mutShuffleIndexes
     genetic_algorithm = _eaSimple
 else:
+    # Use original DEAP functions if not compiled with Cython
     from deap.tools import cxTwoPoint, cxOrdered, mutShuffleIndexes
     from deap.algorithms import eaSimple as eaSimple_deap
     genetic_algorithm = eaSimple_deap
@@ -250,169 +252,77 @@ def mutation(individual: Individual, indpb: float, low: int, up: int) -> tuple[I
             mutation_change_by_one(times, indpb, low, up)
     return individual,
 
-# First-choice hill climbing
-def hill_climbing(
-    individual: Individual, toolbox: Toolbox, ngen: int, stats: Statistics | None = None,
-    halloffame: HallOfFame | None = None, verbose: bool | None = __debug__
+def _hill_climbing_compare(individual: Individual, new_individual: Individual, toolbox: Toolbox, gen: int) -> bool:
+    return new_individual.fitness.values[0] > individual.fitness.values[0]
+
+def _simulated_annealing_compare(individual: Individual, new_individual: Individual, toolbox: Toolbox, gen: int) -> bool:
+    delta = new_individual.fitness.values[0] - individual.fitness.values[0]
+    if delta > 0:
+        return True
+    if random.random() < math.exp(delta / toolbox.schedule(gen)):
+        print(f'Accepting worse solution with p={math.exp(delta / toolbox.schedule(gen))}')
+        return True
+    return False
+
+def _single_state_algorithm(
+    population: list[Individual], toolbox: Toolbox, ngen: int, stats: Statistics | None = None,
+    halloffame: HallOfFame | None = None, verbose: bool | None = __debug__,
+    compare_fn: callable = None
 ) -> tuple[Individual, Logbook]:
-    logbook = Logbook()
-    logbook.header = ['gen', 'nevals'] + (stats.fields if stats else [])
 
-    individual.fitness.values = toolbox.evaluate(individual)
-
-    if halloffame is not None:
-        halloffame.update([individual])
-
-    record = stats.compile([individual]) if stats else {}
-    logbook.record(gen=0, nevals=1, **record)
-    if verbose:
-        print(logbook.stream)
-
-    new_individual = toolbox.clone(individual)
-
-    # Begin the generational process
-    for gen in range(1, ngen + 1):
-        nevals: int = 0
-        start = time.time()
+    def process_individual(individual: Individual, new_individual: Individual):
         _fill_with(new_individual, individual)
 
         new_individual, = toolbox.mutate(new_individual)
-
         new_individual.fitness.values = toolbox.evaluate(new_individual)
 
-        if new_individual.fitness.values[0] > individual.fitness.values[0]:
+        # Compare returns True if new_individual is accepted, based on the algorithm
+        if compare_fn(individual, new_individual, toolbox, gen):
             individual, new_individual = new_individual, individual
-            nevals += 1
+
+        return individual, new_individual
+
+    logbook = Logbook()
+    logbook.header = ['gen', 'nevals'] + (stats.fields if stats else [])
+
+    start_evaluate = time.time()
+    # Evaluate the individuals with an invalid fitness
+    fitnesses = toolbox.map(toolbox.evaluate, population)
+    for ind, fit in zip(population, fitnesses):
+        ind.fitness.values = fit
+    print(f'Evaluation: {time.time() - start_evaluate:.4f}s')
+
+    if halloffame is not None:
+        halloffame.update(population)
+
+    record = stats.compile(population) if stats else {}
+    logbook.record(gen=0, nevals=len(population), **record)
+    if verbose:
+        print(logbook.stream)
+
+    pop2 = [toolbox.clone(ind) for ind in population]
+
+    # Begin the generational process
+    for gen in range(1, ngen + 1):
+        start = time.time()
+
+        # x, y = zip(*toolbox.map(process_individual, population, pop2))
+        # population, pop2 = list(x), list(y)
+        population, pop2 = map(list, zip(*toolbox.map(process_individual, population, pop2)))
 
         # Update the hall of fame with the generated individuals
         if halloffame is not None:
-            halloffame.update([individual])
+            halloffame.update(population)
 
         # Append the current generation statistics to the logbook
-        record = stats.compile([individual]) if stats else {}
-        logbook.record(gen=gen, nevals=nevals, **record)
+        record = stats.compile(population) if stats else {}
+        logbook.record(gen=gen, nevals=len(population), **record)
         if verbose:
             print(logbook.stream)
 
         print(f'Generation {gen}: {time.time() - start:.4f}s')
 
-    return individual, logbook
+    return population, logbook
 
-# def hill_climbing_para(
-#     population: list[Individual], toolbox: Toolbox, ngen: int, stats: Statistics | None = None,
-#     halloffame: HallOfFame | None = None, verbose: bool | None = __debug__
-# ) -> tuple[Individual, Logbook]:
-#     logbook = Logbook()
-#     logbook.header = ['gen', 'nevals'] + (stats.fields if stats else [])
-
-#     start_evaluate = time.time()
-#     # Evaluate the individuals with an invalid fitness
-#     fitnesses = toolbox.map(toolbox.evaluate, population)
-#     for ind, fit in zip(population, fitnesses):
-#         ind.fitness.values = fit
-#     print(f'Evaluation: {time.time() - start_evaluate:.4f}s')
-
-#     if halloffame is not None:
-#         halloffame.update(population)
-
-#     record = stats.compile(population) if stats else {}
-#     logbook.record(gen=0, nevals=len(population), **record)
-#     if verbose:
-#         print(logbook.stream)
-
-#     #new_individual = toolbox.clone(individual)
-#     pop2 = [toolbox.clone(ind) for ind in population]
-
-#     # Begin the generational process
-#     for gen in range(1, ngen + 1):
-#         nevals: int = 0
-#         start = time.time()
-#         # _fill_with(new_individual, individual)
-#         for new, old in zip(pop2, population):
-#             _fill_with(new, old)
-#             # new.fitness.values = old.fitness.values
-
-#         # new_individual = toolbox.mutate(new_individual)[0]
-#         for i in range(len(pop2)):
-#             pop2[i], = toolbox.mutate(pop2[i])
-#             # del offspring[i].fitness.values
-
-#         # new_individual.fitness.values = toolbox.evaluate(new_individual)
-#         fitnesses = toolbox.map(toolbox.evaluate, pop2)
-#         for ind, fit in zip(pop2, fitnesses):
-#             ind.fitness.values = fit
-
-#         # if new_individual.fitness.values > individual.fitness.values:
-#         #     individual, new_individual = new_individual, individual
-#         #     nevals += 1
-#         for i in range(len(pop2)):
-#             if pop2[i].fitness.values[0] > population[i].fitness.values[0]:
-#                 population[i], pop2[i] = pop2[i], population[i]
-#                 nevals += 1
-
-#         # Update the hall of fame with the generated individuals
-#         if halloffame is not None:
-#             # halloffame.update([individual])
-#             halloffame.update(population)
-
-#         # Append the current generation statistics to the logbook
-#         # record = stats.compile([individual]) if stats else {}
-#         record = stats.compile(population) if stats else {}
-#         logbook.record(gen=gen, nevals=nevals, **record)
-#         if verbose:
-#             print(logbook.stream)
-
-#         print(f'Generation {gen}: {time.time() - start:.4f}s')
-
-#     # return individual, logbook
-#     return population, logbook
-
-def simulated_annealing(
-    individual: Individual, toolbox: Toolbox, ngen: int, schedule, stats: Statistics | None = None,
-    halloffame: HallOfFame | None = None, verbose: bool | None = __debug__
-) -> tuple[Individual, Logbook]:
-    logbook = Logbook()
-    logbook.header = ['gen', 'nevals'] + (stats.fields if stats else [])
-
-    individual.fitness.values = toolbox.evaluate(individual)
-
-    if halloffame is not None:
-        halloffame.update([individual])
-
-    record = stats.compile([individual]) if stats else {}
-    logbook.record(gen=0, nevals=1, **record)
-    if verbose:
-        print(logbook.stream)
-
-    new_individual = toolbox.clone(individual)
-
-    # Begin the generational process
-    for gen in range(1, ngen + 1):
-        nevals: int = 0
-        start = time.time()
-        _fill_with(new_individual, individual)
-
-        new_individual, = toolbox.mutate(new_individual)
-
-        new_individual.fitness.values = toolbox.evaluate(new_individual)
-
-        delta = new_individual.fitness.values[0] - individual.fitness.values[0]
-        if delta > 0 or random.random() < math.exp(delta / schedule(gen)):
-            if delta <= 0:
-                print(f'Accepting worse solution with p={math.exp(delta / schedule(gen))}')
-            individual, new_individual = new_individual, individual
-            nevals += 1
-
-        # Update the hall of fame with the generated individuals
-        if halloffame is not None:
-            halloffame.update([individual])
-
-        # Append the current generation statistics to the logbook
-        record = stats.compile([individual]) if stats else {}
-        logbook.record(gen=gen, nevals=nevals, **record)
-        if verbose:
-            print(logbook.stream)
-
-        print(f'Generation {gen}: {time.time() - start:.4f}s')
-
-    return individual, logbook
+hill_climbing = partial(_single_state_algorithm, compare_fn=_hill_climbing_compare)
+simulated_annealing = partial(_single_state_algorithm, compare_fn=_simulated_annealing_compare)

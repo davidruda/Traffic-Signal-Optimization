@@ -172,7 +172,15 @@ class Optimizer:
         best_fitness = int(self._hof.keys[0].values[0])
         with open(os.path.join(logdir, 'info.txt'), 'w') as f:
             f.write(f'Best fitness: {best_fitness:,} ({100 * normalized_score(best_fitness, self._args.data):.2f} %)\n')
-            f.write(f'Total evaluations: {sum(self._logbook.select('nevals')):,}\n')
+
+            if self._args.algorithm == 'ga':
+                # Only count new individuals, not the unchanged ones from the previous generation
+                total_evaluations = sum(self._logbook.select('nevals'))
+            else:
+                # Generations + 1 because we start from generation 0
+                total_evaluations = (self._args.generations + 1) * self._args.population
+
+            f.write(f'Total evaluations: {total_evaluations:,}\n')
             f.write('\n')
             for k, v in self._args.__dict__.items():
                 f.write(f'{k}={v}\n')
@@ -194,33 +202,38 @@ class Optimizer:
         self._save_info(logdir)
 
     def run(self, save_statistics=True):
-        start = time.time()
         kwargs = {
             'stats': self._stats,
             'halloffame': self._hof,
             'verbose': True
         }
-        if self._args.algorithm == 'ga':
-            population = self._toolbox.population(n=self._args.population)
-            print(f'Population created: {time.time() - start:.4f}s')
+        start = time.time()
+        population = self._toolbox.population(n=self._args.population)
+        print(f'Population created: {time.time() - start:.4f}s')
 
-            _, self._logbook = genetic_algorithm(
+        if self._args.algorithm == 'ga':
+            population, self._logbook = genetic_algorithm(
                 population, self._toolbox, self._args.crossover, self._args.mutation, self._args.generations, **kwargs
             )
+
         elif self._args.algorithm == 'hc':
-            _, self._logbook = hill_climbing(
-                self._toolbox.individual(), self._toolbox, self._args.generations, **kwargs
+            population, self._logbook = hill_climbing(
+                population, self._toolbox, self._args.generations, **kwargs
             )
+
         elif self._args.algorithm == 'sa':
             # TODO: cooling schedule settings
-
             def schedule(t):
                 T_0 = 100
                 return T_0 * (1 - (t / (self._args.generations + 1)))
 
-            _, self._logbook = simulated_annealing(
-                self._toolbox.individual(), self._toolbox, self._args.generations, schedule, **kwargs
+            # Schedule function for simulated annealing
+            self._toolbox.register('schedule', schedule)
+
+            population, self._logbook = simulated_annealing(
+                population, self._toolbox, self._args.generations, **kwargs
             )
+
         self._elapsed_time = datetime.timedelta(seconds=int(time.time() - start))
         print(f'Elapsed time: {self._elapsed_time}')
 
