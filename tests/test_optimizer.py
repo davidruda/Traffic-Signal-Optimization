@@ -14,9 +14,9 @@ class TestOptimizer(unittest.TestCase):
             '--no-save',
         ]
         cls.algorithm_args = {
-            'hc': ['--generations=100'],
-            'sa': ['--generations=100'],
-            'ga': ['--generations=10'],
+            'hc': ['--population=4', '--generations=100'],
+            'sa': ['--population=4', '--generations=100'],
+            'ga': ['--population=100', '--generations=10'],
         }
         cls.algorithm = {
             'hc': 'Hill Climbing',
