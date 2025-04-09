@@ -252,6 +252,19 @@ def mutation(individual: Individual, indpb: float, low: int, up: int) -> tuple[I
             mutation_change_by_one(times, indpb, low, up)
     return individual,
 
+
+class LinearSchedule:
+    """
+    Linear cooling schedule for simulated annealing.
+    """
+    def __init__(self, start: float, steps: int) -> None:
+        self.start = start
+        self.steps = steps
+
+    def __call__(self, current: int) -> float:
+        return self.start * (1.0 - current / self.steps) + 1e-6
+
+
 def _hill_climbing_compare(individual: Individual, new_individual: Individual, toolbox: Toolbox, gen: int) -> bool:
     return new_individual.fitness.values[0] > individual.fitness.values[0]
 

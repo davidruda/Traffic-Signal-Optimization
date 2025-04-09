@@ -14,19 +14,20 @@ import numpy as np
 
 from traffic_signaling import *
 
-from operators import genetic_algorithm, hill_climbing, simulated_annealing, crossover, mutation
+from operators import genetic_algorithm, hill_climbing, simulated_annealing, crossover, mutation, LinearSchedule
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--algorithm', required=True, choices=['ga', 'hc', 'sa'], help='Algorithm to use for optimization - Genetic Algorithm, Hill Climbing, Simulated Annealing.')
+parser.add_argument('algorithm', choices=['ga', 'hc', 'sa'], help='Algorithm to use for optimization - Genetic Algorithm, Hill Climbing, Simulated Annealing.')
 parser.add_argument('--data', default='e', type=str, help='Input data.')
-parser.add_argument('--population', default=100, type=int, help='Number of individuals in a population.')
-parser.add_argument('--generations', default=100, type=int, help='Number of generations.')
-parser.add_argument('--crossover', default=0.5, type=float, help='Crossover probability.')
-parser.add_argument('--mutation', default=0.2, type=float, help='Mutation probability.')
+parser.add_argument('--population', default=100, type=int, help='Number of individuals / solutions in a population.')
+parser.add_argument('--generations', default=100, type=int, help='Number of generations / iterations.')
+parser.add_argument('--crossover', default=0.5, type=float, help='Crossover probability (Genetic Algorithm only).')
+parser.add_argument('--mutation', default=0.2, type=float, help='Mutation probability (Genetic Algorithm only).')
 parser.add_argument('--indpb', default=0.005, type=float, help='Probability of mutating each bit.')
 parser.add_argument('--order_init', default='random', choices=['adaptive', 'random', 'default'], help='Method for initializing the order of streets.')
 parser.add_argument('--times_init', default='default', choices=['scaled', 'default'], help='Method for initializing green light durations.')
-parser.add_argument('--threads', default=None, type=int, help='Number of threads for parallel evaluation.')
+parser.add_argument('--temp', default=100, type=float, help='Initial temperature for cooling schedule (Simulated annealing only).')
+parser.add_argument('--threads', default=None, type=int, help='Number of threads for parallel execution.')
 parser.add_argument('--seed', default=42, type=int, help='Random seed.')
 parser.add_argument('--no-save', default=False, action='store_true', help='Do not save results and plots.')
 
@@ -222,13 +223,8 @@ class Optimizer:
             )
 
         elif self._args.algorithm == 'sa':
-            # TODO: cooling schedule settings
-            def schedule(t):
-                T_0 = 100
-                return T_0 * (1 - (t / (self._args.generations + 1)))
-
-            # Schedule function for simulated annealing
-            self._toolbox.register('schedule', schedule)
+            # Cooling schedule for simulated annealing
+            self._toolbox.register('schedule', LinearSchedule(start=self._args.temp, steps=self._args.generations))
 
             population, self._logbook = simulated_annealing(
                 population, self._toolbox, self._args.generations, **kwargs

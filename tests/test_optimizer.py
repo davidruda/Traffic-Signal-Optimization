@@ -38,7 +38,7 @@ class TestOptimizer(unittest.TestCase):
         args = parser.parse_args([
             *self.args,
             *self.algorithm_args[alg],
-            f'--algorithm={alg}'
+            alg,
         ])
         optimizer = Optimizer(args)
         optimizer.run(save_statistics=False)
