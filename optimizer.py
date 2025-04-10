@@ -70,6 +70,9 @@ class Optimizer:
         self._toolbox.register('evaluate', self._evaluate)
         self._toolbox.register('mate', crossover)
 
+        # Cooling schedule for simulated annealing
+        self._toolbox.register('schedule', LinearSchedule(start=self._args.temp, steps=self._args.generations))
+
         green_min = 0
         green_max = self.plan.duration
         self._toolbox.register('mutate', mutation, indpb=self._args.indpb, low=green_min, up=green_max)
@@ -125,15 +128,18 @@ class Optimizer:
         fig, ax1 = plt.subplots()
         ax1.plot(gen, norm_max, label='max score in a generation')
         ax1.plot(gen, norm_avg, label='avg score in a generation')
-        #ax1.plot([0, self._args.generations], [0, 0], 'm--', label='baseline')
-        #ax1.plot([0, self._args.generations], [1, 1], 'b--', label='max known score')
-        ax1.fill_between(gen, norm_max, alpha=0.25)
+        ax1.axhline(0, color='m', linestyle='--', label='baseline')
+        ax1.axhline(1, color='y', linestyle='--', label='max known score')
+
         ax1.set_xlabel('Number of generations')
         ax1.set_ylabel('% of max known score')
-        y_min = np.min([0, np.min(norm_max)])
-        y_max = np.max([1, np.max(norm_max)])
+
+        # Keep some slack around the y-axis limits to display the baseline and max known score
+        y_min = np.min([-0.03, np.min(norm_max)])
+        y_max = np.max([1.03, np.max(norm_max)])
         ax1.set_ylim(y_min, y_max)
-        ax1.legend(framealpha=0.5)
+
+        ax1.legend(framealpha=1)
         best_fitness = np.max(max)
         ax1.set_title(f'Best score: {best_fitness:,} ({100 * normalized_score(best_fitness, self._args.data):.2f} %)')
 
@@ -147,13 +153,13 @@ class Optimizer:
         ax2.set_ylim(y_min, y_max)
 
         ticks = np.linspace(y_min, y_max, num=6)
-        labels = map(lambda x: f'{int(x):,}', ticks)
-        ax2.set_yticks(ticks, labels) #, rotation=45
+        labels = (f'{int(x):,}' for x in ticks)
+        ax2.set_yticks(ticks, labels)
 
-        # Avoid scientific notation
-        #yticks = plt.gca().get_yticks()
-        #plt.gca().yaxis.set_major_locator(ticker.FixedLocator(yticks))
-        #plt.gca().set_yticklabels([f'{x:,.0f}' for x in yticks])#, rotation=45)
+        # Avoid scientific notation for x-axis ticks
+        xticks = ax1.get_xticks()
+        ax1.xaxis.set_major_locator(ticker.FixedLocator(xticks))
+        ax1.set_xticklabels([f'{x:,.0f}' for x in xticks])
 
         fig.tight_layout()
         fig.savefig(os.path.join(logdir, f'{self._args.data}.pdf'), format='pdf')
@@ -223,9 +229,6 @@ class Optimizer:
             )
 
         elif self._args.algorithm == 'sa':
-            # Cooling schedule for simulated annealing
-            self._toolbox.register('schedule', LinearSchedule(start=self._args.temp, steps=self._args.generations))
-
             population, self._logbook = simulated_annealing(
                 population, self._toolbox, self._args.generations, **kwargs
             )
