@@ -35,6 +35,11 @@ def _fill_with(destination: Individual, source: Individual) -> None:
 @cython.wraparound(False)
 @cython.initializedcheck(False)
 def _cxTwoPoint(ind1: cython.ulong[:], ind2: cython.ulong[:]):
+    """
+    Enhanced version of `cxTwoPoint` from DEAP.
+
+    Source: https://github.com/DEAP/deap/blob/master/deap/tools/crossover.py
+    """
     size: cython.Py_ssize_t = min(len(ind1), len(ind2))
     cxpoint1: cython.int = random.randint(1, size)
     cxpoint2: cython.int = random.randint(1, size - 1)
@@ -53,6 +58,11 @@ def _cxTwoPoint(ind1: cython.ulong[:], ind2: cython.ulong[:]):
 @cython.wraparound(False)
 @cython.initializedcheck(False)
 def _cxOrdered(ind1: cython.ulong[:], ind2: cython.ulong[:]):
+    """
+    Enhanced version of `cxOrdered` from DEAP.
+
+    Source: https://github.com/DEAP/deap/blob/master/deap/tools/crossover.py
+    """
     a: cython.int
     b: cython.int
     i: cython.int
@@ -94,6 +104,9 @@ def _cxOrdered(ind1: cython.ulong[:], ind2: cython.ulong[:]):
 @cython.wraparound(False)
 @cython.initializedcheck(False)
 def mutation_change_by_one(individual: cython.ulong[:], indpb: cython.float, low: cython.uint, up: cython.uint):
+    """
+    Mutate individual by changing each value by +-1 in the range [`low`, `up`] with probability `indpb`.
+    """
     size: cython.Py_ssize_t = len(individual)
 
     for i in range(size):
@@ -112,6 +125,11 @@ def mutation_change_by_one(individual: cython.ulong[:], indpb: cython.float, low
 @cython.wraparound(False)
 @cython.initializedcheck(False)
 def _mutShuffleIndexes(individual: cython.ulong[:], indpb: cython.float):
+    """
+    Enhanced version of `mutShuffleIndexes` from DEAP.
+
+    Source: https://github.com/DEAP/deap/blob/master/deap/tools/mutation.py
+    """
     swap_indx: cython.int
     size: cython.Py_ssize_t = len(individual)
 
@@ -128,9 +146,14 @@ def _mutShuffleIndexes(individual: cython.ulong[:], indpb: cython.float):
 def _varAnd(
     population: list[Individual], pop2: list[Individual], toolbox: Toolbox, cxpb: float, mutpb: float
 ) -> list[Individual]:
+    """
+    Enhanced version of `varAnd` from DEAP.
+
+    Source: https://github.com/DEAP/deap/blob/master/deap/algorithms.py
+    """
     i: cython.int
 
-    #offspring = [toolbox.clone(ind) for ind in population]
+    # Fill the offspring with values from the population to avoid expensive cloning
     for new, old in zip(pop2, population):
         _fill_with(new, old)
         new.fitness.values = old.fitness.values
@@ -154,6 +177,11 @@ def _eaSimple(
     population: list[Individual], toolbox: Toolbox, cxpb: float, mutpb: float, ngen: int,
     stats: Statistics | None = None, halloffame: HallOfFame | None = None, verbose: bool | None = __debug__
 ) -> tuple[list[Individual], Logbook]:
+    """
+    Enhanced version of `eaSimple` from DEAP.
+
+    Source: https://github.com/DEAP/deap/blob/master/deap/algorithms.py
+    """
     logbook = Logbook()
     logbook.header = ['gen', 'nevals'] + (stats.fields if stats else [])
 
@@ -173,6 +201,8 @@ def _eaSimple(
     if verbose:
         print(logbook.stream)
 
+    # Create a full copy of the population
+    # From now on, keep filling values between population and pop2 to avoid expensive cloning
     pop2 = [toolbox.clone(ind) for ind in population]
 
     # Begin the generational process
@@ -185,7 +215,7 @@ def _eaSimple(
         start_mutate = time.time()
         # Vary the pool of individuals
         offspring = _varAnd(offspring, pop2, toolbox, cxpb, mutpb)
-        #offspring = varAnd(offspring, toolbox, cxpb, mutpb)
+
         print(f'Cross+Mut: {time.time() - start_mutate:.4f}s')
 
         start_evaluate = time.time()
@@ -202,7 +232,7 @@ def _eaSimple(
             halloffame.update(offspring)
 
         # Replace the current population by the offspring
-        #population[:] = offspring
+        # Swap the only two populations we have
         population, pop2 = offspring, population
 
 
@@ -228,6 +258,12 @@ else:
     genetic_algorithm = eaSimple_deap
 
 def crossover(ind1: Individual, ind2: Individual) -> tuple[Individual, Individual]:
+    """
+    Crossover that combines two individuals.
+
+    For each corresponding part of the individual (schedule of one intersection),
+    crossover only the order, or only the times, or both at random.
+    """
     choice: cython.int
 
     for (order1, times1), (order2, times2) in zip(ind1, ind2):
@@ -241,6 +277,12 @@ def crossover(ind1: Individual, ind2: Individual) -> tuple[Individual, Individua
     return ind1, ind2
 
 def mutation(individual: Individual, indpb: float, low: int, up: int) -> tuple[Individual]:
+    """
+    Mutation that applies random changes to an individual.
+
+    For each part of the individual (schedule of one intersection),
+    mutate only the order, or only the times, or both at random.
+    """
     choice: cython.int
 
     for order, times in individual:
@@ -266,9 +308,19 @@ class LinearSchedule:
 
 
 def _hill_climbing_compare(individual: Individual, new_individual: Individual, toolbox: Toolbox, gen: int) -> bool:
+    """
+    Hill climbing comparison function.
+
+    Returns True if the new individual is better and should be accepted.
+    """
     return new_individual.fitness.values[0] > individual.fitness.values[0]
 
 def _simulated_annealing_compare(individual: Individual, new_individual: Individual, toolbox: Toolbox, gen: int) -> bool:
+    """
+    Simulated annealing comparison function.
+
+    Returns True if the new individual is better or randomly accepted as worse.
+    """
     delta = new_individual.fitness.values[0] - individual.fitness.values[0]
     if delta > 0:
         return True
@@ -282,6 +334,12 @@ def _single_state_algorithm(
     halloffame: HallOfFame | None = None, verbose: bool | None = __debug__,
     compare_fn: callable = None
 ) -> tuple[Individual, Logbook]:
+    """
+    Template function for single-state algorithms like hill climbing and simulated annealing.
+    `compare_fn` has to be given to provide the comparison method between individuals.
+
+    Based on `eaSimple` function from DEAP.
+    """
 
     def process_individual(individual: Individual, new_individual: Individual):
         _fill_with(new_individual, individual)
@@ -313,14 +371,15 @@ def _single_state_algorithm(
     if verbose:
         print(logbook.stream)
 
+    # Create a full copy of the population
+    # From now on, keep filling values between population and pop2 to avoid expensive cloning
     pop2 = [toolbox.clone(ind) for ind in population]
 
     # Begin the generational process
     for gen in range(1, ngen + 1):
         start = time.time()
 
-        # x, y = zip(*toolbox.map(process_individual, population, pop2))
-        # population, pop2 = list(x), list(y)
+        # This has to be written as a one-liner or Cython won't compile it
         population, pop2 = map(list, zip(*toolbox.map(process_individual, population, pop2)))
 
         # Update the hall of fame with the generated individuals
