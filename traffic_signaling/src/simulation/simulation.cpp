@@ -288,6 +288,10 @@ void Simulation::summary() const {
 std::vector<std::pair<std::vector<unsigned long>, std::vector<unsigned long>>> Simulation::non_trivial_schedules(
     bool relative_order
 ) const {
+    if (schedules_.empty()) {
+        return {};
+    }
+
     auto &&non_trivial_schedules_view = city_plan_.non_trivial_intersections()
         | std::views::transform(&city_plan::Intersection::id)
         | std::views::transform([&](unsigned long intersection_id) {
@@ -301,6 +305,7 @@ std::vector<std::pair<std::vector<unsigned long>, std::vector<unsigned long>>> S
             }
             return std::pair{schedule.order(), schedule.times()};
         });
+
         return {non_trivial_schedules_view.begin(), non_trivial_schedules_view.end()};
 }
 
