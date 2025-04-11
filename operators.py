@@ -12,7 +12,9 @@ from deap.tools import Logbook, Statistics, HallOfFame
 # Compile this file with Cython to speed up the optimization
 # cythonize -3ai operators.py
 
-Individual = list[tuple[array, array]]
+Order = array
+Times = array
+Individual = tuple[Order, Times]
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
@@ -31,16 +33,19 @@ def _fill_with(destination: Individual, source: Individual) -> None:
             order1[i] = order2[i]
             times1[i] = times2[i]
 
+
 @cython.boundscheck(False)
 @cython.wraparound(False)
 @cython.initializedcheck(False)
-def _cxTwoPoint(ind1: cython.ulong[:], ind2: cython.ulong[:]):
+def _cxTwoPoint(schedule1: tuple, schedule2: tuple):
     """
-    Enhanced version of `cxTwoPoint` from DEAP.
+    Modified version of `cxTwoPoint` from DEAP.
 
     Source: https://github.com/DEAP/deap/blob/master/deap/tools/crossover.py
     """
-    size: cython.Py_ssize_t = min(len(ind1), len(ind2))
+    times1: cython.ulong[:] = schedule1[1]
+    times2: cython.ulong[:] = schedule2[1]
+    size: cython.Py_ssize_t = min(len(times1), len(times2))
     cxpoint1: cython.int = random.randint(1, size)
     cxpoint2: cython.int = random.randint(1, size - 1)
 
@@ -49,29 +54,32 @@ def _cxTwoPoint(ind1: cython.ulong[:], ind2: cython.ulong[:]):
     else:  # Swap the two cx points
         cxpoint1, cxpoint2 = cxpoint2, cxpoint1
 
-    ind1[cxpoint1:cxpoint2], ind2[cxpoint1:cxpoint2] \
-        = ind2[cxpoint1:cxpoint2], ind1[cxpoint1:cxpoint2]
+    times1[cxpoint1:cxpoint2], times2[cxpoint1:cxpoint2] = times2[cxpoint1:cxpoint2], times1[cxpoint1:cxpoint2]
 
-    return ind1, ind2
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
 @cython.initializedcheck(False)
-def _cxOrdered(ind1: cython.ulong[:], ind2: cython.ulong[:]):
+def _cxOrdered(schedule1: tuple, schedule2: tuple):
     """
-    Enhanced version of `cxOrdered` from DEAP.
+    Modified version of `cxOrdered` from DEAP.
 
     Source: https://github.com/DEAP/deap/blob/master/deap/tools/crossover.py
     """
+    order1: cython.ulong[:] = schedule1[0]
+    times1: cython.ulong[:] = schedule1[1]
+    order2: cython.ulong[:] = schedule2[0]
+    times2: cython.ulong[:] = schedule2[1]
     a: cython.int
     b: cython.int
     i: cython.int
     k1: cython.int
     k2: cython.int
-    temp1: cython.ulong[:]
-    temp2: cython.ulong[:]
-    size: cython.Py_ssize_t = min(len(ind1), len(ind2))
+    order1_temp: cython.ulong[:]
+    order2_temp: cython.ulong[:]
+    size: cython.Py_ssize_t = min(len(order1), len(order2))
 
+    # Note that we must do the same changes to times because they are based on orders
     a, b = random.sample(range(size), 2)
     if a > b:
         a, b = b, a
@@ -79,75 +87,82 @@ def _cxOrdered(ind1: cython.ulong[:], ind2: cython.ulong[:]):
     holes1, holes2 = [True] * size, [True] * size
     for i in range(size):
         if i < a or i > b:
-            holes1[ind2[i]] = False
-            holes2[ind1[i]] = False
+            holes1[order2[i]] = False
+            holes2[order1[i]] = False
 
     # We must keep the original values somewhere before scrambling everything
-    temp1, temp2 = ind1, ind2
+    order1_temp, order2_temp = order1, order2
+    times1_temp, times2_temp = times1, times2
     k1, k2 = b + 1, b + 1
     for i in range(size):
-        if not holes1[temp1[(i + b + 1) % size]]:
-            ind1[k1 % size] = temp1[(i + b + 1) % size]
+        if not holes1[order1_temp[(i + b + 1) % size]]:
+            order1[k1 % size] = order1_temp[(i + b + 1) % size]
+            times1[k1 % size] = times1_temp[(i + b + 1) % size]
             k1 += 1
 
-        if not holes2[temp2[(i + b + 1) % size]]:
-            ind2[k2 % size] = temp2[(i + b + 1) % size]
+        if not holes2[order2_temp[(i + b + 1) % size]]:
+            order2[k2 % size] = order2_temp[(i + b + 1) % size]
+            times2[k2 % size] = times2_temp[(i + b + 1) % size]
             k2 += 1
 
     # Swap the content between a and b (included)
     for i in range(a, b + 1):
-        ind1[i], ind2[i] = ind2[i], ind1[i]
+        order1[i], order2[i] = order2[i], order1[i]
+        times1[i], times2[i] = times2[i], times1[i]
 
-    return ind1, ind2
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
 @cython.initializedcheck(False)
-def mutation_change_by_one(individual: cython.ulong[:], indpb: cython.float, low: cython.uint, up: cython.uint):
+def mutation_change_by_one(schedule: tuple, indpb: cython.float, low: cython.uint, up: cython.uint):
     """
     Mutate individual by changing each value by +-1 in the range [`low`, `up`] with probability `indpb`.
     """
-    size: cython.Py_ssize_t = len(individual)
+    times: cython.ulong[:] = schedule[1]
+    size: cython.Py_ssize_t = len(times)
 
     for i in range(size):
         if random.random() < indpb:
             if random.random() < 0.5:
                 # Make sure the number doesn't overflow
-                if individual[i] < up:
-                    individual[i] = individual[i] + 1
+                if times[i] < up:
+                    times[i] = times[i] + 1
             else:
                 # Make sure the number doesn't overflow
-                if individual[i] > low:
-                    individual[i] = individual[i] - 1
-    return individual,
+                if times[i] > low:
+                    times[i] = times[i] - 1
+
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
 @cython.initializedcheck(False)
-def _mutShuffleIndexes(individual: cython.ulong[:], indpb: cython.float):
+def _mutShuffleIndexes(schedule: tuple, indpb: cython.float):
     """
-    Enhanced version of `mutShuffleIndexes` from DEAP.
+    Modified version of `mutShuffleIndexes` from DEAP.
 
     Source: https://github.com/DEAP/deap/blob/master/deap/tools/mutation.py
     """
+    order: cython.ulong[:] = schedule[0]
+    times: cython.ulong[:] = schedule[1]
     swap_indx: cython.int
-    size: cython.Py_ssize_t = len(individual)
+    size: cython.Py_ssize_t = len(order)
 
     for i in range(size):
         if random.random() < indpb:
             swap_indx = random.randint(0, size - 2)
             if swap_indx >= i:
                 swap_indx += 1
-            individual[i], individual[swap_indx] = \
-                individual[swap_indx], individual[i]
 
-    return individual,
+            # Swap both order and times because times are based on order
+            order[i], order[swap_indx] = order[swap_indx], order[i]
+            times[i], times[swap_indx] = times[swap_indx], times[i]
+
 
 def _varAnd(
     population: list[Individual], pop2: list[Individual], toolbox: Toolbox, cxpb: float, mutpb: float
 ) -> list[Individual]:
     """
-    Enhanced version of `varAnd` from DEAP.
+    Modified version of `varAnd` from DEAP.
 
     Source: https://github.com/DEAP/deap/blob/master/deap/algorithms.py
     """
@@ -173,12 +188,13 @@ def _varAnd(
 
     return offspring
 
+
 def _eaSimple(
     population: list[Individual], toolbox: Toolbox, cxpb: float, mutpb: float, ngen: int,
     stats: Statistics | None = None, halloffame: HallOfFame | None = None, verbose: bool | None = __debug__
 ) -> tuple[list[Individual], Logbook]:
     """
-    Enhanced version of `eaSimple` from DEAP.
+    Modified version of `eaSimple` from DEAP.
 
     Source: https://github.com/DEAP/deap/blob/master/deap/algorithms.py
     """
@@ -246,16 +262,11 @@ def _eaSimple(
 
     return population, logbook
 
-if cython.compiled:
-    cxTwoPoint = _cxTwoPoint
-    cxOrdered = _cxOrdered
-    mutShuffleIndexes = _mutShuffleIndexes
-    genetic_algorithm = _eaSimple
-else:
-    # Use original DEAP functions if not compiled with Cython
-    from deap.tools import cxTwoPoint, cxOrdered, mutShuffleIndexes
-    from deap.algorithms import eaSimple as eaSimple_deap
-    genetic_algorithm = eaSimple_deap
+
+cxTwoPoint = _cxTwoPoint
+cxOrdered = _cxOrdered
+mutShuffleIndexes = _mutShuffleIndexes
+genetic_algorithm = _eaSimple
 
 def crossover(ind1: Individual, ind2: Individual) -> tuple[Individual, Individual]:
     """
@@ -266,17 +277,18 @@ def crossover(ind1: Individual, ind2: Individual) -> tuple[Individual, Individua
     """
     choice: cython.int
 
-    for (order1, times1), (order2, times2) in zip(ind1, ind2):
+    for i in range(len(ind1)):
         # crossover only order, or only times, or both
         choice = random.randint(1, 3)
         if choice & 0b01:
-            cxOrdered(order1, order2)
+            cxOrdered(ind1[i], ind2[i])
         if choice & 0b10:
-            cxTwoPoint(times1, times2)
+            cxTwoPoint(ind1[i], ind2[i])
 
     return ind1, ind2
 
-def mutation(individual: Individual, indpb: float, low: int, up: int) -> tuple[Individual]:
+
+def mutation(ind: Individual, indpb: float, low: int, up: int) -> tuple[Individual]:
     """
     Mutation that applies random changes to an individual.
 
@@ -285,14 +297,15 @@ def mutation(individual: Individual, indpb: float, low: int, up: int) -> tuple[I
     """
     choice: cython.int
 
-    for order, times in individual:
+    for i in range(len(ind)):
         # mutation only order, or only times, or both
         choice = random.randint(1, 3)
         if choice & 0b01:
-            mutShuffleIndexes(order, indpb)
+            mutShuffleIndexes(ind[i], indpb)
         if choice & 0b10:
-            mutation_change_by_one(times, indpb, low, up)
-    return individual,
+            mutation_change_by_one(ind[i], indpb, low, up)
+
+    return ind,
 
 
 class LinearSchedule:
@@ -315,6 +328,7 @@ def _hill_climbing_compare(individual: Individual, new_individual: Individual, t
     """
     return new_individual.fitness.values[0] > individual.fitness.values[0]
 
+
 def _simulated_annealing_compare(individual: Individual, new_individual: Individual, toolbox: Toolbox, gen: int) -> bool:
     """
     Simulated annealing comparison function.
@@ -328,6 +342,7 @@ def _simulated_annealing_compare(individual: Individual, new_individual: Individ
         print(f'Accepting worse solution with p={math.exp(delta / toolbox.schedule(gen))}')
         return True
     return False
+
 
 def _single_state_algorithm(
     population: list[Individual], toolbox: Toolbox, ngen: int, stats: Statistics | None = None,

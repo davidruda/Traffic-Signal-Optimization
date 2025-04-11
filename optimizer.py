@@ -18,7 +18,7 @@ from operators import genetic_algorithm, hill_climbing, simulated_annealing, cro
 
 parser = argparse.ArgumentParser()
 parser.add_argument('algorithm', choices=['ga', 'hc', 'sa'], help='Algorithm to use for optimization - Genetic Algorithm, Hill Climbing, Simulated Annealing.')
-parser.add_argument('--data', default='e', type=str, help='Input data.')
+parser.add_argument('--data', choices=TEST_DATA, help='Input dataset - a, b, c, d, e, f.')
 parser.add_argument('--population', default=100, type=int, help='Number of individuals / solutions in a population.')
 parser.add_argument('--generations', default=100, type=int, help='Number of generations / iterations.')
 parser.add_argument('--crossover', default=0.5, type=float, help='Crossover probability (Genetic Algorithm only).')
