@@ -6,6 +6,7 @@
 #include <vector>
 #include <ranges>
 #include <limits>
+#include <random>
 
 #include "city_plan/intersection.hpp"
 
@@ -92,6 +93,26 @@ private:
 };
 
 void set_seed(unsigned long seed);
+
+/// Use this exact one deterministic random shuffle algorithm (Fisher–Yates Knuth shuffle) instead of relying on
+/// different implementations of `std::shuffle` across different compilers and std libraries producing different results.
+///
+/// However, this function is still not totally platform independent because it relies on `std::uniform_int_distribution` implementation.
+/// On Windows, it produces the same results with MSVC, GCC and Clang.
+/// On Linux, it produces the same results with GCC and Clang but only with `-stdlib=libstdc++` - not with `-stdlib=libc++`.
+///
+/// Source: https://en.cppreference.com/w/cpp/algorithm/random_shuffle#Version_3
+template<class RandomIt, class URBG>
+void deterministic_shuffle(RandomIt first, RandomIt last, URBG &&g){
+    using diff_t = std::iterator_traits<RandomIt>::difference_type;
+    using distr_t = std::uniform_int_distribution<diff_t>;
+    using param_t = distr_t::param_type;
+
+    distr_t D;
+    for (diff_t i = last - first - 1; i > 0; --i) {
+        std::swap(first[i], first[D(g, param_t(0, i))]);
+    }
+}
 }
 
 #endif

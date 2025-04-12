@@ -1,6 +1,5 @@
 #include <algorithm>
 #include <cassert>
-#include <random>
 #include <stdexcept>
 
 #include "simulation/schedule.hpp"
@@ -106,7 +105,8 @@ void Schedule::set(Order order_type, Times times_type) {
     order.assign(street_ids.begin(), street_ids.end());
 
     if (order_type == Order::RANDOM) {
-        std::ranges::shuffle(order, random_engine);
+        // Use our own shuffle function instead of std::shuffle for more consistent results
+        deterministic_shuffle(order.begin(), order.end(), random_engine);
     }
 
     if (times_type == Times::DEFAULT) {
