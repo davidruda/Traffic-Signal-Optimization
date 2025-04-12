@@ -18,18 +18,25 @@ from operators import genetic_algorithm, hill_climbing, simulated_annealing, cro
 
 parser = argparse.ArgumentParser()
 parser.add_argument('algorithm', choices=['ga', 'hc', 'sa'], help='Algorithm to use for optimization - Genetic Algorithm, Hill Climbing, Simulated Annealing.')
-parser.add_argument('--data', choices=TEST_DATA, help='Input dataset - a, b, c, d, e, f.')
+parser.add_argument('data', choices=TEST_DATA, help='Input dataset - a, b, c, d, e, f.')
+
 parser.add_argument('--population', default=100, type=int, help='Number of individuals / solutions in a population.')
 parser.add_argument('--generations', default=100, type=int, help='Number of generations / iterations.')
-parser.add_argument('--crossover', default=0.5, type=float, help='Crossover probability (Genetic Algorithm only).')
-parser.add_argument('--mutation', default=0.2, type=float, help='Mutation probability (Genetic Algorithm only).')
-parser.add_argument('--indpb', default=0.005, type=float, help='Probability of mutating each bit.')
-parser.add_argument('--order_init', default='random', choices=['adaptive', 'random', 'default'], help='Method for initializing the order of streets.')
+parser.add_argument('--order_init', default='default', choices=['adaptive', 'random', 'default'], help='Method for initializing the order of streets.')
 parser.add_argument('--times_init', default='default', choices=['scaled', 'default'], help='Method for initializing green light durations.')
-parser.add_argument('--temp', default=100, type=float, help='Initial temperature for cooling schedule (Simulated annealing only).')
-parser.add_argument('--threads', default=None, type=int, help='Number of threads for parallel execution.')
+parser.add_argument('--indpb', default=0.005, type=float, help='Probability of mutating each bit.')
+
 parser.add_argument('--seed', default=42, type=int, help='Random seed.')
+parser.add_argument('--threads', default=None, type=int, help='Number of threads for parallel execution.')
 parser.add_argument('--no-save', default=False, action='store_true', help='Do not save results and plots.')
+
+ga_group = parser.add_argument_group('Genetic Algorithm Hyperparameters')
+ga_group.add_argument('--crossover', default=0.5, type=float, help='Crossover probability (Genetic Algorithm only).')
+ga_group.add_argument('--mutation', default=0.2, type=float, help='Mutation probability (Genetic Algorithm only).')
+
+sa_group = parser.add_argument_group('Simulated Annealing Hyperparameters')
+sa_group.add_argument('--temp', default=100, type=float, help='Initial temperature for cooling schedule (Simulated annealing only).')
+
 
 class Optimizer:
     def __init__(self, args):

@@ -8,7 +8,7 @@ class TestOptimizer(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.args = [
-            '--data=c',
+            'c', # dataset
             '--indpb=0.0005',
             f'--threads={max(2, os.cpu_count())}',
             '--no-save',
@@ -36,9 +36,9 @@ class TestOptimizer(unittest.TestCase):
     def _run_algorithm(self, alg):
         print('\n' + f' {self.algorithm[alg]} '.center(70, '-'))
         args = parser.parse_args([
+            alg,
             *self.args,
             *self.algorithm_args[alg],
-            alg,
         ])
         optimizer = Optimizer(args)
         optimizer.run(save_statistics=False)
