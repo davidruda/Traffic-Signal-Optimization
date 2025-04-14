@@ -29,6 +29,7 @@ parser.add_argument('--indpb', default=0.005, type=float, help='Probability of m
 parser.add_argument('--seed', default=42, type=int, help='Random seed.')
 parser.add_argument('--threads', default=None, type=int, help='Number of threads for parallel execution.')
 parser.add_argument('--no-save', default=False, action='store_true', help='Do not save results and plots.')
+parser.add_argument('--logdir', default=None, type=str, help='Custom name for the log directory.')
 
 ga_group = parser.add_argument_group('Genetic Algorithm Hyperparameters')
 ga_group.add_argument('--crossover', default=0.5, type=float, help='Crossover probability (Genetic Algorithm only).')
@@ -205,11 +206,14 @@ class Optimizer:
             print('Run the optimizer first!')
             return
 
-        logdir = os.path.join('logs', self._args.data, '{}-{}-{}'.format(
-            os.path.basename(globals().get('__file__', 'notebook')),
-            datetime.datetime.now().strftime('%Y-%m-%d_%H%M%S'),
-            ','.join(('{}={}'.format(re.sub('(.)[^_]*_?', r'\1', k), v) for k, v in sorted(vars(self._args).items())))
-        ))
+        if self._args.logdir is None:
+            logdir = os.path.join('logs', self._args.data, '{}-{}-{}'.format(
+                os.path.basename(globals().get('__file__', 'notebook')),
+                datetime.datetime.now().strftime('%Y-%m-%d_%H%M%S'),
+                ','.join(('{}={}'.format(re.sub('(.)[^_]*_?', r'\1', k), v) for k, v in sorted(vars(self._args).items())))
+            ))
+        else:
+            logdir = self._args.logdir
         os.makedirs(logdir, exist_ok=True)
         self._save_data_plots(logdir, show_plot)
         self._save_best_schedules(logdir)
