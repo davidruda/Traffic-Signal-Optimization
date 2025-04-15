@@ -74,8 +74,7 @@ def normalized_score(score: int, data: str) -> float:
 
     The score is normalized between the default score (baseline) and the maximum known score.
     """
-    score_norm = (score - DEFAULT_SCORE[data]) / (MAX_KNOWN_SCORE[data] - DEFAULT_SCORE[data])
-    return round(score_norm, ndigits=2)
+    return (score - DEFAULT_SCORE[data]) / (MAX_KNOWN_SCORE[data] - DEFAULT_SCORE[data])
 
 def get_data_filename(data: str) -> str:
     """
