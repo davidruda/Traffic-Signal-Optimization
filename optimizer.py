@@ -24,7 +24,7 @@ parser.add_argument('--population', default=100, type=int, help='Number of indiv
 parser.add_argument('--generations', default=100, type=int, help='Number of generations / iterations.')
 parser.add_argument('--order_init', default='default', choices=['adaptive', 'random', 'default'], help='Method for initializing the order of streets.')
 parser.add_argument('--times_init', default='default', choices=['scaled', 'default'], help='Method for initializing green light durations.')
-parser.add_argument('--indpb', default=0.005, type=float, help='Probability of mutating each bit.')
+parser.add_argument('--mutation_bit_rate', default=10, type=float, help='If between 0-1, it defines the probability of mutating each bit. If >= 1, it defines the expected value of bits to mutate.')
 
 parser.add_argument('--seed', default=42, type=int, help='Random seed.')
 parser.add_argument('--threads', default=None, type=int, help='Number of threads for parallel execution.')
@@ -36,7 +36,7 @@ ga_group.add_argument('--crossover', default=0.5, type=float, help='Crossover pr
 ga_group.add_argument('--mutation', default=0.2, type=float, help='Mutation probability (Genetic Algorithm only).')
 
 sa_group = parser.add_argument_group('Simulated Annealing Hyperparameters')
-sa_group.add_argument('--temp', default=100, type=float, help='Initial temperature for cooling schedule (Simulated annealing only).')
+sa_group.add_argument('--temperature', default=100, type=float, help='Initial temperature for cooling schedule (Simulated annealing only).')
 
 
 class Optimizer:
@@ -79,11 +79,22 @@ class Optimizer:
         self._toolbox.register('mate', crossover)
 
         # Cooling schedule for simulated annealing
-        self._toolbox.register('schedule', LinearSchedule(start=self._args.temp, steps=self._args.generations))
+        self._toolbox.register('schedule', LinearSchedule(start=self._args.temperature, steps=self._args.generations))
 
         green_min = 0
         green_max = self.plan.duration
-        self._toolbox.register('mutate', mutation, indpb=self._args.indpb, low=green_min, up=green_max)
+
+        mutation_bit_rate = self._args.mutation_bit_rate
+        if mutation_bit_rate >= 0 and mutation_bit_rate < 1:
+            # Probability of mutating each bit
+            indpb = mutation_bit_rate
+        elif mutation_bit_rate >= 1:
+            # Expected number of bits to mutate
+            indpb = mutation_bit_rate / PARAMETERS[self._args.data]
+        else:
+            raise ValueError('Mutation bit rate must be >= 0.')
+        print(indpb)
+        self._toolbox.register('mutate', mutation, indpb=indpb, low=green_min, up=green_max)
 
         norm_score = partial(normalized_score, data=self._args.data)
         self._stats.register('norm_max', lambda x: norm_score(np.max(x)))
@@ -140,7 +151,7 @@ class Optimizer:
         ax1.axhline(1, color='y', linestyle='--', label='max known score')
 
         ax1.set_xlabel('Number of generations')
-        ax1.set_ylabel('% of max known score')
+        ax1.set_ylabel('Normalized score')
 
         # Keep some slack around the y-axis limits to display the baseline and max known score
         y_min = np.min([-0.03, np.min(norm_max)])
