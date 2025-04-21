@@ -9,7 +9,6 @@ class TestOptimizer(unittest.TestCase):
     def setUpClass(cls):
         cls.args = [
             'c', # dataset
-            '--indpb=0.0005',
             f'--threads={max(2, os.cpu_count())}',
             '--no-save',
         ]
