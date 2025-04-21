@@ -20,6 +20,8 @@ logs/
 *.c
 *.html
 
+experiments/*.pdf
+
 /.gitlab-ci-local/
 
 CMakeSettings.json

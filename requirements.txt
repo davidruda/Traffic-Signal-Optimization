@@ -5,9 +5,8 @@ numpy
 deap
 matplotlib
 pandas
+seaborn
 
 Cython
 # In python>=3.12, `cythonize` crashes without setuptools
 setuptools
-
-ipykernel
