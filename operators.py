@@ -317,7 +317,19 @@ class LinearSchedule:
         self.steps = steps
 
     def __call__(self, current: int) -> float:
-        return self.start * (1.0 - current / self.steps) + 1e-6
+        return self.start * (1.0 - current / self.steps) + 1e-9
+
+
+class InverseSchedule:
+    """
+    Inverse / hyperbolic cooling schedule for simulated annealing.
+    """
+    def __init__(self, start: float, steps: int) -> None:
+        self.start = start
+        self.steps = steps
+
+    def __call__(self, current: int) -> float:
+        return self.start * (1.0 / current) + 1e-9
 
 
 def _hill_climbing_compare(individual: Individual, new_individual: Individual, toolbox: Toolbox, gen: int) -> bool:

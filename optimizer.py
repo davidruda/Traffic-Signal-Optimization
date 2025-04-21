@@ -32,8 +32,8 @@ parser.add_argument('--no-save', default=False, action='store_true', help='Do no
 parser.add_argument('--logdir', default=None, type=str, help='Custom name for the log directory.')
 
 ga_group = parser.add_argument_group('Genetic Algorithm Hyperparameters')
-ga_group.add_argument('--crossover', default=0.5, type=float, help='Crossover probability (Genetic Algorithm only).')
-ga_group.add_argument('--mutation', default=0.2, type=float, help='Mutation probability (Genetic Algorithm only).')
+ga_group.add_argument('--crossover', default=0.6, type=float, help='Crossover probability (Genetic Algorithm only).')
+ga_group.add_argument('--mutation', default=0.4, type=float, help='Mutation probability (Genetic Algorithm only).')
 
 sa_group = parser.add_argument_group('Simulated Annealing Hyperparameters')
 sa_group.add_argument('--temperature', default=100, type=float, help='Initial temperature for cooling schedule (Simulated annealing only).')
@@ -93,7 +93,6 @@ class Optimizer:
             indpb = mutation_bit_rate / PARAMETERS[self._args.data]
         else:
             raise ValueError('Mutation bit rate must be >= 0.')
-        print(indpb)
         self._toolbox.register('mutate', mutation, indpb=indpb, low=green_min, up=green_max)
 
         norm_score = partial(normalized_score, data=self._args.data)
@@ -157,23 +156,20 @@ class Optimizer:
         y_min = np.min([-0.03, np.min(norm_max)])
         y_max = np.max([1.03, np.max(norm_max)])
         ax1.set_ylim(y_min, y_max)
-
-        ax1.legend(framealpha=1)
+        ax1.legend()
         best_fitness = np.max(max)
         ax1.set_title(f'Best score: {best_fitness:,} ({100 * normalized_score(best_fitness, self._args.data):.2f} %)')
 
+        ax2 = ax1.twinx()
+        ax2.set_ylim(*ax1.get_ylim())
+        ax2.grid(False)
+        ax2.set_ylabel('Score')
         baseline = DEFAULT_SCORE[self._args.data]
         best_known = MAX_KNOWN_SCORE[self._args.data]
 
-        ax2 = ax1.twinx()
-        ax2.set_ylabel('Score')
-        y_min = np.min([baseline, np.min(max)])
-        y_max = np.max([best_known, np.max(max)])
-        ax2.set_ylim(y_min, y_max)
-
-        ticks = np.linspace(y_min, y_max, num=6)
-        labels = (f'{int(x):,}' for x in ticks)
-        ax2.set_yticks(ticks, labels)
+        labels = np.linspace(baseline, best_known, num=6)
+        labels = (f'{int(x):,}' for x in labels)
+        ax2.set_yticks([0, 0.2, 0.4, 0.6, 0.8, 1], labels)
 
         # Avoid scientific notation for x-axis ticks
         xticks = ax1.get_xticks()
@@ -181,8 +177,7 @@ class Optimizer:
         ax1.set_xticklabels([f'{x:,.0f}' for x in xticks])
 
         fig.tight_layout()
-        fig.savefig(os.path.join(logdir, f'{self._args.data}.pdf'), format='pdf')
-        fig.savefig(os.path.join(logdir, f'{self._args.data}.svg'), format='svg')
+        fig.savefig(os.path.join(logdir, f'{self._args.data}.pdf'), bbox_inches='tight')
 
         if show_plot:
             plt.show()
