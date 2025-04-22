@@ -1,11 +1,9 @@
 \chapter{Experiments}
 
 In this chapter, we explain the setup of our experiments, describe how we measure the performance of different methods, and present the results.
-On the hardware side, all experiments were run on a laptop with a 16 thread Intel Core i7-12650H CPU and 32 GB of RAM. On the software side, Windows 11 24H2 was used as the operating system, MSVC 19.43 as the C++ compiler, and Python 3.12.
+All experiments were performed on a laptop with a 10-core, 16-thread Intel Core i7-12650H CPU and 32 GB of RAM. As for the software, Windows 11 24H2 was the operating system, MSVC 19.43 was the C++ compiler, and Python 3.12 was used.
 
-\section{Experiments Setup}
-
-\subsection{Datasets}
+\section{Datasets}
 
 Here we briefly describe all datasets provided with the Google Hash Code Traffic signalling problem. This is important because the datasets have different sizes and structures.
 
@@ -25,8 +23,8 @@ Here we briefly describe all datasets provided with the Google Hash Code Traffic
 \begin{figure}
     \centering
     % \includegraphics[width=\linewidth]{img/hashcode/figure5.png}
-    % \includegraphics[width=.8\linewidth]{img/hashcode/figure5.png}
-    \includegraphics[width=.6\linewidth]{img/hashcode/figure5.png}
+    % \includegraphics[width=.6\linewidth]{img/hashcode/figure5.png}
+    \includegraphics[width=.5\linewidth]{img/hashcode/figure5.png}
     \caption[Dataset A]{
         Dataset A \cite{google2023google}.
     }
@@ -38,29 +36,28 @@ Here we briefly describe all datasets provided with the Google Hash Code Traffic
     \includegraphics[width=\linewidth]{img/screenshots/hashcode_datasets_b.png}
     % \includegraphics[width=.8\linewidth]{img/screenshots/hashcode_datasets_b.png}
     \caption[Dataset B]{
-        Dataset B based on the real data of Lisbon on the right \cite{google2023google}.
+        Dataset B based on the real data of Lisbon on the right\footnotemark.
     }
     \label{fig:hashcode_dataset_b}
 \end{figure}
 
+\footnotetext{Screenshot from \href{https://www.youtube.com/watch?v=YPOVd-hQUjA}{Hash Code 2021: Online Qualification Round Livestream}.}
 
 \begin{figure}
     \centering
     \includegraphics[width=\linewidth]{img/screenshots/hashcode_datasets_c_e.png}
     % \includegraphics[width=.8\linewidth]{img/screenshots/hashcode_datasets_c_e.png}
     \caption[Datasets C and E]{
-        Datasets C and E \cite{google2023google}.
-    }
-    \label{fig:hashcode_dataset_c_e}
-\end{figure}
+        Datasets C and E\footnotemark.
+        }
+        \label{fig:hashcode_dataset_c_e}
+    \end{figure}
+    
+\footnotetext{See previous footnote.}
 
 \bigskip
 
 As previously stated, each dataset yields an absolute score in different range. To compare the performance across all datasets, we normalize the scores to a 0--1 range. 0 is a baseline solution with default order and default times and 1 is the maximum known score for the dataset. Note that the baseline is already a good solution and there may not be much room to improve further e.g., in dataset B.
-
-\subsection{Measuring Performance}
-
-All datasets 
 
 \section{Experiment 1: Initialization}
 
@@ -74,3 +71,5 @@ All datasets
     }
     \label{fig:init_experiment}
 \end{figure}
+
+\section{Experiment 2: Optimization}
