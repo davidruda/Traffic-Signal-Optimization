@@ -13,14 +13,14 @@ for dataset in TEST_DATA:
     # Default score (baseline) is the same for all datasets - 0.0
 
     adaptive = normalized_score(ADAPTIVE_SCORE[dataset], data=dataset)
-    data['dataset'].append(dataset)
+    data['dataset'].append(dataset.upper())
     data['method'].append('adaptive')
     data['score'].append(adaptive)
 
     simulation = Simulation(create_city_plan(dataset))
     simulation.scaled_schedules()
     scaled = normalized_score(simulation.score(), data=dataset)
-    data['dataset'].append(dataset)
+    data['dataset'].append(dataset.upper())
     data['method'].append('scaled')
     data['score'].append(scaled)
 
@@ -30,7 +30,7 @@ for dataset in TEST_DATA:
     for _ in range(RANDOM_REPEATS):
         simulation.random_schedules()
         random.append(normalized_score(simulation.score(), data=dataset))
-    data['dataset'].extend([dataset] * RANDOM_REPEATS)
+    data['dataset'].extend([dataset.upper()] * RANDOM_REPEATS)
     data['method'].extend(['random'] * RANDOM_REPEATS)
     data['score'].extend(random)
 
