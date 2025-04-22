@@ -61,15 +61,33 @@ As previously stated, each dataset yields an absolute score in different range. 
 
 \section{Experiment 1: Initialization}
 
+In the first experiment, we compare the performance of different initialization methods across all datasets. The goal is to figure out how much we can improve the baseline solution and which initialization method to use for further optimization.
+
+\subsection*{Methodology}
+
+We compare three initialization methods: \textit{adaptive}---adaptive order and default times, \textit{random}---random order and default times, and \textit{scaled}---default order and scaled times. Since the random method is stochastic, it was run 100 times and averaged. The rest of the methods are deterministic and therefore run only once.
+
+\subsection*{Results}
+
+The results are shown in Figure~\ref{fig:init_experiment}. Overall, the adaptive method provides the biggest improvement over the baseline. It also yields a really high score for the largest dataset D. The only exception is the dataset F, where the otherwise mediocre scaled method performs really well. The random method generally performs the same as the baseline but it can still be a good initialization starting point if we care about variety and randomness in the solution. 
+
 \begin{figure}
     \centering
     % \includegraphics[width=\linewidth]{img/screenshots/hashcode_datasets_c_e.png}
     % \includegraphics[width=.8\linewidth]{img/screenshots/hashcode_datasets_c_e.png}
     \includegraphics[width=\linewidth]{img/experiments/init_experiment.pdf}
     \caption[Initialization Experiment]{
-        Initialization Experiment.
+        Initialization Experiment
     }
     \label{fig:init_experiment}
 \end{figure}
 
 \section{Experiment 2: Optimization}
+
+In the second experiment, we compare different optimization methods on datasets B--F. The goal is to find if some method is superior to others or if the ideal method is dataset-dependent. We also want to see how much we can improve from the starting solutions.
+
+\subsection*{Methodology}
+
+We compare the three previously mentioned optimization methods: \textit{genetic algorithm}, \textit{hill climbing} and \textit{simulated annealing}. For each dataset and method, 10 runs with different seeds were performed and averaged to obtain reliable results. ...
+
+\subsection*{Results}
