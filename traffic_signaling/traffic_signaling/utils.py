@@ -9,6 +9,15 @@ except ImportError:
 
 # Short names of the datasets.
 TEST_DATA = ['a', 'b', 'c', 'd', 'e', 'f']
+# Long names of the datasets.
+DATA_NICKNAMES = {
+    'a': 'An example',
+    'b': 'By the ocean',
+    'c': 'Checkmate',
+    'd': 'Daily commute',
+    'e': 'Etoile',
+    'f': 'Forever jammed'
+}
 
 # Score for each dataset with default schedules - default order and default times.
 DEFAULT_SCORE = {
