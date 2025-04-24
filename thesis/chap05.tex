@@ -1,4 +1,4 @@
-\chapter{Experiments}
+\chapter{Experiments} \label{chap:experiments}
 
 In this chapter, we explain the setup of our experiments, describe how we measure the performance of different methods, and present the results.
 All experiments were performed on a laptop with a 10-core, 16-thread Intel Core i7-12650H CPU and 32 GB of RAM. As for the software, Windows 11 24H2 was the operating system, MSVC 19.43 was the C++ compiler, and Python 3.12 was used.
@@ -61,15 +61,11 @@ As previously stated, each dataset yields an absolute score in different range. 
 
 \section{Experiment 1: Initialization}
 
-In the first experiment, we compare the performance of different initialization methods across all datasets. The goal is to figure out how much we can improve the baseline solution and which initialization method to use for further optimization.
+In the first experiment, we compare the performance of different initialization methods across all datasets. The goal is to figure out how much we can improve the baseline solution by using a ``smarter'' initialization and which initialization methods to use for further optimization.
 
 \subsection*{Methodology}
 
 We compare three initialization methods: \textit{adaptive}---adaptive order and default times, \textit{random}---random order and default times, and \textit{scaled}---default order and scaled times. Since the random method is stochastic, it was run 100 times and averaged. The rest of the methods are deterministic and therefore run only once.
-
-\subsection*{Results}
-
-The results are shown in Figure~\ref{fig:init_experiment}. Overall, the adaptive method provides the biggest improvement over the baseline. It also yields a really high score for the largest dataset D. The only exception is the dataset F, where the otherwise mediocre scaled method performs really well. The random method generally performs the same as the baseline but it can still be a good initialization starting point if we care about variety and randomness in the solution. 
 
 \begin{figure}
     \centering
@@ -81,6 +77,10 @@ The results are shown in Figure~\ref{fig:init_experiment}. Overall, the adaptive
     }
     \label{fig:init_experiment}
 \end{figure}
+
+\subsection*{Results}
+
+The results are shown in Figure~\ref{fig:init_experiment}. Overall, the adaptive method provides the biggest improvement over the baseline. It also yields a really high score for the largest dataset D. The only exception is the dataset F, where the otherwise mediocre scaled method performs really well. The random method generally performs the same as the baseline but it can still be a good initialization starting point if we care about variety and randomness in the solution. 
 
 \section{Experiment 2: Optimization}
 

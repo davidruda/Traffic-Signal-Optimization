@@ -1,4 +1,4 @@
-\chapter{Theoretical Background of Optimization Methods}
+\chapter{Theoretical Background of Optimization Methods} \label{chap:optimization_methods}
 
 In this chapter, we cover the theory of the methods we use to optimize the traffic signalling problem. Specifically, we describe \textit{hill climbing} (Section~\ref{sec:hill_climbing}), \textit{simulated annealing} (Section~\ref{sec:simulated_annealing}) and \textit{genetic algorithm} (Section~\ref{sec:genetic_algorithm}). In Section~\ref{sec:initialization} and Section~\ref{sec:parallelization} we discuss common methods for initializing and parallelizing the algorithms.
 
@@ -142,7 +142,7 @@ When using optimization algorithms, it is always important to balance the trade-
 
 \section{Parallelization} \label{sec:parallelization}
 
-As hinted in the previous sections, heuristic algorithms can run for a long time. It is not uncommon to compute hundrets of thousands of fitness evaluations --- imagine a genetic algorithm with a population size of 200, run for 1000 generations. And the evaluations can take a while, especially if they are simulations, games, neural network training, or similar. As a result, we may want to use parallelization to speed up this process and fully utilize our computational resources.
+As hinted in the previous sections, heuristic algorithms can run for a long time. It is not uncommon to compute hundrets of thousands of fitness evaluations---imagine a genetic algorithm with a population size of 200, run for 1000 generations. And the evaluations can take a while, especially if they are simulations, games, neural network training, or similar. As a result, we may want to use parallelization to speed up this process and fully utilize our computational resources.
 
 Single-state methods like hill climbing and simulated annealing are inherently sequential and thus difficult to parallelize. But we can at least run multiple independent instances of the algorithm in parallel. Note that this different from methods like \textit{beam search}, where useful information is shared between the instances.
 

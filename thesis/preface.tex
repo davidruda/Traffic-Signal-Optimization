@@ -19,27 +19,20 @@
 % 4) Metaheuristiky
 % 5) Náhradní modely
 
-Traffic signal optimization is an important problem in today's world due to its
-significant impact on urban mobility and the environment. Effective traffic
-signal optimization reduces delays at intersections, which directly translates
-to saving time for commuters and improving the overall efficiency of
-transportation networks. By minimizing congestion, optimized traffic signals
-facilitate smoother traffic flow, which not only enhances the daily commute
-experience but also supports the economic vitality of urban areas by reducing
-the time lost in traffic.
+Due to its significant impact on urban mobility and the environment, Traffic Signal Control (TSC) is a widely studied problem. As the number of vehicles on the road continues to increase, its importance is growing even further.
+Traffic Signal Optimization is known to be a cost-effective method for reducing congestion without physically changing the road infrastructure.
+Optimized traffic lights reduce delays at intersections, which directly translates into time savings for commuters and improves the overall efficiency of transportation networks.
+Additionally, TSC plays a critical role in reducing vehicle emissions, helping to reduce pollution and promote environmental sustainability.
 
-Additionally, efficient traffic signal timing plays a
-critical role in reducing vehicle emissions, thereby contributing to lower
-pollution levels and promoting environmental sustainability. Furthermore, as
-urban populations continue to grow, the demand for more intelligent and
-responsive traffic management systems increases, making traffic signal
-optimization a key component in the development of smart cities and sustainable
-urban infrastructures.
+There are many approaches \cite{qadri2020state} to solving TSC. Early static, fixed-time designs have evolved into real-time adaptive systems and data-driven algorithms, utilizing data from various detectors and sensors. In practice, commonly used are adaptive traffic control systems (ATCS) such as SCOOT, SCATS, and SURTRAC \cite{smith2013surtrac}, which continuously adjust splits, offsets, and cycle lengths network-wide. In addition, optimization-based methods---such as Genetic Algorithms (GA), metaheuristics, and Model Predictive Control (MPC)---have also been employed for traffic signal planning and coordination \cite{qadri2020state, ye2019survey}. More recently, learning-based methods, particularly those based on Reinforcement Learning (RL) and Deep Reinforcement Learning (DRL), have demonstrated superior performance compared to traditionally used methods \cite{zhao2024survey, saadi2025survey}.
 
-An~example citation: \cite{google2023google} \cite{rodrigues2023principled} \cite{li2022building} \cite{fortin2012deap}.
+In this thesis, we focus on the Traffic signalling problem from the Google Hash Code 2021 competition. It serves as a simplified version of the real-world problem of traffic light optimization in a city. First, we implement a fast and efficient C++ simulator of the problem and wrap it as a Python package to allow for easy use and integration with the wide ecosystem of Python libraries. Then, we use the simulator to optimize the traffic light schedules using three heuristic algorithms: Genetic Algorithm (GA), Hill Climbing (HC), and Simulated Annealing (SA). We experimentally compare the performance of these algorithms on provided datasets of different sizes and structures.
 
-\section*{Related Work} \label{sec:related_work}
-\addcontentsline{toc}{section}{Related Work}
+The thesis is structured as follows. Chapter~\ref{chap:problem_statement} describes the Traffic signalling problem in detail, including the city layout, cars, traffic lights, and scoring system. Chapter~\ref{chap:optimization_methods} covers the theory of the optimization algorithms used in this thesis. Chapter ...
+
+Chapter~\ref{chap:experiments} presents the expertiments comparing the optimization algorithms on the provided datasets.
+
+Unused citations: Principled Modeling of the Google Hash Code Problems for Meta-Heuristics \cite{rodrigues2023principled}, Building a Simulator and Emulator for Traffic Signaling \cite{li2022building}.
 
 \section*{Contribution of the Thesis} \label{sec:contribution_of_the_thesis}
-\addcontentsline{toc}{section}{Contribution of the Thesis}
+% \addcontentsline{toc}{section}{Contribution of the Thesis}
