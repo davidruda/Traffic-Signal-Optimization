@@ -20,8 +20,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('algorithm', choices=['ga', 'hc', 'sa'], help='Algorithm to use for optimization - Genetic Algorithm, Hill Climbing, Simulated Annealing.')
 parser.add_argument('data', choices=TEST_DATA, help='Input dataset - a, b, c, d, e, f.')
 
-parser.add_argument('--population', default=100, type=int, help='Number of individuals / solutions in a population.')
-parser.add_argument('--generations', default=100, type=int, help='Number of generations / iterations.')
+# Common parameters for all algorithms
 parser.add_argument('--order_init', default='default', choices=['adaptive', 'random', 'default'], help='Method for initializing the order of streets.')
 parser.add_argument('--times_init', default='default', choices=['scaled', 'default'], help='Method for initializing green light durations.')
 parser.add_argument('--mutation_bit_rate', default=10, type=float, help='If between 0-1, it defines the probability of mutating each bit. If >= 1, it defines the expected value of bits to mutate.')
@@ -31,12 +30,16 @@ parser.add_argument('--threads', default=None, type=int, help='Number of threads
 parser.add_argument('--no-save', default=False, action='store_true', help='Do not save results and plots.')
 parser.add_argument('--logdir', default=None, type=str, help='Custom name for the log directory.')
 
-ga_group = parser.add_argument_group('Genetic Algorithm Hyperparameters')
-ga_group.add_argument('--crossover', default=0.6, type=float, help='Crossover probability (Genetic Algorithm only).')
-ga_group.add_argument('--mutation', default=0.4, type=float, help='Mutation probability (Genetic Algorithm only).')
+# Hyperparameters for Genetic Algorithm
+parser.add_argument('--population', default=100, type=int, help='Number of individuals in a population (Genetic Algorithm only).')
+parser.add_argument('--generations', default=100, type=int, help='Number of generations (Genetic Algorithm only).')
+parser.add_argument('--crossover', default=0.6, type=float, help='Crossover probability (Genetic Algorithm only).')
+parser.add_argument('--mutation', default=0.4, type=float, help='Mutation probability (Genetic Algorithm only).')
 
-sa_group = parser.add_argument_group('Simulated Annealing Hyperparameters')
-sa_group.add_argument('--temperature', default=100, type=float, help='Initial temperature for cooling schedule (Simulated annealing only).')
+# Hyperparameters for Hill Climbing and Simulated Annealing
+parser.add_argument('--instances', default=1, type=int, help='Number of independent instances to run in parallel (Hill Climbing and Simulated Annealing).')
+parser.add_argument('--iterations', default=5000, type=int, help='Number of iterations (Hill Climbing and Simulated Annealing).')
+parser.add_argument('--temperature', default=100, type=float, help='Initial temperature for cooling schedule (Simulated annealing only).')
 
 
 class Optimizer:
@@ -73,15 +76,20 @@ class Optimizer:
             'individual', tools.initIterate, creator.Individual, partial(self._create_individual, simulation=sim)
         )
         self._toolbox.register('population', tools.initRepeat, list, self._toolbox.individual)
-
-        self._toolbox.register('select', tools.selTournament, tournsize=3)
         self._toolbox.register('evaluate', self._evaluate)
-        self._toolbox.register('mate', crossover)
 
-        # Cooling schedule for simulated annealing
-        self._toolbox.register('schedule', LinearSchedule(start=self._args.temperature, steps=self._args.generations))
+        if self._args.algorithm == 'ga':
+            self._toolbox.register('select', tools.selTournament, tournsize=3)
+            self._toolbox.register('mate', crossover)
 
+        if self._args.algorithm == 'sa':
+            # Cooling schedule for simulated annealing
+            cooling_schedule = LinearSchedule(start=self._args.temperature, steps=self._args.iterations)
+            self._toolbox.register('schedule', cooling_schedule)
+
+        # Mininum value for green light duration
         green_min = 0
+        # Maximum value for green light duration
         green_max = self.plan.duration
 
         mutation_bit_rate = self._args.mutation_bit_rate
@@ -149,7 +157,7 @@ class Optimizer:
         ax1.axhline(0, color='m', linestyle='--', label='baseline')
         ax1.axhline(1, color='y', linestyle='--', label='max known score')
 
-        ax1.set_xlabel('Number of generations')
+        ax1.set_xlabel('Number of generations/iterations')
         ax1.set_ylabel('Normalized score')
 
         # Keep some slack around the y-axis limits to display the baseline and max known score
@@ -198,8 +206,8 @@ class Optimizer:
                 # Only count new individuals, not the unchanged ones from the previous generation
                 total_evaluations = sum(self._logbook.select('nevals'))
             else:
-                # Generations + 1 because we start from generation 0
-                total_evaluations = (self._args.generations + 1) * self._args.population
+                # Iterations + 1 because we start from 0
+                total_evaluations = (self._args.iterations + 1) * self._args.instances
 
             f.write(f'Total evaluations: {total_evaluations:,}\n')
             f.write('\n')
@@ -232,7 +240,8 @@ class Optimizer:
             'verbose': True
         }
         start = time.time()
-        population = self._toolbox.population(n=self._args.population)
+        num_instances = self._args.population if self._args.algorithm == 'ga' else self._args.instances
+        population = self._toolbox.population(n=num_instances)
         print(f'Population created: {time.time() - start:.4f}s')
 
         if self._args.algorithm == 'ga':
@@ -242,12 +251,12 @@ class Optimizer:
 
         elif self._args.algorithm == 'hc':
             population, self._logbook = hill_climbing(
-                population, self._toolbox, self._args.generations, **kwargs
+                population, self._toolbox, self._args.iterations, **kwargs
             )
 
         elif self._args.algorithm == 'sa':
             population, self._logbook = simulated_annealing(
-                population, self._toolbox, self._args.generations, **kwargs
+                population, self._toolbox, self._args.iterations, **kwargs
             )
 
         self._elapsed_time = datetime.timedelta(seconds=int(time.time() - start))

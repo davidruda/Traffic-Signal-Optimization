@@ -419,7 +419,7 @@ def _single_state_algorithm(
         if verbose:
             print(logbook.stream)
 
-        print(f'Generation {gen}: {time.time() - start:.4f}s')
+        print(f'Iteration {gen}: {time.time() - start:.4f}s')
 
     return population, logbook
 

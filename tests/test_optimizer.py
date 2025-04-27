@@ -13,8 +13,8 @@ class TestOptimizer(unittest.TestCase):
             '--no-save',
         ]
         cls.algorithm_args = {
-            'hc': ['--population=4', '--generations=100'],
-            'sa': ['--population=4', '--generations=100'],
+            'hc': ['--instances=4', '--iterations=100'],
+            'sa': ['--instances=4', '--iterations=100'],
             'ga': ['--population=100', '--generations=10'],
         }
         cls.algorithm = {

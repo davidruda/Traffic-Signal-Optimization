@@ -54,12 +54,12 @@ logs/b/ga_adaptive:
 
 logs/b/hc_adaptive:
 	$(PYTHON) optimize_experiment.py hc_adaptive b \
-		"hc b --population 1 --generations 228000 --order_init adaptive --times_init default" \
+		"hc b --instances 1 --iterations 228000 --order_init adaptive --times_init default" \
 		--parallel
 
 logs/b/sa_adaptive:
 	$(PYTHON) optimize_experiment.py sa_adaptive b \
-		"sa b --population 1 --generations 228000 --order_init adaptive --times_init default --temperature 1" \
+		"sa b --instances 1 --iterations 228000 --order_init adaptive --times_init default --temperature 1" \
 		--parallel
 
 #################################### Data c ####################################
@@ -70,12 +70,12 @@ logs/c/ga_adaptive:
 
 logs/c/hc_adaptive:
 	$(PYTHON) optimize_experiment.py hc_adaptive c \
-		"hc c --population 1 --generations 114000 --order_init adaptive --times_init default" \
+		"hc c --instances 1 --iterations 114000 --order_init adaptive --times_init default" \
 		--parallel
 
 logs/c/sa_adaptive:
 	$(PYTHON) optimize_experiment.py sa_adaptive c \
-		"sa c --population 1 --generations 114000 --order_init adaptive --times_init default --temperature 10" \
+		"sa c --instances 1 --iterations 114000 --order_init adaptive --times_init default --temperature 10" \
 		--parallel
 
 #################################### Data d ####################################
@@ -86,12 +86,12 @@ logs/d/ga_adaptive:
 
 logs/d/hc_adaptive:
 	$(PYTHON) optimize_experiment.py hc_adaptive d \
-		"hc d --population 1 --generations 15200 --order_init adaptive --times_init default --mutation_bit_rate 1e-5" \
+		"hc d --instances 1 --iterations 15200 --order_init adaptive --times_init default --mutation_bit_rate 1e-5" \
 		--parallel
 
 logs/d/sa_adaptive:
 	$(PYTHON) optimize_experiment.py sa_adaptive d \
-		"sa d --population 1 --generations 15200 --order_init adaptive --times_init default --mutation_bit_rate 1e-5 --temperature 10" \
+		"sa d --instances 1 --iterations 15200 --order_init adaptive --times_init default --mutation_bit_rate 1e-5 --temperature 10" \
 		--parallel
 
 #################################### Data e ####################################
@@ -102,12 +102,12 @@ logs/e/ga_random:
 
 logs/e/hc_random:
 	$(PYTHON) optimize_experiment.py hc_random e \
-		"hc e --population 1 --generations 304000 --order_init random --times_init default" \
+		"hc e --instances 1 --iterations 304000 --order_init random --times_init default" \
 		--parallel
 
 logs/e/sa_random:
 	$(PYTHON) optimize_experiment.py sa_random e \
-		"sa e --population 1 --generations 304000 --order_init random --times_init default --temperature 100" \
+		"sa e --instances 1 --iterations 304000 --order_init random --times_init default --temperature 100" \
 		--parallel
 
 #################################### Data f ####################################
@@ -118,10 +118,10 @@ logs/f/ga_random_scaled:
 
 logs/f/hc_random_scaled:
 	$(PYTHON) optimize_experiment.py hc_random_scaled f \
-		"hc f --population 1 --generations 114000 --order_init random --times_init scaled" \
+		"hc f --instances 1 --iterations 114000 --order_init random --times_init scaled" \
 		--parallel
 
 logs/f/sa_random_scaled:
 	$(PYTHON) optimize_experiment.py sa_random_scaled f \
-		"sa f --population 1 --generations 114000 --order_init random --times_init scaled --temperature 100" \
+		"sa f --instances 1 --iterations 114000 --order_init random --times_init scaled --temperature 100" \
 		--parallel
