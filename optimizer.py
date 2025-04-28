@@ -14,7 +14,10 @@ import numpy as np
 
 from traffic_signaling import *
 
-from operators import genetic_algorithm, hill_climbing, simulated_annealing, crossover, mutation, LinearSchedule
+from operators import (
+    genetic_algorithm, hill_climbing, simulated_annealing,
+    crossover, mutation, LinearSchedule, tournament_selection_with_elitism
+)
 
 parser = argparse.ArgumentParser()
 parser.add_argument('algorithm', choices=['ga', 'hc', 'sa'], help='Algorithm to use for optimization - Genetic Algorithm, Hill Climbing, Simulated Annealing.')
@@ -35,6 +38,8 @@ parser.add_argument('--population', default=100, type=int, help='Number of indiv
 parser.add_argument('--generations', default=100, type=int, help='Number of generations (Genetic Algorithm only).')
 parser.add_argument('--crossover', default=0.6, type=float, help='Crossover probability (Genetic Algorithm only).')
 parser.add_argument('--mutation', default=0.4, type=float, help='Mutation probability (Genetic Algorithm only).')
+parser.add_argument('--elitism', default=0.1, type=float, help='Elitism rate (Genetic Algorithm only).')
+parser.add_argument('--tournsize', default=3, type=int, help='Tournament size for selection (Genetic Algorithm only).')
 
 # Hyperparameters for Hill Climbing and Simulated Annealing
 parser.add_argument('--instances', default=1, type=int, help='Number of independent instances to run in parallel (Hill Climbing and Simulated Annealing).')
@@ -79,7 +84,10 @@ class Optimizer:
         self._toolbox.register('evaluate', self._evaluate)
 
         if self._args.algorithm == 'ga':
-            self._toolbox.register('select', tools.selTournament, tournsize=3)
+            selection = partial(
+                tournament_selection_with_elitism, tournsize=self._args.tournsize, elitism=self._args.elitism
+            )
+            self._toolbox.register('select', selection)
             self._toolbox.register('mate', crossover)
 
         if self._args.algorithm == 'sa':

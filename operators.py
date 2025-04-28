@@ -7,7 +7,7 @@ import time
 import cython
 
 from deap.base import Toolbox
-from deap.tools import Logbook, Statistics, HallOfFame
+from deap.tools import Logbook, Statistics, HallOfFame, selBest, selTournament
 
 # Compile this file with Cython to speed up the optimization
 # cythonize -3ai operators.py
@@ -156,6 +156,14 @@ def _mutShuffleIndexes(schedule: tuple, indpb: cython.float):
             # Swap both order and times because times are based on order
             order[i], order[swap_indx] = order[swap_indx], order[i]
             times[i], times[swap_indx] = times[swap_indx], times[i]
+
+
+def tournament_selection_with_elitism(
+    population: list[Individual], k: int, tournsize: int, elitism: float
+) -> list[Individual]:
+    # https://groups.google.com/g/deap-users/c/iannnLI2ncE
+    num_best = int(elitism * k)
+    return selBest(population, num_best) + selTournament(population, k - num_best, tournsize)
 
 
 def _varAnd(
