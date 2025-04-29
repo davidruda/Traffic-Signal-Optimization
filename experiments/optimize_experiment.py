@@ -5,7 +5,6 @@ import subprocess
 
 parser = argparse.ArgumentParser()
 parser.add_argument('name', type=str, help='Name of the experiment.')
-parser.add_argument('data', choices=['a', 'b', 'c', 'd', 'e', 'f'], help='Dataset of the experiment.')
 parser.add_argument('parameters', type=str, help='All parameters for `optimizer.py` in one string.' )
 parser.add_argument('--parallel', action='store_true', help='Run different seeds in parallel, not sequentially.')
 args = parser.parse_args()
@@ -18,7 +17,8 @@ if platform.system() == 'Windows':
 else:
     PYTHON = '../.venv/bin/python'
 
-EXPERIMENT_DIR = f'logs/{args.data}/{args.name}'
+DATA = args.parameters.split()[1]
+EXPERIMENT_DIR = f'logs/{DATA}/{args.name}'
 
 processes = []
 # Run command for each seed

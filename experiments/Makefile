@@ -48,80 +48,80 @@ run_f: logs/f/ga_random_scaled logs/f/hc_random_scaled logs/f/sa_random_scaled
 
 #################################### Data b ####################################
 logs/b/ga_adaptive:
-	$(PYTHON) optimize_experiment.py ga_adaptive b \
+	$(PYTHON) optimize_experiment.py ga_adaptive \
 		"ga b --population 100 --generations 3000 --order_init adaptive --times_init default --threads 16" \
 		--parallel
 
 logs/b/hc_adaptive:
-	$(PYTHON) optimize_experiment.py hc_adaptive b \
+	$(PYTHON) optimize_experiment.py hc_adaptive \
 		"hc b --instances 1 --iterations 228000 --order_init adaptive --times_init default" \
 		--parallel
 
 logs/b/sa_adaptive:
-	$(PYTHON) optimize_experiment.py sa_adaptive b \
+	$(PYTHON) optimize_experiment.py sa_adaptive \
 		"sa b --instances 1 --iterations 228000 --order_init adaptive --times_init default --temperature 1" \
 		--parallel
 
 #################################### Data c ####################################
 logs/c/ga_adaptive:
-	$(PYTHON) optimize_experiment.py ga_adaptive c \
+	$(PYTHON) optimize_experiment.py ga_adaptive \
 		"ga c --population 100 --generations 1500 --order_init adaptive --times_init default --threads 16" \
 		--parallel
 
 logs/c/hc_adaptive:
-	$(PYTHON) optimize_experiment.py hc_adaptive c \
+	$(PYTHON) optimize_experiment.py hc_adaptive \
 		"hc c --instances 1 --iterations 114000 --order_init adaptive --times_init default" \
 		--parallel
 
 logs/c/sa_adaptive:
-	$(PYTHON) optimize_experiment.py sa_adaptive c \
+	$(PYTHON) optimize_experiment.py sa_adaptive \
 		"sa c --instances 1 --iterations 114000 --order_init adaptive --times_init default --temperature 10" \
 		--parallel
 
 #################################### Data d ####################################
 logs/d/ga_adaptive:
-	$(PYTHON) optimize_experiment.py ga_adaptive d \
+	$(PYTHON) optimize_experiment.py ga_adaptive \
 		"ga d --population 100 --generations 200 --order_init adaptive --times_init default --mutation_bit_rate 1e-5 --threads 16" \
 		--parallel
 
 logs/d/hc_adaptive:
-	$(PYTHON) optimize_experiment.py hc_adaptive d \
+	$(PYTHON) optimize_experiment.py hc_adaptive \
 		"hc d --instances 1 --iterations 15200 --order_init adaptive --times_init default --mutation_bit_rate 1e-5" \
 		--parallel
 
 logs/d/sa_adaptive:
-	$(PYTHON) optimize_experiment.py sa_adaptive d \
+	$(PYTHON) optimize_experiment.py sa_adaptive \
 		"sa d --instances 1 --iterations 15200 --order_init adaptive --times_init default --mutation_bit_rate 1e-5 --temperature 10" \
 		--parallel
 
 #################################### Data e ####################################
 logs/e/ga_random:
-	$(PYTHON) optimize_experiment.py ga_random e \
+	$(PYTHON) optimize_experiment.py ga_random \
 		"ga e --population 100 --generations 4000 --order_init random --times_init default --threads 16" \
 		--parallel
 
 logs/e/hc_random:
-	$(PYTHON) optimize_experiment.py hc_random e \
+	$(PYTHON) optimize_experiment.py hc_random \
 		"hc e --instances 1 --iterations 304000 --order_init random --times_init default" \
 		--parallel
 
 logs/e/sa_random:
-	$(PYTHON) optimize_experiment.py sa_random e \
+	$(PYTHON) optimize_experiment.py sa_random \
 		"sa e --instances 1 --iterations 304000 --order_init random --times_init default --temperature 100" \
 		--parallel
 
 #################################### Data f ####################################
 logs/f/ga_random_scaled:
-	$(PYTHON) optimize_experiment.py ga_random_scaled f \
+	$(PYTHON) optimize_experiment.py ga_random_scaled \
 		"ga f --population 100 --generations 1500 --order_init random --times_init scaled --threads 16" \
 		--parallel
 
 logs/f/hc_random_scaled:
-	$(PYTHON) optimize_experiment.py hc_random_scaled f \
+	$(PYTHON) optimize_experiment.py hc_random_scaled \
 		"hc f --instances 1 --iterations 114000 --order_init random --times_init scaled" \
 		--parallel
 
 logs/f/sa_random_scaled:
-	$(PYTHON) optimize_experiment.py sa_random_scaled f \
+	$(PYTHON) optimize_experiment.py sa_random_scaled \
 		"sa f --instances 1 --iterations 114000 --order_init random --times_init scaled --temperature 100" \
 		--parallel
