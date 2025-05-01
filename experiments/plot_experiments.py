@@ -13,6 +13,7 @@ from traffic_signaling import *
 parser = argparse.ArgumentParser()
 parser.add_argument('data', choices=['a', 'b', 'c', 'd', 'e', 'f'], help='Dataset to plot.')
 parser.add_argument('experiments', nargs="+", type=str, help='List of experiment names to plot.')
+parser.add_argument('--logdir', default='logs', type=str, help='Log directory of the experiments.')
 parser.add_argument('--y_min', default=None, type=float, help='Minimum y-axis value.')
 parser.add_argument('--y_max', default=None, type=float, help='Maximum y-axis value.')
 parser.add_argument('--baseline', action='store_true', help='Plot baseline score.')
@@ -67,7 +68,7 @@ def get_mean(folder):
 
 dfs = []
 for experiment in args.experiments:
-    folder = f'logs/{args.data}/{experiment}'
+    folder = f'{args.logdir}/{args.data}/{experiment}'
     if experiment.startswith('ga'):
         # Genetic Algorithm always has a different number of evaluations at different times
         # so we need to interpolate the scores to get a mean score

@@ -37,11 +37,11 @@ for seed in SEEDS:
     logf.flush()
     if args.parallel:
         # Run in parallel
-        p = subprocess.Popen(command, stdout=logf, stderr=subprocess.STDOUT)
+        p = subprocess.Popen(command, stdout=logf, stderr=subprocess.STDOUT, shell=True)
         processes.append((p, logf))
     else:
         # Run sequentially
-        subprocess.run(command, stdout=logf, stderr=subprocess.STDOUT)
+        subprocess.run(command, stdout=logf, stderr=subprocess.STDOUT, shell=True)
         logf.close()
 
 # This is only reached if running in parallel
