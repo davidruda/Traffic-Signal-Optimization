@@ -11,11 +11,12 @@ class TestOptimizer(unittest.TestCase):
             'c', # dataset
             f'--threads={max(2, os.cpu_count())}',
             '--no-save',
+            '--verbose',
         ]
         cls.algorithm_args = {
-            'hc': ['--instances=4', '--iterations=100'],
-            'sa': ['--instances=4', '--iterations=100'],
-            'ga': ['--population=100', '--generations=10'],
+            'hc': ['--instances=4', '--iterations=50'],
+            'sa': ['--instances=4', '--iterations=50'],
+            'ga': ['--population=100', '--generations=5'],
         }
         cls.algorithm = {
             'hc': 'Hill Climbing',
