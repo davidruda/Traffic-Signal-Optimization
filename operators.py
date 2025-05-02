@@ -215,7 +215,8 @@ def _eaSimple(
     fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
     for ind, fit in zip(invalid_ind, fitnesses):
         ind.fitness.values = fit
-    print(f'Evaluation: {time.time() - start_evaluate:.4f}s')
+    if verbose:
+        print(f'Evaluation: {time.time() - start_evaluate:.4f}s')
 
     if halloffame is not None:
         halloffame.update(population)
@@ -239,8 +240,8 @@ def _eaSimple(
         start_mutate = time.time()
         # Vary the pool of individuals
         offspring = _varAnd(offspring, pop2, toolbox, cxpb, mutpb)
-
-        print(f'Cross+Mut: {time.time() - start_mutate:.4f}s')
+        if verbose:
+            print(f'Cross+Mut: {time.time() - start_mutate:.4f}s')
 
         start_evaluate = time.time()
         # Evaluate the individuals with an invalid fitness
@@ -249,7 +250,8 @@ def _eaSimple(
         fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
         for ind, fit in zip(invalid_ind, fitnesses):
             ind.fitness.values = fit
-        print(f'Evaluation: {time.time() - start_evaluate:.4f}s')
+        if verbose:
+            print(f'Evaluation: {time.time() - start_evaluate:.4f}s')
 
         # Update the hall of fame with the generated individuals
         if halloffame is not None:
@@ -266,7 +268,8 @@ def _eaSimple(
         if verbose:
             print(logbook.stream)
 
-        print(f'Generation {gen}: {time.time() - start:.4f}s')
+        if verbose:
+            print(f'Generation {gen}: {time.time() - start:.4f}s')
 
     return population, logbook
 
@@ -340,7 +343,9 @@ class InverseSchedule:
         return self.start * (1.0 / current) + 1e-9
 
 
-def _hill_climbing_compare(individual: Individual, new_individual: Individual, toolbox: Toolbox, gen: int) -> bool:
+def _hill_climbing_compare(
+    individual: Individual, new_individual: Individual, toolbox: Toolbox, gen: int, verbose: bool
+) -> bool:
     """
     Hill climbing comparison function.
 
@@ -349,7 +354,9 @@ def _hill_climbing_compare(individual: Individual, new_individual: Individual, t
     return new_individual.fitness.values[0] > individual.fitness.values[0]
 
 
-def _simulated_annealing_compare(individual: Individual, new_individual: Individual, toolbox: Toolbox, gen: int) -> bool:
+def _simulated_annealing_compare(
+    individual: Individual, new_individual: Individual, toolbox: Toolbox, gen: int, verbose: bool
+) -> bool:
     """
     Simulated annealing comparison function.
 
@@ -358,8 +365,10 @@ def _simulated_annealing_compare(individual: Individual, new_individual: Individ
     delta = new_individual.fitness.values[0] - individual.fitness.values[0]
     if delta > 0:
         return True
-    if random.random() < math.exp(delta / toolbox.schedule(gen)):
-        print(f'Accepting worse solution with p={math.exp(delta / toolbox.schedule(gen))}')
+    threshold = math.exp(delta / toolbox.schedule(gen))
+    if random.random() < threshold:
+        if verbose:
+            print(f'Accepting worse solution with p={threshold}')
         return True
     return False
 
@@ -383,7 +392,7 @@ def _single_state_algorithm(
         new_individual.fitness.values = toolbox.evaluate(new_individual)
 
         # Compare returns True if new_individual is accepted, based on the algorithm
-        if compare_fn(individual, new_individual, toolbox, gen):
+        if compare_fn(individual, new_individual, toolbox, gen, verbose):
             individual, new_individual = new_individual, individual
 
         return individual, new_individual
@@ -396,7 +405,8 @@ def _single_state_algorithm(
     fitnesses = toolbox.map(toolbox.evaluate, population)
     for ind, fit in zip(population, fitnesses):
         ind.fitness.values = fit
-    print(f'Evaluation: {time.time() - start_evaluate:.4f}s')
+    if verbose:
+        print(f'Evaluation: {time.time() - start_evaluate:.4f}s')
 
     if halloffame is not None:
         halloffame.update(population)
@@ -427,7 +437,8 @@ def _single_state_algorithm(
         if verbose:
             print(logbook.stream)
 
-        print(f'Iteration {gen}: {time.time() - start:.4f}s')
+        if verbose:
+            print(f'Iteration {gen}: {time.time() - start:.4f}s')
 
     return population, logbook
 

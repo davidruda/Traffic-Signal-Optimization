@@ -30,6 +30,7 @@ parser.add_argument('--mutation_bit_rate', default=10, type=float, help='If betw
 
 parser.add_argument('--seed', default=42, type=int, help='Random seed.')
 parser.add_argument('--threads', default=None, type=int, help='Number of threads for parallel execution.')
+parser.add_argument('--verbose', default=False, action='store_true', help='Print detailed information during execution.')
 parser.add_argument('--no-save', default=False, action='store_true', help='Do not save results and plots.')
 parser.add_argument('--logdir', default=None, type=str, help='Custom name for the log directory.')
 
@@ -225,8 +226,7 @@ class Optimizer:
 
     def _save_statistics(self, show_plot=False):
         if self._logbook is None:
-            print('Run the optimizer first!')
-            return
+            raise ValueError('Run the optimizer first!')
 
         if self._args.logdir is None:
             logdir = os.path.join('logs', self._args.data, '{}-{}-{}'.format(
@@ -242,15 +242,17 @@ class Optimizer:
         self._save_info(logdir)
 
     def run(self, save_statistics=True):
+        verbose = self._args.verbose
         kwargs = {
             'stats': self._stats,
             'halloffame': self._hof,
-            'verbose': True
+            'verbose': verbose
         }
         start = time.time()
         num_instances = self._args.population if self._args.algorithm == 'ga' else self._args.instances
         population = self._toolbox.population(n=num_instances)
-        print(f'Population created: {time.time() - start:.4f}s')
+        if verbose:
+            print(f'Population created: {time.time() - start:.4f}s')
 
         if self._args.algorithm == 'ga':
             population, self._logbook = genetic_algorithm(
