@@ -16,7 +16,6 @@ namespace city_plan {
 class CityPlan {
 public:
     explicit CityPlan(const std::string &filename);
-    explicit CityPlan(std::ifstream &file);
 
     const std::vector<Intersection> &intersections() const {
         return intersections_;
@@ -54,6 +53,8 @@ public:
     unsigned long upper_bound() const;
 
 private:
+    explicit CityPlan(std::ifstream &file);
+
     void read_streets(std::ifstream &file, unsigned long count);
     void read_cars(std::ifstream &file, unsigned long count);
 
