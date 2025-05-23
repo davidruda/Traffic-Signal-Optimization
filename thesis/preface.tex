@@ -26,6 +26,8 @@ Additionally, TSC plays a critical role in reducing vehicle emissions, helping t
 
 There are many approaches \cite{qadri2020state} to solving TSC. Early static, fixed-time designs have evolved into real-time adaptive systems and data-driven algorithms, utilizing data from various detectors and sensors. In practice, commonly used are adaptive traffic control systems (ATCS) such as SCOOT, SCATS, and SURTRAC \cite{smith2013surtrac}, which continuously adjust splits, offsets, and cycle lengths network-wide. In addition, optimization-based methods---such as Genetic Algorithms (GA), metaheuristics, and Model Predictive Control (MPC)---have also been employed for traffic signal planning and coordination \cite{qadri2020state, ye2019survey}. More recently, learning-based methods, particularly those based on Reinforcement Learning (RL) and Deep Reinforcement Learning (DRL), have demonstrated superior performance compared to traditionally used methods \cite{zhao2024survey, saadi2025survey}.
 
+\section*{Contribution of the Thesis}
+
 In this thesis, we focus on the Traffic signalling problem from the Google Hash Code 2021 competition. It serves as a simplified version of the real-world problem of traffic light optimization in a city. First, we implement a fast and efficient C++ simulator of the problem and wrap it as a Python package to allow for easy use and integration with the wide ecosystem of Python libraries. Then, we use the simulator to optimize the traffic light schedules using three heuristic algorithms: Genetic Algorithm (GA), Hill Climbing (HC), and Simulated Annealing (SA). We experimentally compare the performance of these algorithms on provided datasets of different sizes and structures.
 
 The thesis is structured as follows. Chapter~\ref{chap:problem_statement} describes the Traffic signalling problem in detail, including the city layout, cars, traffic lights, and scoring system. Chapter~\ref{chap:optimization_methods} covers the theory of the optimization algorithms used in this thesis. Chapter ...
@@ -33,6 +35,3 @@ The thesis is structured as follows. Chapter~\ref{chap:problem_statement} descri
 Chapter~\ref{chap:experiments} presents the expertiments comparing the optimization algorithms on the provided datasets.
 
 Unused citations: Principled Modeling of the Google Hash Code Problems for Meta-Heuristics \cite{rodrigues2023principled}, Building a Simulator and Emulator for Traffic Signaling \cite{li2022building}.
-
-\section*{Contribution of the Thesis} \label{sec:contribution_of_the_thesis}
-% \addcontentsline{toc}{section}{Contribution of the Thesis}
