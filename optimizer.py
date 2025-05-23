@@ -39,7 +39,7 @@ parser.add_argument('--population', default=100, type=int, help='Number of indiv
 parser.add_argument('--generations', default=100, type=int, help='Number of generations (Genetic Algorithm only).')
 parser.add_argument('--crossover', default=0.6, type=float, help='Crossover probability (Genetic Algorithm only).')
 parser.add_argument('--mutation', default=0.4, type=float, help='Mutation probability (Genetic Algorithm only).')
-parser.add_argument('--elitism', default=0.1, type=float, help='Elitism rate (Genetic Algorithm only).')
+parser.add_argument('--elitism', default=0.05, type=float, help='Elitism rate (Genetic Algorithm only).')
 parser.add_argument('--tournsize', default=3, type=int, help='Tournament size for selection (Genetic Algorithm only).')
 
 # Hyperparameters for Hill Climbing and Simulated Annealing
