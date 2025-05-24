@@ -16,6 +16,7 @@ parser.add_argument('experiments', nargs="+", type=str, help='List of experiment
 parser.add_argument('--logdir', default='logs', type=str, help='Log directory of the experiments.')
 parser.add_argument('--y_min', default=None, type=float, help='Minimum y-axis value.')
 parser.add_argument('--y_max', default=None, type=float, help='Maximum y-axis value.')
+parser.add_argument('--std', action='store_true', help='Plot standard deviation.')
 parser.add_argument('--baseline', action='store_true', help='Plot baseline score.')
 parser.add_argument('--max_known', action='store_true', help='Plot max known score.')
 args = parser.parse_args()
@@ -45,9 +46,11 @@ def get_interpolated_mean(folder):
         interps.append(interp_fn(common_evals))
 
     mean_scores = np.stack(interps).mean(axis=0)
+    std_scores = np.stack(interps).std(axis=0)
     df = pd.DataFrame({
         'evaluations': common_evals,
-        'norm_max': mean_scores
+        'norm_max': mean_scores,
+        'norm_max_std': std_scores,
     })
 
     return df
@@ -59,9 +62,11 @@ def get_mean(folder):
     scores = [df['norm_max'] for df in dfs]
 
     mean_scores = np.stack(scores).mean(axis=0)
+    std_scores = np.stack(scores).std(axis=0)
     df = pd.DataFrame({
         'evaluations': evaluations,
-        'norm_max': mean_scores
+        'norm_max': mean_scores,
+        'norm_max_std': std_scores,
     })
 
     return df
@@ -82,6 +87,13 @@ fig, ax1 = plt.subplots()
 
 for df, experiment in zip(dfs, args.experiments):
     ax1.plot(df['evaluations'], df['norm_max'], label=experiment)
+    if args.std:
+        ax1.fill_between(
+            df['evaluations'],
+            df['norm_max'] - df['norm_max_std'],
+            df['norm_max'] + df['norm_max_std'],
+            alpha=0.3
+        )
 
 if args.baseline:
     ax1.axhline(0, color='m', linestyle='--', label='baseline')
