@@ -3,7 +3,7 @@ from typing import Literal
 from .city_plan import CityPlan
 
 class Schedule:
-    DEFAULT_DIVISOR: int = 20
+    DEFAULT_DIVISOR: int = 27
 
     @property
     def length(self) -> int: ...

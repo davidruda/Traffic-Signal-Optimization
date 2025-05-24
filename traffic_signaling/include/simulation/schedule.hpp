@@ -70,7 +70,7 @@ public:
     // helper function to fill in the missing streets when using adaptive schedule
     void fill_missing_streets();
 
-    static constexpr auto DEFAULT_DIVISOR = 20UL;
+    static constexpr auto DEFAULT_DIVISOR = 27UL;
 
 private:
     using TimeInterval = std::ranges::iota_view<unsigned long, unsigned long>;
