@@ -70,6 +70,7 @@ public:
     // helper function to fill in the missing streets when using adaptive schedule
     void fill_missing_streets();
 
+    // The best value for dataset F, which is the only dataset that benefits from using scaled times
     static constexpr auto DEFAULT_DIVISOR = 27UL;
 
 private:
