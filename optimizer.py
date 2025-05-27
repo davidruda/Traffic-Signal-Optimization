@@ -181,12 +181,11 @@ class Optimizer:
         ax2.set_ylim(*ax1.get_ylim())
         ax2.grid(False)
         ax2.set_ylabel('Score')
-        baseline = DEFAULT_SCORE[self._args.data]
-        best_known = MAX_KNOWN_SCORE[self._args.data]
 
-        labels = np.linspace(baseline, best_known, num=6)
-        labels = (f'{int(x):,}' for x in labels)
-        ax2.set_yticks([0, 0.2, 0.4, 0.6, 0.8, 1], labels)
+        ticks = ax1.get_yticks()
+        labels = (f'{absolute_score(x, args.data):,}' for x in ticks)
+        ax2.yaxis.set_major_locator(ticker.FixedLocator(ax2.get_yticks()))
+        ax2.set_yticklabels(labels)
 
         # Avoid scientific notation for x-axis ticks
         xticks = ax1.get_xticks()

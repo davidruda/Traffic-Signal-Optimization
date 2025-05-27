@@ -92,7 +92,7 @@ for df, experiment in zip(dfs, args.experiments):
             df['evaluations'],
             df['norm_max'] - df['norm_max_std'],
             df['norm_max'] + df['norm_max_std'],
-            alpha=0.3
+            alpha=0.2
         )
 
 if args.baseline:
@@ -103,6 +103,7 @@ if args.max_known:
 norm_low = min(np.min(x['norm_max']) for x in dfs)
 norm_high = max(np.max(x['norm_max']) for x in dfs)
 
+ax1.set_title(f'Dataset {args.data.capitalize()}')
 ax1.set_xlabel('Simulation evaluations')
 ax1.set_ylabel('Normalized score')
 
@@ -117,16 +118,10 @@ ax2.set_ylim(*ax1.get_ylim())
 ax2.grid(False)
 ax2.set_ylabel('Score')
 
-baseline = DEFAULT_SCORE[args.data]
-best_known = MAX_KNOWN_SCORE[args.data]
-diff = best_known - baseline
-
 ticks = ax1.get_yticks()
-ticks = ticks[(ticks >= 0) & (ticks <= 1.01)]
-
-labels = ticks * diff + baseline
-labels = (f'{int(x):,}' for x in labels)
-ax2.set_yticks(ticks, labels)
+labels = (f'{absolute_score(x, args.data):,}' for x in ticks)
+ax2.yaxis.set_major_locator(ticker.FixedLocator(ax2.get_yticks()))
+ax2.set_yticklabels(labels)
 
 # Avoid scientific notation for x-axis ticks
 xticks = ax1.get_xticks()

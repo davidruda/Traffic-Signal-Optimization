@@ -85,6 +85,12 @@ def normalized_score(score: int, data: str) -> float:
     """
     return (score - DEFAULT_SCORE[data]) / (MAX_KNOWN_SCORE[data] - DEFAULT_SCORE[data])
 
+def absolute_score(norm_score: float, data: str) -> int:
+    """
+    Converts the normalized score back to the absolute score for the given dataset.
+    """
+    return int(norm_score * (MAX_KNOWN_SCORE[data] - DEFAULT_SCORE[data]) + DEFAULT_SCORE[data])
+
 def get_data_filename(data: str) -> str:
     """
     Returns the path to the data file for the given dataset.
