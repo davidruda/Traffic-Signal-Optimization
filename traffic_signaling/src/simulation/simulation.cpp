@@ -38,6 +38,8 @@ void Simulation::reset_schedules() {
     for (auto &&s: schedules_) {
         s.second.reset();
     }
+    // Also reset information from possible previous runs
+    reset_run();
 }
 
 void Simulation::load_schedules(const std::string &filename) {
@@ -133,7 +135,7 @@ void Simulation::create_schedules(std::string order, std::string times, unsigned
         order_type = Schedule::Order::RANDOM;
     }
     else {
-        throw std::invalid_argument("Invalid order option");
+        throw std::invalid_argument{"Invalid order option"};
     }
 
     if (times == "default") {
@@ -143,7 +145,11 @@ void Simulation::create_schedules(std::string order, std::string times, unsigned
         times_type = Schedule::Times::SCALED;
     }
     else {
-        throw std::invalid_argument("Invalid times option");
+        throw std::invalid_argument{"Invalid times option"};
+    }
+
+    if (order == "adaptive" && times != "default") {
+        throw std::invalid_argument{"'adaptive' order can only be used with 'default' times"};
     }
 
     Schedule::set_divisor(divisor);
@@ -241,15 +247,32 @@ void Simulation::summary() const {
             ++cars_finished;
             total_driving_time += *c.arrival_time();
             if (!earliest_car ||
-                c.arrival_time() > earliest_car->get().arrival_time()) {
+                c.arrival_time() < earliest_car->get().arrival_time()) {
                 earliest_car = c;
             }
             if (!latest_car ||
-                c.arrival_time() < latest_car->get().arrival_time()) {
+                c.arrival_time() > latest_car->get().arrival_time()) {
                 latest_car = c;
             }
         }
     }
+
+    double total_cycle_duration = 0;
+    // All streets with a scheduled green light
+    double total_green_streets = 0;
+    unsigned long total_schedules = 0;
+    for (auto &&[id, schedule]: schedules_) {
+        if (schedule.length() == 0) {
+            continue; // Skip empty schedules
+        }
+        total_cycle_duration += schedule.duration();
+        total_green_streets += schedule.length();
+        ++total_schedules;
+    }
+    auto average_cycle_length = total_cycle_duration / static_cast<double>(total_schedules);
+    // auto average_cycle_length = total_cycle_duration / static_cast<double>(city_plan_.intersections().size());
+    auto average_green_light_duration = total_cycle_duration / total_green_streets;
+
     // Ensure that the thousand separator is used for printing numbers
     // without relying on other locales such as en_US.UTF-8, which may not be available.
     std::locale custom_locale{std::locale{}, new ThousandSeparator};
@@ -264,12 +287,12 @@ void Simulation::summary() const {
         << " points for early arrival times.\n\n"
         << cars_finished << " of " << city_plan_.cars().size()
         << " cars arrived before the deadline (";
-    auto finished_percentage = static_cast<float>(cars_finished) / static_cast<float>(city_plan_.cars().size()) * 100;
+    auto finished_percentage = cars_finished / static_cast<double>(city_plan_.cars().size()) * 100;
     std::cout
         << std::fixed << std::setprecision(2) << finished_percentage << "%). ";
 
     if (earliest_car && latest_car) {
-        auto average_drive_time_ = static_cast<float>(total_driving_time) / static_cast<float>(cars_finished);
+        auto average_drive_time_ = static_cast<double>(total_driving_time) / cars_finished;
 
         std::cout
             << "The earliest car (ID " << earliest_car->get().id()
@@ -281,8 +304,21 @@ void Simulation::summary() const {
             << latest_car->get().score() << " points. "
             << "Cars that arrived within the deadline drove for an average of "
             << average_drive_time_ << " seconds to arrive at their destination.";
+
+        auto scheduled_percentage = total_schedules / static_cast<double>(city_plan_.intersections().size()) * 100;
+
+        std::cout
+            << "\n\n"
+            << "The schedules for the " << total_schedules
+            << " traffic lights, out of " << city_plan_.intersections().size()
+            << " traffic lights in total (" << std::fixed << std::setprecision(2) << scheduled_percentage
+            << "%), had an average total cycle length of "
+            << std::fixed << std::setprecision(2) << average_cycle_length
+            << " seconds. A traffic light that turned green was scheduled to stay green for "
+            << std::fixed << std::setprecision(2) << average_green_light_duration
+            << " seconds on average."
+            << "\n";
     }
-    std::cout << "\n";
 }
 
 std::vector<std::pair<std::vector<unsigned long>, std::vector<unsigned long>>> Simulation::non_trivial_schedules(

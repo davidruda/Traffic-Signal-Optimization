@@ -63,6 +63,9 @@ public:
     void reset();
 
     static void set_divisor(unsigned long divisor) {
+        if (divisor == 0) {
+            throw std::invalid_argument{"divisor cannot be zero"};
+        }
         divisor_ = divisor;
     }
     
