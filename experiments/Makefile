@@ -17,33 +17,34 @@ THREADS=16
 # Set the parallel execution, leave empty to disable
 PARALLEL=--parallel
 # Plot standard deviation, leave empty to disable
-STD=
-# STD=--std
+STD=--std
+# Downsample the data points, plot every N-th point
+DOWNSAMPLE=100
 
-all: init_experiment plot_optimization
+all: init_experiment plots
 
-.PHONY: all init_experiment  plot_optimization plot_b plot_c plot_d plot_e plot_f run_b run_c run_d run_e run_f
+.PHONY: all init_experiment plots plot_b plot_c plot_d plot_e plot_f run_b run_c run_d run_e run_f
 
 init_experiment:
 	$(PYTHON) init_experiment.py
 
-plot_optimization: plot_b plot_c plot_d plot_e plot_f
+plots: plot_b plot_c plot_d plot_e plot_f
 
 ##################################### Plot #####################################
 plot_b: run_b
-	$(PYTHON) plot_experiments.py b "Genetic Algorithm" "Hill Climbing" "Simulated Annealing" $(STD)
+	$(PYTHON) plot_experiments.py b "Genetic Algorithm" "Hill Climbing" "Simulated Annealing" $(STD) --downsample $(DOWNSAMPLE)
 
 plot_c: run_c
-	$(PYTHON) plot_experiments.py c "Genetic Algorithm" "Hill Climbing" "Simulated Annealing" $(STD)
+	$(PYTHON) plot_experiments.py c "Genetic Algorithm" "Hill Climbing" "Simulated Annealing" $(STD) --downsample $(DOWNSAMPLE)
 
 plot_d: run_d
-	$(PYTHON) plot_experiments.py d "Genetic Algorithm" "Hill Climbing" "Simulated Annealing" $(STD)
+	$(PYTHON) plot_experiments.py d "Genetic Algorithm" "Hill Climbing" "Simulated Annealing" $(STD) --downsample $(DOWNSAMPLE)
 
 plot_e: run_e
-	$(PYTHON) plot_experiments.py e "Genetic Algorithm" "Hill Climbing" "Simulated Annealing" $(STD)
+	$(PYTHON) plot_experiments.py e "Genetic Algorithm" "Hill Climbing" "Simulated Annealing" $(STD) --downsample $(DOWNSAMPLE)
 
 plot_f: run_f
-	$(PYTHON) plot_experiments.py f "Genetic Algorithm" "Hill Climbing" "Simulated Annealing" $(STD)
+	$(PYTHON) plot_experiments.py f "Genetic Algorithm" "Hill Climbing" "Simulated Annealing" $(STD) --downsample $(DOWNSAMPLE)
 
 ##################################### Run ######################################
 run_b: logs/b/Genetic\ Algorithm logs/b/Hill\ Climbing logs/b/Simulated\ Annealing

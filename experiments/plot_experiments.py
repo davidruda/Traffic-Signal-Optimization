@@ -19,6 +19,7 @@ parser.add_argument('--y_max', default=None, type=float, help='Maximum y-axis va
 parser.add_argument('--std', action='store_true', help='Plot standard deviation.')
 parser.add_argument('--baseline', action='store_true', help='Plot baseline score.')
 parser.add_argument('--max_known', action='store_true', help='Plot max known score.')
+parser.add_argument('--downsample', default=1, type=int, help='Plot every N-th point to reduce size of the plot.')
 args = parser.parse_args()
 
 def get_all_runs(folder):
@@ -80,6 +81,9 @@ for experiment in args.experiments:
         df = get_interpolated_mean(folder)
     else:
         df = get_mean(folder)
+
+    # Downsample the data points
+    df = df.iloc[::args.downsample]
     dfs.append(df)
 
 # PLOT
