@@ -16,9 +16,9 @@ Pybind11 citation \cite{jakob2017pybind11}, DEAP citation \cite{fortin2012deap}
 
 \paragraph{Observation (Trivial intersections)} Trivial intersections do not need to be optimized. The schedule for these intersections is always the same: the only used incoming street has a green light the whole time. This allows us to substantially reduce the number of optimized parameters for most of the datasets. (Not so obvious)
 
-But what if it would be better to keep the light red the whole time, effectively blocking all cars on this street? Well, if a car passing through this intersection is problematic, it must reach some non-trivial intersection via a street eventually. Non-trivial intersections are optimized, so this street can be blocked and the car would stop there. If we block all incoming streets to non-trivial intersections reachable from this trivial intersection, it results in the same score as if we blocked the trivial intersection.
+But what if it would be better to keep the light red the whole time, effectively blocking all cars on this street? Well, if a car passing through this intersection is problematic, it must reach some non-trivial intersection via a street eventually. Non-trivial intersections are optimized, so such a street can be blocked and the car would stop there. If we block all incoming streets to non-trivial intersections reachable from this trivial intersection, it results in the same score as if we blocked the trivial intersection.
 
-\xxx{TODO: Add graph for better explanation.}
+\xxx{TODO: Maybe add graph for better explanation?}
 
 % To consider all cases, suppose that it would be better to block this street by keeping the light red the whole time.
 % Even if it would be better to block this street
