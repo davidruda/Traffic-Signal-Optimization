@@ -21,9 +21,11 @@ overview)
 
 - C++20 code - `gcc 11`, `clang 16` or `MSVC 19.29` (or later) is required to build the package
 
+- Python 3.10 or later
+
 - Note that you need to have Python headers installed on your system in order to build the package (some Linux distributions don’t install them by default)
 
-  - You can check the location of the headers by running `python3 -c "import sysconfig; print(sysconfig.get_path('include'))"`
+  - You can verify that the headers are available by inspecting their expected location with e.g. `python3 -c "import sysconfig; print(sysconfig.get_path('include'))"`
   - If not available, install them; e.g. `sudo apt install python3-dev` on Ubuntu
 
 - Run `pip install ./traffic_signaling` (preferably in a virtual environment)

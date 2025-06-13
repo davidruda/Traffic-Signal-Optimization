@@ -12,7 +12,7 @@ authors = [
 ]
 description = "Package for the Traffic signaling problem from Google Hash Code 2021"
 dynamic = ["version"]
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 #readme = "README.md
 #license = {file = "LICENSE"}
 
