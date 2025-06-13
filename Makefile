@@ -21,10 +21,13 @@ endif
 
 all: test_package_cmake test
 
-.PHONY: all clean test test_package_cmake test_package_python test_optimizer
+.PHONY: all clean setup test test_package_cmake test_package_python test_optimizer
 
 clean:
 	rm -rf $(VENV) $(CMAKE_BUILD_DIR) operators*.{c,pyd,so}
+
+# Create a ready-to-use environment for the optimization
+setup: $(VENV) $(COMPILED_OPERATORS)
 
 $(VENV): requirements-test.txt requirements.txt
 	$(PYTHON) -m venv $(VENV)
@@ -45,10 +48,10 @@ test_package_cmake: $(VENV) $(CMAKE_BUILD_DIR)
 test_package_python: $(VENV)
 	$(VENV_BIN)/$(PYTHON) -m unittest discover -s traffic_signaling/tests
 
-$(COMPILED_OPERATORS): operators.py
+$(COMPILED_OPERATORS): $(VENV) operators.py
 	$(VENV_BIN)/cythonize -3i operators.py
 
-test_optimizer: $(VENV) $(COMPILED_OPERATORS)
+test_optimizer: setup
 	$(VENV_BIN)/$(PYTHON) -m unittest discover -s tests
 
 test: test_package_python test_optimizer
