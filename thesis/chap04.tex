@@ -1,34 +1,60 @@
-\chapter{Practical Configuration of Optimization Algorithms}
+\chapter{Configuration of Optimization Algorithms}
+
+In this chapter, we describe the problem specific details of our chosen optimization algorithms.
 
 \section{Coding of a solution}
 
-The solution is encoded as a list of intersection schedules, where each schedule consists of two parts: \textit{order} and \textit{times}. Order is an array of street indices that defines the order in which the streets have the green light. Times is an array of integers that defines the duration of the green light with respect to the street order. To keep the two parts consistent, any changes to the order array must also be applied to the corresponding times array. 
+The solution is encoded as a \textbf{list of intersection schedules}, where each schedule consists of two parts: \textit{order} and \textit{times}. Order is an array of street indices that defines the order in which the streets have the green light. Times is an array of integers that defines the duration of the green light with respect to the street order. To keep the two parts consistent, any changes to the order array are also applied to the corresponding times array.
 
 As described \xxx{in the X section}, we only optimize non-trivial intersections.
 
 \section{Initial solutions}
 
 The creation of an initial solution is a part of the simulator functionality. We provide a few different initial options for both order and times. Order initializations include:
-
 \begin{itemize}
     \item \textit{default} - simply uses the order given by street IDs in the input file
     \item \textit{random} - takes a random permutation of the streets
     \item \textit{adaptive} - determines the order during a simulation run; whenever a street is used for the first time, it is assigned to the earliest free position in the order array (only usable with the \textit{default} times initialization)
 \end{itemize}
-
 Times initializations include:
-
 \begin{itemize}
     \item \textit{default} - all times are set to 1 second
     \item \textit{scaled} - time for each street is a total number of cars using this street divided by a single given constant
 \end{itemize}
 
 
-\section{Operators}
+\section{Algorithm specifics}
 
+Since the solution structure is quite complex and each schedule of an intersection can have a different number of streets, we apply the operators for each intersection separately.
+
+\subsection*{Genetic Algorithm}
+
+\paragraph{Crossover}
+
+For each intersection, we randomly decide whether to crossover only the order, only the times, or both. We use the \textit{order crossover (OX)} for order and the \textit{two-point crossover} for times. The probability of performing crossover is one of the hyperparameters.
+
+\paragraph{Mutation}
+
+For each intersection, we randomly decide whether to mutate only the order, only the times, or both. For order, we use the \textit{index shuffle}, and for times, we add plus or minus one to some values at random. The probability of performing mutation and the probability of mutating each value are tuneable hyperparameters.
+
+\paragraph{Selection}
+
+We use the \textit{tournament selection} with \textit{elitism}. The tournament size and the elitism rate are hyperparameters.
+
+\subsection*{Hill Climbing}
+
+As mentioned in Section~\ref{sec:hill_climbing}, we randomly generate the next state because there is no explicit neighborhood structure. To do so, we simply reuse the mutation operator from the genetic algorithm.
+
+\subsection*{Simulated Annealing}
+
+We use the same strategy to generate the next state as in Hill Climbing, i.e., apply the mutation from the genetic algorithm. For the temperature cooling schedule, introduced in Section~\ref{sec:simulated_annealing}, we use a linear decay. It is defined as
+\begin{equation}
+    schedule(t) = T_0 \cdot \left(1 - \frac{t}{T}\right) + \varepsilon,
+\end{equation}
+where $T_0$ is the initial temperature, and $T$ is the total number of iterations. Both of these values are hyperparameters, with the initial temperature especially requiring careful tuning for each dataset to achieve good results.
 \section{Hyperparameters}
 
-All of the aformentioned algorithms depend on the setting of multiple hyperparameters. To find the best hyperparameters for experiment runs, we use a \textit{greedy search}. We focus on optimizing one hyperparameter at a time and try to find the best value for it. Other hyperparameters are fixed; either heuristically or to an already optimized value based on the previous runs. We start by tuning more general parameters like the \textit{population size} and gradually move to more specific ones like the \textit{mutation bit rate}. We heuristically try a number of reasonable values for each parameter, e.g., [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0] for the mutation probability. We perform runs with additional values if the results are not satisfactory. Every setting is tested on 10 different fixed seeds and the results are averaged.
+All three aforementioned algorithms depend on the setting of multiple hyperparameters. To find the best hyperparameters for our experiments, we use a \textit{greedy search}. We focus on optimizing one hyperparameter at a time and try to find the best value for it. Other hyperparameters are fixed; either heuristically or to an already optimized value based on the previous runs. We start by tuning more general parameters like the \textit{population size} and gradually move to more specific ones like the \textit{mutation bit rate}. We heuristically try a number of reasonable values for each parameter, e.g., [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0] for the mutation probability. We perform runs with additional values if the results are not satisfactory. Every setting is tested on 10 different fixed seeds and the results are averaged.
 
 Most of the hyperparameters were tuned on smaller datasets E and B. However, \xxx{some parameters are highly dependent on the dataset (temperature) and those were also tested on the larger datasets}.
 
