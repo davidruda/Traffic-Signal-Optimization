@@ -1,18 +1,25 @@
-\chapter{Problem Statement} \label{chap:problem_statement}
+\chapter{Problem Description} \label{chap:problem_description}
 
-In this chapter, we describe in detail the optimization problem that we address in this thesis. This problem was originally assigned in the qualifying round of Google Hash Code 2021. Google Hash Code was a global team programming competition, running between 2014--2022, where teams of 2--4 competitors solved an optimization problem with the goal of achieving the best score in a limited time of 4 hours.
 
-The standard solution procedure was as follows: Read the input data, create a trivial solution and write it to the output file in the specified format, and upload the solution to the evaluation system, where you could see not only the total score, but also some informative statistics, such as the number of cars that reached the finish before the deadline. For some datasets, an interactive visualization of the simulation process was also available, allowing to see the structure of a particular dataset. Although the local simulator was not needed to solve the problem, the manual upload of the solution to the evaluation system was slow and cumbersome and therefore not suitable for the use of efficient optimization algorithms.
+In this chapter, we introduce the optimization problem that we address in this thesis. Section~\ref{sec:competition_overview} briefly mentions the competition setting in which the problem was originally assigned. Section~\ref{sec:original_problem_statement} presents the original problem statement and describes it in detail. Section~\ref{sec:further_insights_and_heuristics} provides additional insights and heuristics that we use to simplify the problem and improve solutions.
 
-Most teams were able to construct trivial solutions, which they then tried to improve by randomly changing the values. However, the best teams were able to write their own local simulator and use it to run multiple heuristics to get a better total score. Still, there was no time for anything more complex than a simple local search.
+\section{Competition Overview} \label{sec:competition_overview}
 
-The total score is the sum of the scores of all 6 datasets (A--F). The first dataset (A) serves as a ``toy problem'' mainly for debugging purposes, but the rest of the datasetes are large enough for the optimization. It should be noted that the distribution of points among the datasets is uneven, so the contestants mostly focused on the datasets with the highest possible score (D, F) and pragmatically skipped optimizing the rest (B, C, E).
+The problem we address in this thesis was originally assigned in the qualifying round of Google Hash Code 2021. Google Hash Code was a global team programming competition, running between 2014--2022, where teams of 2--4 competitors solved an optimization problem with the goal of achieving the best score in a limited time of 4 hours.
 
-\section{Problem Description}
+The usual solution procedure for our problem was as follows: Read the input data, create a trivial solution and write it to the output file in the specified format, and upload the solution to the evaluation system, where you could see not only the total score, but also some informative statistics, such as the number of cars that reached the finish before the deadline. For some datasets, an interactive visualization of the simulation process was also available, allowing to see the structure of a particular dataset. Although the local simulator was not needed to solve the problem, the manual upload of the solution to the evaluation system was slow and cumbersome and therefore not suitable for the use of efficient optimization algorithms.
+
+Most teams were able to construct trivial solutions, which they then tried to improve by randomly changing the values. However, the best teams were able to write their own local simulator and use it to run multiple heuristics to get a better total score. Still, there was no time for anything more complex than a simple random search.
+
+The total score was the sum of the scores of all 6 datasets (A--F). The first dataset (A) served as a ``toy problem'' mainly for debugging purposes, but the rest of the datasets were large enough for the optimization. It should be noted that the distribution of points among the datasets is uneven, so the contestants mostly focused on the datasets with the highest possible score (D, F) and pragmatically skipped optimizing the rest (B, C, E).
+
+\section{Original Problem Statement} \label{sec:original_problem_statement}
 
 The full problem statement\footnote{\url{https://github.com/google/coding-competitions-archive/blob/main/hashcode/hashcode_2021_qualification_round.pdf}} is available in the Google Coding Competitions archive~\cite{google2023google}. Here we describe only important details for the reader.
-In short, the task is as follows: \textit{Given a city plan describing intersections and streets and cars with planned paths through the city, optimize the schedule of traffic lights to minimize the total amount of time spent in traffic, and help as many cars as possible reach their destination before a specified deadline.}
-
+In short, the task is as follows:
+\begin{quote}
+    \textit{Given a city plan describing intersections and streets and cars with planned paths through the city, optimize the schedule of traffic lights to minimize the total amount of time spent in traffic, and help as many cars as possible reach their destination before a specified deadline.}
+\end{quote}
 In terms of graph theory, the city plan is a \textit{directed graph}. The intersections are \textit{vertices} and the streets are \textit{directed edges} (See Figure~\ref{fig:hashcode_city_plan}). The planned path for each car is indeed a \textit{path} in this graph because it has a different start and end, and no intersection is repeated.
 
 \begin{figure}
@@ -52,7 +59,7 @@ For each intersection $i \in I$, we can set a traffic light schedule. This sched
     % \includegraphics[width=.8\linewidth]{img/hashcode/figure2-def.png}
     \caption[Example of a traffic light schedule]{
         This figure shows how the traffic light schedule works for an intersection with two incoming streets \cite{google2023google}.
-        The schedule is as follows: first \textit{a-street} for $2$ seconds, then \textit{b-street} for $3$ seconds.
+        The schedule is as follows: First \textit{a-street} for $2$ seconds, then \textit{b-street} for $3$ seconds.
         We can see the first two cars from \textit{a-street} pass in the first two seconds, then the green light switches to \textit{b-street} for three seconds,
         allowing the two cars from \textit{b-street} pass. The last car from \textit{a-street} waits till the beginning of the next cycle and then passes.
     }
@@ -63,7 +70,7 @@ For each intersection $i \in I$, we can set a traffic light schedule. This sched
 
 Furthermore, we have a set of cars $C$, where $1 \leq \abs{C} \leq 10^3$. Each car $c \in C$ has a given path through the city. The path is a sequence of streets the car has to drive through. The number of streets in the path is limited: $\forall c \in C \;\; 2 \leq \abs{\bm{p_c}} \leq 10^3$. No intersection or street can be repeated in the path.
 
-At the beginning of the simulation, all cars are at the end of the first street in their path. They either wait if the light is red or are ready to move if the light is green. If more cars start at the end of the same street, they queue up in a predetermined order (See Figure~\ref{fig:hashcode_street}). When a car reaches the end of the last street in its path, it is immediately removed from the street.
+At the beginning of the simulation, all cars are at the end of the first street in their path. They either wait if the light is red or are ready to move if the light is green. If more cars start at the end of the same street, they queue up according to their IDs in the input file (See Figure~\ref{fig:hashcode_street}). When a car reaches the end of the last street in its path, it is immediately removed from the street.
 
 \begin{figure}[ht] % h = here, t = top, p = page of floats
     \centering
@@ -84,7 +91,6 @@ At the beginning of the simulation, all cars are at the end of the first street 
 \subsection{Score}
 
 The score of a solution is determined as follows: Let $\bm{\theta}$ denote the traffic light schedule. Given a duration of the simulation $\mathrm{D}$ in seconds, where $1 \leq \mathrm{D} \leq 10^4$, and a fixed bonus for reaching the destination $\mathrm{F}$, where $1 \leq \mathrm{F} \leq 10^3$, let $t(c; \bm{\theta}) \in \mathbb{N}$ be the time a car $c \in C$ reaches the destination. The $score$ of a car $c$ is defined as
-
 \begin{equation}
     score(c; \bm{\theta}) =
     \begin{cases}
@@ -92,9 +98,39 @@ The score of a solution is determined as follows: Let $\bm{\theta}$ denote the t
         0, & \text{otherwise}.
     \end{cases}
 \end{equation}
-
 The $SCORE$ of a solution $\bm{\theta}$ is defined as
-
 \begin{equation}
     SCORE(\bm{\theta}) = \sum_{c \in C} score(c; \bm{\theta}).
 \end{equation}
+
+\section{Further Insights and Heuristics} \label{sec:further_insights_and_heuristics}
+
+In this section, we introduce some additional terms and heuristics for the problem. These are our own observations and are not part of the original problem statement. Thanks to these heuristics, we can simplify the solution creation, achieve better scores, and reduce the number of parameters to optimize.
+
+\paragraph{Used and Unused Streets} \textit{Unused street} is a street that is either not used by any car at all or it is the final destination of all cars that use it (i.e. traffic light for this street is not needed). \textit{Used street} is a street that is used by at least one car and is not the final destination of at least one car that uses it.
+
+\paragraph{Used and Unused Intersections} \textit{Unused intersection} is an intersection where all incoming streets are unused streets. \textit{Used intersection} is an intersection with at least one used incoming street.
+
+% https://tex.stackexchange.com/questions/32160/new-line-after-paragraph
+\paragraph{Heuristic 1: Remove Unused Intersections and Unused Streets} \mbox{} \\
+Remove unused intersections and unused streets from used intersections before creating the schedules. They contribute nothing and can only worsen the score. \\
+
+This heuristic is an obvious one; unused intersections are never used and only add unnecessary complexity. Unused streets prolong the traffic light cycle for the whole intersection, which very frequently leads to longer waiting times and thus a lower score. Now, let us move on to some less obvious insights.
+
+\paragraph{Trivial and Non-trivial Intersections} \textit{Trivial intersection} is an intersection with exactly one used incoming street. \textit{Non-trivial intersection} is an intersection with two or more used incoming streets.
+
+\paragraph{Blocked Streets and Blocked Intersections} \textit{Blocked street} is an unscheduled street or a street with a green light scheduled for 0 seconds. \textit{Blocked intersection} is an intersection with no schedule or with all incoming streets blocked.
+
+\paragraph{Heuristic 2: Fix Schedules for Trivial Intersections} Trivial intersections do not have to be optimized. The schedule for these intersections can be fixed: The only used incoming street has a green light the whole time. This can substantially reduce the number of optimized parameters. \\
+
+This heuristic is not straightforward, so let us think about it in more detail. For trivial intersections, we have two meaningful schedule options:
+\begin{enumerate}
+    \item Keep the light green the whole time.
+    \item Keep the light red the whole time, effectively blocking all cars there.
+\end{enumerate}
+Empirically speaking, the vast majority of trivial intersections should be kept green anyway, otherwise many cars would not be able to reach their destination at all.
+Furthermore, we argue that we can omit the second option because we can achieve a similar result in a different way. Suppose that blocking a particular trivial intersection would improve the score. This means that there must be a problematic car passing through this intersection. However, the problematic car must eventually reach some non-trivial intersection via a street, and this street can still be blocked during the optimization. We therefore leave this up to the optimization algorithm, hoping that it will explore this option if it is indeed beneficial.
+
+% \xxx{Maybe add an illustration for better explanation?}
+
+As previously mentioned, this smart heuristic is important because it reduces the number of parameters and speeds up the optimization. To put it into perspective, around $80 \%$ of used intersections in dataset B are trivial, $60 \%$ in dataset C, and $50 \%$ in dataset E. This allows us to skip optimizing thousands of parameters.
