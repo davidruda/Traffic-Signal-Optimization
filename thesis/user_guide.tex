@@ -1,3 +1,38 @@
 \chapter{User Guide} \label{chap:user_guide}
 
-\section{Section 1}
+This guide is intended for users interested in running the code associated with this thesis. It is logically divided into two parts:
+\begin{itemize}
+    \item \textbf{Simulator} - a standalone tool for running the Traffic signaling problem (described in Chapter~\ref{chap:problem_description}) with various handy features, wrapped into the \verb|traffic_signaling| Python package 
+    \item \textbf{Optimization} - scripts for running the optimization and experiments, built on top of the simulator
+\end{itemize}
+
+\section{Prerequisites}
+
+TL;DR: If you just want to setup the environment for optimization, run
+\begin{verbatim}
+    make setup
+\end{verbatim}
+
+To build and install the \verb|traffic_signaling| package, you need:
+\begin{itemize}
+    \item \textbf{C++ compiler} with C++20 code support; e.g., gcc 11, clang 16, or MSVC 19.29 (or later versions)
+    \item \textbf{Python} 3.10 or later
+    \item \textbf{Python headers} (most likely already installed with Python)
+    \begin{itemize}
+        \item You can verify that the headers are available by inspecting their expected location with e.g.
+\begin{verbatim}
+    python3 -c "import sysconfig;
+        print(sysconfig.get_path('include'))"
+\end{verbatim}
+        \item If not available, install the headers with e.g.
+\begin{verbatim}
+    sudo apt install python3-dev
+\end{verbatim}
+    \end{itemize}
+\end{itemize}
+For running the optimization, you also need to install packages from \\
+the \verb|requirements.txt| file
+% Assuming you are in the root directory of the repository, you can install the package with
+% \begin{verbatim}
+%     pip install ./traffic_signaling
+% \end{verbatim}
