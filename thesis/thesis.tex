@@ -82,7 +82,7 @@
 % Packages for computer science theses
 % https://tex.stackexchange.com/questions/145760/how-may-i-remove-endif-and-endfor-in-algorithmicx/145764#145764
 %\usepackage{algpseudocode}  % part of algorithmicx package
-\usepackage[noend]{algpseudocode}  % use noend to not disaply endif, endfor, etc.
+\usepackage[noend]{algpseudocode}  % use noend to not display endif, endfor, etc.
 
 % https://latex.org/forum/viewtopic.php?t=15388
 %\usepackage{algorithm}
@@ -122,6 +122,11 @@
 % Our definitions of macros (see description inside)
 \input macros.tex
 
+% Include automatic generation of abbreviations
+% \usepackage{glossaries-extra}
+% \makeglossaries
+% \input abbreviations.tex
+
 %%% Title page and various mandatory informational pages
 \begin{document}
 \include{title}
@@ -153,6 +158,14 @@
 %%% Abbreviations used in the thesis, if any, including their explanation
 %%% In mathematical theses, it could be better to move the list of abbreviations to the beginning of the thesis.
 \chapwithtoc{List of Abbreviations}
+
+\begin{description}
+	\item[GA] Genetic Algorithm
+	\item[HC] Hill Climbing
+	\item[SA] Simulated Annealing 
+\end{description}
+
+% \printglossary[title={List of Abbreviations}]
 
 %%% Doctoral theses must contain a list of author's publications
 \ifx\ThesisType\TypePhD
