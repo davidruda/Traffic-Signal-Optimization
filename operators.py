@@ -231,7 +231,7 @@ def _eaSimple(
     pop2 = [toolbox.clone(ind) for ind in population]
 
     # Begin the generational process
-    for gen in range(1, ngen + 1):
+    for gen in range(1, ngen + int(1)): # the int call is there to avoid Cython warning
         start = time.time()
 
         # Select the next generation individuals
@@ -421,7 +421,7 @@ def _single_state_algorithm(
     pop2 = [toolbox.clone(ind) for ind in population]
 
     # Begin the generational process
-    for gen in range(1, ngen + 1):
+    for gen in range(1, ngen + int(1)): # the int call is there to avoid Cython warning
         start = time.time()
 
         # This has to be written as a one-liner or Cython won't compile it
