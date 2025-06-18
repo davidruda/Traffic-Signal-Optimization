@@ -75,18 +75,20 @@ class Optimizer:
         creator.create('FitnessMax', base.Fitness, weights=(1.0,))
         creator.create('Individual', list, fitness=creator.FitnessMax)
 
-        sim = Simulation(self.plan)
-        sim.create_schedules(order=self._args.order_init, times=self._args.times_init)
-
         self._toolbox.register(
-            'individual', tools.initIterate, creator.Individual, partial(self._create_individual, simulation=sim)
+            'individual',
+            tools.initIterate,
+            creator.Individual,
+            partial(self._create_individual, simulation=Simulation(self.plan)),
         )
         self._toolbox.register('population', tools.initRepeat, list, self._toolbox.individual)
         self._toolbox.register('evaluate', self._evaluate)
 
         if self._args.algorithm == 'ga':
             selection = partial(
-                tournament_selection_with_elitism, tournsize=self._args.tournsize, elitism=self._args.elitism
+                tournament_selection_with_elitism,
+                tournsize=self._args.tournsize,
+                elitism=self._args.elitism,
             )
             self._toolbox.register('select', selection)
             self._toolbox.register('mate', crossover)
@@ -121,9 +123,15 @@ class Optimizer:
         self._stats.register('avg', lambda x: f'{int(np.mean(x)):,}')
 
     def _create_individual(self, simulation):
-        if self._args.order_init == 'random':
+        if len(simulation.non_trivial_schedules()) == 0 or self._args.order_init == 'random':
+            # Schedules are not created yet or
             # For random order initialization, we need to create new schedules each time
-            simulation.create_schedules(order=self._args.order_init, times=self._args.times_init)
+            simulation.create_schedules(
+                order=self._args.order_init,
+                times=self._args.times_init,
+                divisor=BEST_DIVISOR[self._args.data],
+            )
+
         # Relative order is required for the operators (order crossover) to work correctly
         schedules = simulation.non_trivial_schedules(relative_order=True)
 
@@ -190,7 +198,7 @@ class Optimizer:
         # Avoid scientific notation for x-axis ticks
         xticks = ax1.get_xticks()
         ax1.xaxis.set_major_locator(ticker.FixedLocator(xticks))
-        ax1.set_xticklabels([f'{x:,.0f}' for x in xticks])
+        ax1.set_xticklabels([f'{x:,.0f}' for x in xticks], rotation=45)
 
         fig.tight_layout()
         fig.savefig(os.path.join(logdir, f'{self._args.data}.pdf'), bbox_inches='tight')

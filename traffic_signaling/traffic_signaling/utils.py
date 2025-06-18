@@ -77,6 +77,16 @@ PARAMETERS = {
     'f': 10_002
 }
 
+# Best divisor (with the highest score) for scaled schedules for each dataset.
+BEST_DIVISOR = {
+    'a': 1,
+    'b': 5,
+    'c': 11,
+    'd': 5,
+    'e': 2,
+    'f': 27,
+}
+
 def normalized_score(score: int, data: str) -> float:
     """
     Normalizes the absolute score value between 0 and 1 for the given dataset.

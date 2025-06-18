@@ -12,24 +12,31 @@ for dataset in TEST_DATA:
     print(f"Running dataset {dataset}")
     # Default score (baseline) is the same for all datasets - 0.0
 
-    adaptive = normalized_score(ADAPTIVE_SCORE[dataset], data=dataset)
+    sim = Simulation(create_city_plan(dataset))
+    sim.adaptive_schedules()
+    adaptive = normalized_score(sim.score(), data=dataset)
     data['dataset'].append(dataset.upper())
     data['method'].append('adaptive')
     data['score'].append(adaptive)
 
-    simulation = Simulation(create_city_plan(dataset))
-    simulation.scaled_schedules()
-    scaled = normalized_score(simulation.score(), data=dataset)
+    # Find the best divisor for scaled schedules
+    scaled = []
+    for divisor in range(1, 101):
+        sim.scaled_schedules(divisor=divisor)
+        scaled.append(normalized_score(sim.score(), data=dataset))
+    best_divisor = np.argmax(scaled)
+    best_scaled = scaled[best_divisor]
+    print(f"Best divisor for {dataset} is {best_divisor + 1} with score {best_scaled:.2f}")
     data['dataset'].append(dataset.upper())
     data['method'].append('scaled')
-    data['score'].append(scaled)
+    data['score'].append(best_scaled)
 
     set_seed(42)
     RANDOM_REPEATS = 100
     random = []
     for _ in range(RANDOM_REPEATS):
-        simulation.random_schedules()
-        random.append(normalized_score(simulation.score(), data=dataset))
+        sim.random_schedules()
+        random.append(normalized_score(sim.score(), data=dataset))
     data['dataset'].extend([dataset.upper()] * RANDOM_REPEATS)
     data['method'].extend(['random'] * RANDOM_REPEATS)
     data['score'].extend(random)

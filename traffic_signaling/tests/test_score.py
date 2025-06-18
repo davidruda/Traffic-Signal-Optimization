@@ -49,7 +49,7 @@ class TestScore(unittest.TestCase):
         simulation.random_schedules()
         self.assertEqual(score, simulation.score())
 
-        simulation.scaled_schedules(divisor=27)
+        simulation.scaled_schedules(divisor=BEST_DIVISOR[data])
         score = simulation.score()
         print('\n' + ' scaled_schedules '.center(70, '*'))
         simulation.summary()
