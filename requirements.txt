@@ -6,6 +6,7 @@ deap
 matplotlib
 pandas
 seaborn
+scipy
 
 Cython
 # In python>=3.12, `cythonize` crashes without setuptools
