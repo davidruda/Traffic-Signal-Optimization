@@ -108,17 +108,17 @@ logs/d/Simulated\ Annealing:
 #################################### Data e ####################################
 logs/e/Genetic\ Algorithm:
 	$(PYTHON) optimize_experiment.py "Genetic Algorithm" \
-		"ga e --order_init random --times_init default --population 150 --generations 4000 --mutation_bit_rate 10 --crossover 0.6 --mutation 0.4 --tournsize 3 --elitism 0.05 --threads $(THREADS)" \
+		"ga e --order_init random --times_init scaled --population 90 --generations 6667 --mutation_bit_rate 9 --crossover 0.6 --mutation 0.4 --tournsize 3 --elitism 0.05 --threads $(THREADS)" \
 		$(PARALLEL)
 
 logs/e/Hill\ Climbing:
 	$(PYTHON) optimize_experiment.py "Hill Climbing" \
-		"hc e --order_init random --times_init default --instances 1 --iterations 450000 --mutation_bit_rate 14" \
+		"hc e --order_init random --times_init scaled --instances 1 --iterations 450000 --mutation_bit_rate 15" \
 		$(PARALLEL)
 
 logs/e/Simulated\ Annealing:
 	$(PYTHON) optimize_experiment.py "Simulated Annealing" \
-		"sa e --order_init random --times_init default --instances 1 --iterations 450000 --mutation_bit_rate 6 --temperature 300" \
+		"sa e --order_init random --times_init scaled --instances 1 --iterations 450000 --mutation_bit_rate 5 --temperature 275" \
 		$(PARALLEL)
 
 #################################### Data f ####################################

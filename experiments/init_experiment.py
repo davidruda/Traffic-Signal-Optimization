@@ -1,3 +1,5 @@
+import argparse
+
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
@@ -5,6 +7,11 @@ import seaborn as sns
 sns.set_theme()
 
 from traffic_signaling import *
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--baseline', action='store_true', help='Plot baseline score.')
+parser.add_argument('--max_known', action='store_true', help='Plot max known score.')
+args = parser.parse_args()
 
 data = {'dataset': [], 'method': [], 'score': []}
 
@@ -44,15 +51,17 @@ for dataset in TEST_DATA:
 df = pd.DataFrame(data)
 
 colors = sns.color_palette('tab10')
-plt.axhline(0, linestyle='--', color=colors[0], label='default (baseline)')
+
+if args.baseline:
+    plt.axhline(0, linestyle='--', color=colors[0], label='default (baseline)')
+if args.max_known:
+    plt.axhline(1, color=colors[4], linestyle='--', label='max known score')
 ax = sns.barplot(data=df, x='dataset', y='score', hue='method', hue_order=['adaptive', 'random', 'scaled'], palette=colors[1:4])
 
 # Create bar text labels
 ax.bar_label(ax.containers[0], labels=np.round(ax.containers[0].datavalues, 2), fontsize=10, color=colors[1])
 ax.bar_label(ax.containers[1], labels=np.round(ax.containers[1].datavalues, 2), fontsize=10, color=colors[2])
 ax.bar_label(ax.containers[2], labels=np.round(ax.containers[2].datavalues, 2), fontsize=10, color=colors[3])
-
-plt.axhline(1, color=colors[4], linestyle='--', label='max known score')
 
 y_min = -0.03
 y_max = 1.03

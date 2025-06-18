@@ -133,5 +133,5 @@ ax1.xaxis.set_major_locator(ticker.FixedLocator(xticks))
 ax1.set_xticklabels([f'{x:,.0f}' for x in xticks], rotation=45)
 
 fig.tight_layout()
-plt.savefig(f'{args.data}_{'_'.join(args.experiments)}.pdf', bbox_inches='tight')
 # plt.show()
+plt.savefig(f'{args.data}_{'_'.join(args.experiments)}.pdf', bbox_inches='tight')
