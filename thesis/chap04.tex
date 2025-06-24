@@ -1,14 +1,14 @@
-\chapter{Configuration of Optimization Algorithms}
+\chapter{Application of Optimization Algorithms}
 
 In this chapter, we describe the problem specific details of our chosen optimization algorithms.
 
-\section{Coding of a solution}
+\section{Coding of a Solution}
 
 The solution is encoded as a \textbf{list of intersection schedules}, where each schedule consists of two parts: \textit{order} and \textit{times}. Order is an array of street indices that defines the order in which the streets have the green light. Times is an array of integers that defines the duration of the green light with respect to the street order. To keep the two parts consistent, any changes to the order array are also applied to the corresponding times array.
 
 As described \xxx{in the X section}, we only optimize non-trivial intersections.
 
-\section{Initial solutions}
+\section{Initial Solutions}
 
 The creation of an initial solution is a part of the simulator functionality. We provide a few different initial options for both order and times. Order initializations include:
 \begin{itemize}
@@ -23,7 +23,7 @@ Times initializations include:
 \end{itemize}
 
 
-\section{Algorithm specifics}
+\section{Algorithm Specifics \xxx{Generating New Solutions}}
 
 Since the solution structure is quite complex and each schedule of an intersection can have a different number of streets, we apply the operators for each intersection separately.
 
@@ -58,4 +58,3 @@ All three aforementioned algorithms depend on the setting of multiple hyperparam
 
 Most of the hyperparameters were tuned on smaller datasets E and B. However, \xxx{some parameters are highly dependent on the dataset (temperature) and those were also tested on the larger datasets}.
 
-\section{Optimizer?}

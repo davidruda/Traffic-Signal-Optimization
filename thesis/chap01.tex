@@ -129,7 +129,7 @@ This heuristic is not straightforward, so let us think about it in more detail. 
     \item Keep the light red the whole time, effectively blocking all cars there.
 \end{enumerate}
 Empirically speaking, the vast majority of trivial intersections should be kept green anyway, otherwise many cars would not be able to reach their destination at all.
-Furthermore, we argue that we can omit the second option because we can achieve a similar result in a different way. Suppose that blocking a particular trivial intersection would improve the score. This means that there must be a problematic car passing through this intersection. However, the problematic car must eventually reach some non-trivial intersection via a street, and this street can still be blocked during the optimization. We therefore leave this up to the optimization algorithm, hoping that it will explore this option if it is indeed beneficial.
+Furthermore, we argue that we can omit the second option because we can achieve a similar result in a different way. Suppose that blocking a particular trivial intersection improves the score. This means that there must be a problematic car passing through this intersection. However, the problematic car must eventually reach some non-trivial intersection via a street, and this street can still be blocked during the optimization. We therefore leave this up to the optimization algorithm, hoping that it explores this option if it is indeed beneficial.
 
 % \xxx{Maybe add an illustration for better explanation?}
 
