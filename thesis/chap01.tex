@@ -1,17 +1,18 @@
 \chapter{Problem Description} \label{chap:problem_description}
 
 
-In this chapter, we introduce the optimization problem that we address in this thesis. Section~\ref{sec:competition_overview} briefly mentions the competition setting in which the problem was originally assigned. Section~\ref{sec:original_problem_statement} presents the original problem statement and describes it in detail. Section~\ref{sec:further_insights_and_heuristics} provides additional insights and heuristics that we use to simplify the problem and improve solutions.
+In this chapter, we introduce the optimization problem that we address in this thesis. Section~\ref{sec:competition_overview} briefly mentions the competition setting in which the problem was originally assigned. Section~\ref{sec:original_problem_statement} presents the original problem statement and describes it in detail. Section~\ref{sec:further_insights_and_heuristics} provides additional insights and heuristics that we use to simplify the problem and improve solutions. \xxx{Section~\ref{sec:simulator} ...}
 
 \section{Competition Overview} \label{sec:competition_overview}
 
 The problem we address in this thesis was originally assigned in the qualifying round of Google Hash Code 2021. Google Hash Code was a global team programming competition, running between 2014--2022, where teams of 2--4 competitors solved an optimization problem with the goal of achieving the best score in a limited time of 4 hours.
 
-The usual solution procedure for our problem was as follows: Read the input data, create a trivial solution and write it to the output file in the specified format, and upload the solution to the evaluation system, where you could see not only the total score, but also some informative statistics, such as the number of cars that reached the finish before the deadline. For some datasets, an interactive visualization of the simulation process was also available, allowing to see the structure of a particular dataset. Although the local simulator was not needed to solve the problem, the manual upload of the solution to the evaluation system was slow and cumbersome and therefore not suitable for the use of efficient optimization algorithms.
+The usual solution procedure for our problem was as follows: Read the input data, create a trivial solution and write it to the output file in the specified format, and upload the solution to the evaluation system. The evaluation system not only displayed the score, but also some informative statistics, such as the number of cars that reached the finish before the deadline, the cars that arrived earliest and latest, the average cycle length of traffic lights at intersections, etc.
+For some datasets, an interactive visualization of the evaluation process was also available, allowing to see the structure of a particular dataset. Although a local simulator was not needed to solve the problem, the manual upload of the solution to the evaluation system was slow and cumbersome and therefore not suitable for the use of efficient optimization algorithms.
 
 Most teams were able to construct trivial solutions, which they then tried to improve by randomly changing the values. However, the best teams were able to write their own local simulator and use it to run multiple heuristics to get a better total score. Still, there was no time for anything more complex than a simple random search.
 
-The total score was the sum of the scores of all 6 datasets (A--F). The first dataset (A) served as a ``toy problem'' mainly for debugging purposes, but the rest of the datasets were large enough for the optimization. It should be noted that the distribution of points among the datasets is uneven, so the contestants mostly focused on the datasets with the highest possible score (D, F) and pragmatically skipped optimizing the rest (B, C, E).
+The total score was the sum of the scores of all 6 datasets (A--F). The first dataset (A) served as a ``toy problem'' mainly for debugging purposes, but the rest of the datasets were large enough for optimization. It should be noted that the distribution of points among the datasets is uneven, so the contestants mostly focused on the datasets with the highest possible score (D, F) and pragmatically skipped optimizing the rest (B, C, E).
 
 \section{Original Problem Statement} \label{sec:original_problem_statement}
 
@@ -90,7 +91,7 @@ At the beginning of the simulation, all cars are at the end of the first street 
 
 \subsection{Score}
 
-The score of a solution is determined as follows: Let $\bm{\theta}$ denote the traffic light schedule. Given a duration of the simulation $\mathrm{D}$ in seconds, where $1 \leq \mathrm{D} \leq 10^4$, and a fixed bonus for reaching the destination $\mathrm{F}$, where $1 \leq \mathrm{F} \leq 10^3$, let $t(c; \bm{\theta}) \in \mathbb{N}$ be the time a car $c \in C$ reaches the destination. The $score$ of a car $c$ is defined as
+The score of a solution is determined as follows: Let $\bm{\theta}$ denote the traffic light schedules. Given a duration of the simulation $\mathrm{D}$ in seconds, where $1 \leq \mathrm{D} \leq 10^4$, and a fixed bonus for reaching the destination $\mathrm{F}$, where $1 \leq \mathrm{F} \leq 10^3$, let $t(c; \bm{\theta}) \in \mathbb{N}$ be the time a car $c \in C$ reaches the destination. The $score$ of a car $c$ is defined as
 \begin{equation}
     score(c; \bm{\theta}) =
     \begin{cases}
@@ -121,7 +122,7 @@ This heuristic is an obvious one; unused intersections are never used and only a
 
 \paragraph{Blocked Streets and Blocked Intersections} \textit{Blocked street} is an unscheduled street or a street with a green light scheduled for 0 seconds. \textit{Blocked intersection} is an intersection with no schedule or with all incoming streets blocked.
 
-\paragraph{Heuristic 2: Fix Schedules for Trivial Intersections} Trivial intersections do not have to be optimized. The schedule for these intersections can be fixed: The only used incoming street has a green light the whole time. This can substantially reduce the number of optimized parameters. \\
+\paragraph{Heuristic 2: Fix the Schedule for Trivial Intersections, Optimize Only Non-trivial Schedules} Trivial intersections do not require optimization; their schedule can be fixed by giving a green light to the only used incoming street for the entire duration. Only the schedules of non-trivial intersections need to be optimized. This can substantially reduce the number of optimized parameters. \\
 
 This heuristic is not straightforward, so let us think about it in more detail. For trivial intersections, we have two meaningful schedule options:
 \begin{enumerate}
@@ -129,8 +130,31 @@ This heuristic is not straightforward, so let us think about it in more detail. 
     \item Keep the light red the whole time, effectively blocking all cars there.
 \end{enumerate}
 Empirically speaking, the vast majority of trivial intersections should be kept green anyway, otherwise many cars would not be able to reach their destination at all.
-Furthermore, we argue that we can omit the second option because we can achieve a similar result in a different way. Suppose that blocking a particular trivial intersection improves the score. This means that there must be a problematic car passing through this intersection. However, the problematic car must eventually reach some non-trivial intersection via a street, and this street can still be blocked during the optimization. We therefore leave this up to the optimization algorithm, hoping that it explores this option if it is indeed beneficial.
+Furthermore, we argue that we can omit the second option because we can achieve a similar result in a different way. Suppose that blocking a particular trivial intersection improves the score. This means that there must be a problematic car passing through this intersection. However, the problematic car must eventually reach some non-trivial intersection via a street, and this street can still be blocked during optimization. We therefore leave this up to the optimization algorithm, hoping that it explores this option if it is indeed beneficial.
 
-% \xxx{Maybe add an illustration for better explanation?}
+As previously mentioned, this smart heuristic is important because it allows us to focus only on the non-trivial intersections and simplifies the optimization process. To put it into perspective, approximately $80 \%$ of used intersections in dataset B are trivial, $60 \%$ in dataset C, and $50 \%$ in dataset E. This enables us to skip optimizing thousands of parameters.
 
-As previously mentioned, this smart heuristic is important because it reduces the number of parameters and speeds up the optimization. To put it into perspective, around $80 \%$ of used intersections in dataset B are trivial, $60 \%$ in dataset C, and $50 \%$ in dataset E. This allows us to skip optimizing thousands of parameters.
+\section{Simulator} \label{sec:simulator}
+
+This section briefly presents a custom simulator that we developed to help us optimize the problem. We explain its motivation and describe the functionality relevant to optimization.
+\xxx{For more details on the code and implementation, please refer to the Developer Documentation in Appendix~\ref{chap:developer_documentation}.}
+
+\bigskip
+
+Our simulator replaces the original competition evaluation system, which was accessible only through the competition website via a user interface and is no longer available. It also adds several features on top of the original system.
+The simulator is written in C++ to be as fast and efficient as possible, but is wrapped as a Python package using the powerful pybind11 library~\cite{jakob2017pybind11}, making it very convenient to use.
+Inspired by libraries such as NumPy\footnote{\url{https://numpy.org/}} and PyTorch\footnote{\url{https://pytorch.org/}}, our goal is to provide an easy-to-use interface and seamless integration with the vital Python ecosystem, without compromising on top-tier performance.
+
+Below are the features of the simulator package that are important for optimization. These are implemented in C++ and exposed only through a lightweight Python API:
+\begin{itemize}
+    \item Reading and storing the input data.
+    \item Creating initial schedules using several different options.
+    \item Running the simulation to evaluate given schedules.
+    \item Getting and setting the non-trivial schedules in a format suitable for optimization.
+\end{itemize}
+The different options for creating initial schedules are described in Section~\ref{sec:initial_solutions} and the format of the non-trivial schedules is described in Section~\ref{sec:coding_of_a_solution}.
+
+
+The only case where larger data are passed between C++ and Python is when working with the \textit{non-trivial schedules}.
+As explained in Section~\ref{sec:further_insights_and_heuristics}, these are the only schedules that require optimization.
+Since the optimization loop is implemented in Python using parts of the DEAP library~\cite{fortin2012deap}, it must retrieve these schedules from the simulator, modify them externally, and then send the modified schedules back into the simulator to evaluate their score.

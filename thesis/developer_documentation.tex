@@ -3,3 +3,20 @@
 \xxx{DEAP citation \cite{fortin2012deap}.}
 
 \section{Section 1}
+
+\xxx{Code example...}
+
+\begin{lstlisting}[language=Python]
+from traffic_signaling import *
+
+# Load the city plan for a specific dataset
+plan = create_city_plan(data='e')
+# Create a simulation for the given city plan
+sim = Simulation(plan)
+# Set traffic light schedules to default values
+sim.default_schedules()
+# Calculate the score
+score = sim.score()
+# Show statistics of the simulation
+sim.summary()
+\end{lstlisting}
