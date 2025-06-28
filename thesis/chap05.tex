@@ -232,3 +232,162 @@ F & 0.93 & 0.90 & 0.88 \\
 %}  % uncomment if you use the \floatbox
 \label{tab:results}
 \end{table}
+
+% TABLE WITH SHARED HYPERPARAMETERS
+\begin{table}[h]
+\centering\footnotesize\sf
+
+\begin{tabular}{l@{}c}
+% \toprule
+\multicolumn{2}{l}{\textbf{Genetic Algorithm}} \\
+Crossover probability & 0.6 \\
+Mutation probability & 0.4 \\
+Tournament size & 3 \\
+Elitism & 0.05 \\
+\midrule
+\multicolumn{2}{l}{\textbf{Hill Climbing}} \\
+Iterations & 450000 \\
+\midrule
+\multicolumn{2}{l}{\textbf{Simulated Annealing}} \\
+Iterations & 450000 \\
+% \bottomrule
+\end{tabular}
+
+\caption[Shared hyperparameters]{Shared hyperparameters across all datasets.}
+\label{tab:hyperparams_shared}
+\end{table}
+
+% TABLE WITH DATASET-SPECIFIC HYPERPARAMETERS
+\begin{table}[h]
+\centering\footnotesize\sf
+
+\begin{minipage}[t]{0.48\textwidth}
+\centering
+\begin{tabular}{l@{\hspace{0.5cm}}c}
+% \toprule
+\multicolumn{2}{c}{\textbf{Dataset E}} \\
+\midrule
+Order initialization & random \\
+Times initialization & scaled \\
+\midrule
+\multicolumn{2}{l}{\textbf{Genetic Algorithm}} \\
+Population size & 90 \\
+Generations & 6667 \\
+Mutation bit rate & 9 \\
+\midrule
+\multicolumn{2}{l}{\textbf{Hill Climbing}} \\
+Mutation bit rate & 15 \\
+\midrule
+\multicolumn{2}{l}{\textbf{Simulated Annealing}} \\
+Mutation bit rate & 5 \\
+Initial temperature & 275 \\
+% \bottomrule
+\end{tabular}
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.48\textwidth}
+\centering
+\begin{tabular}{l@{\hspace{0.5cm}}c}
+% \toprule
+\multicolumn{2}{c}{\textbf{Dataset B}} \\
+\midrule
+Order initialization & adaptive \\
+Times initialization & default \\
+\midrule
+\multicolumn{2}{l}{\textbf{Genetic Algorithm}} \\
+Population size & 10 \\
+Generations & 60000 \\
+Mutation bit rate & 2 \\
+\midrule
+\multicolumn{2}{l}{\textbf{Hill Climbing}} \\
+Mutation bit rate & 4 \\
+\midrule
+\multicolumn{2}{l}{\textbf{Simulated Annealing}} \\
+Mutation bit rate & 1 \\
+Initial temperature & 0.25 \\
+% \bottomrule
+\end{tabular}
+\end{minipage}
+\newline
+\newline
+\newline
+\begin{minipage}[t]{0.48\textwidth}
+\centering
+\begin{tabular}{l@{\hspace{0.5cm}}c}
+% \toprule
+\multicolumn{2}{c}{\textbf{Dataset F}} \\
+\midrule
+Order initialization & random \\
+Times initialization & scaled \\
+\midrule
+\multicolumn{2}{l}{\textbf{Genetic Algorithm}} \\
+Population size & 50 \\
+Generations & 12000 \\
+Mutation bit rate & 2 \\
+\midrule
+\multicolumn{2}{l}{\textbf{Hill Climbing}} \\
+Mutation bit rate & 5 \\
+\midrule
+\multicolumn{2}{l}{\textbf{Simulated Annealing}} \\
+Mutation bit rate & 3 \\
+Initial temperature & 15 \\
+% \bottomrule
+\end{tabular}
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.48\textwidth}
+\centering
+\begin{tabular}{l@{\hspace{0.5cm}}c}
+% \toprule
+\multicolumn{2}{c}{\textbf{Dataset C}} \\
+\midrule
+Order initialization & adaptive \\
+Times initialization & default \\
+\midrule
+\multicolumn{2}{l}{\textbf{Genetic Algorithm}} \\
+Population size & 20 \\
+Generations & 30000 \\
+Mutation bit rate & 2 \\
+\midrule
+\multicolumn{2}{l}{\textbf{Hill Climbing}} \\
+Mutation bit rate & 4 \\
+\midrule
+\multicolumn{2}{l}{\textbf{Simulated Annealing}} \\
+Mutation bit rate & 2 \\
+Initial temperature & 0.1 \\
+% \bottomrule
+\end{tabular}
+\end{minipage}
+\newline
+\newline
+\newline
+\begin{minipage}[t]{0.48\textwidth}
+\centering
+\begin{tabular}{l@{\hspace{0.5cm}}c}
+% \toprule
+\multicolumn{2}{c}{\textbf{Dataset D}} \\
+\midrule
+Order initialization & adaptive \\
+Times initialization & default \\
+\midrule
+\multicolumn{2}{l}{\textbf{Genetic Algorithm}} \\
+Population size & 40 \\
+Generations & 15000 \\
+Mutation bit rate & 2 \\
+\midrule
+\multicolumn{2}{l}{\textbf{Hill Climbing}} \\
+Mutation bit rate & 2 \\
+\midrule
+\multicolumn{2}{l}{\textbf{Simulated Annealing}} \\
+Mutation bit rate & 2 \\
+Initial temperature & 0.1 \\
+% \bottomrule
+\end{tabular}
+\end{minipage}
+
+\caption[Dataset-specific hyperparameters]{
+    Dataset-specific hyperparameters.
+    The order and times initializations are the same for all three methods for each dataset.
+}
+\label{tab:hyperparams_datasets_specific}
+\end{table}
