@@ -8,7 +8,8 @@ The solution is encoded as a \textbf{list of intersection schedules}, where each
 
 \section{Initial Solutions} \label{sec:initial_solutions}
 
-The creation of an initial solution is a part of the simulator functionality. We provide a few different initial options for both order and times. Order initializations include:
+The creation of an initial solution is a part of the simulator functionality and uses \hyperref[para:heuristic_1]{Heuristic 1}.
+We provide a few different initialization options for both order and times. Order initializations include:
 \begin{itemize}
     \item \textit{default} - simply uses the order given by street IDs in the input file
     \item \textit{random} - takes a random permutation of the streets
@@ -17,15 +18,32 @@ The creation of an initial solution is a part of the simulator functionality. We
 Times initializations include:
 \begin{itemize}
     \item \textit{default} - all times are set to 1 second
-    \item \textit{scaled} - time for each street is a total number of cars using this street divided by a single given constant
+    \item \textit{scaled} - time for each street is a total number of cars using this street divided by a single given constant (divisor)
 \end{itemize}
+Both order initialization and times initialization are hyperparameters. To decide which setting to use for optimization, we experimentally compared scores of different initialization options across all datasets.
 
+The results are shown in Figure~\ref{fig:init_comparison}. We can see that by using other ``smarter'' initialization methods, we can significantly improve the baseline solution and start optimizing from much better starting points.
+We decided to use \textit{adaptive order} and \textit{default times} for datasets B, C, and D, and \textit{random order} and \textit{scaled times} for datasets E and F (See Table~\ref{tab:hyperparams_datasets_specific}).
+
+\begin{figure}[h]
+    \centering
+    % \includegraphics[width=.8\linewidth]{img/screenshots/hashcode_datasets_c_e.png}
+    \includegraphics[width=\linewidth]{img/experiments/init_experiment.pdf}
+    \caption[Comparison of initialization options]{
+        Comparison of different initialization options across datasets.
+        Specifically, we compare \textcolor{myorange}{\textbf{adaptive}} (adaptive order and default times), \textcolor{mygreen}{\textbf{random}} (random order and default times), and \textcolor{myred}{\textbf{scaled}} (default order and scaled times) options. \textcolor{myblue}{\textbf{Default}} (default order and default times) option represents the baseline solution.
+        \textcolor{mygreen}{\textbf{Random}} option is averaged over 100 trials, the black error bars show the 95\% confidence interval.
+        For \textcolor{myred}{\textbf{scaled}} option, we use the best divisor between 1--100 for each dataset.
+        Y-axis shows the normalized score, where 0 is the baseline score and 1 is the maximum known score for each dataset.
+    }
+    \label{fig:init_comparison}
+\end{figure}
 
 \section{Algorithm Specifics \xxx{Generating New Solutions}}
 
 Since the solution structure is quite complex and each schedule of an intersection can have a different number of streets, we apply the operators for each intersection separately.
 
-\subsection*{Genetic Algorithm}
+\section{Genetic Algorithm}
 
 \paragraph{Crossover}
 
@@ -39,11 +57,11 @@ For each intersection, we randomly decide whether to mutate only the order, only
 
 We use the \textit{tournament selection} with \textit{elitism}. The tournament size and the elitism rate are hyperparameters.
 
-\subsection*{Hill Climbing}
+\section{Hill Climbing}
 
 As mentioned in Section~\ref{sec:hill_climbing}, we randomly generate the next state because there is no explicit neighborhood structure. To do so, we simply reuse the mutation operator from the genetic algorithm.
 
-\subsection*{Simulated Annealing}
+\section{Simulated Annealing}
 
 We use the same strategy to generate the next state as in Hill Climbing, i.e., apply the mutation from the genetic algorithm. For the temperature cooling schedule, introduced in Section~\ref{sec:simulated_annealing}, we use a linear decay. It is defined as
 \begin{equation}

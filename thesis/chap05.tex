@@ -58,29 +58,6 @@ Here we briefly describe all datasets provided with the Google Hash Code Traffic
 
 As previously stated, each dataset yields an absolute score in different range. To compare the performance across all datasets, we normalize the scores to a 0--1 range. 0 is a baseline solution with default order and default times and 1 is the maximum known score for the dataset. Note that the baseline is already a good solution and there may not be much room to improve further, e.g., in dataset B.
 
-\section{Experiment 1: Initialization}
-
-In the first experiment, we compare the performance of different initialization methods across all datasets. The goal is to figure out how much we can improve the baseline solution by using a ``smarter'' initialization and which initialization methods to use for further optimization.
-
-\subsection*{Methodology}
-
-We compare three initialization methods: \textit{adaptive}---adaptive order and default times, \textit{random}---random order and default times, and \textit{scaled}---default order and scaled times. Since the random method is stochastic, it was run 100 times and averaged. The rest of the methods are deterministic and therefore run only once.
-
-\begin{figure}
-    \centering
-    % \includegraphics[width=\linewidth]{img/screenshots/hashcode_datasets_c_e.png}
-    % \includegraphics[width=.8\linewidth]{img/screenshots/hashcode_datasets_c_e.png}
-    \includegraphics[width=\linewidth]{img/experiments/init_experiment.pdf}
-    \caption[Initialization Experiment]{
-        Initialization Experiment
-    }
-    \label{fig:init_experiment}
-\end{figure}
-
-\subsection*{Results}
-
-The results are shown in Figure~\ref{fig:init_experiment}. Overall, the adaptive method provides the biggest improvement over the baseline. It also yields a really high score for the largest dataset D. The only exception is the dataset F, where the otherwise mediocre scaled method performs really well. The random method generally performs the same as the baseline but it can still be a good initialization starting point if we care about variety and randomness in the solution. 
-
 \section{Experiment 2: Optimization}
 
 In the second experiment, we compare different optimization methods on datasets B--F. The goal is to find if some method is superior to others or if the ideal method is dataset-dependent. We also want to see how much we can improve from the starting solutions.

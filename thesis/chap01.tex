@@ -113,8 +113,8 @@ In this section, we introduce some additional terms and heuristics for the probl
 \paragraph{Used and Unused Intersections} \textit{Unused intersection} is an intersection where all incoming streets are unused streets. \textit{Used intersection} is an intersection with at least one used incoming street.
 
 % https://tex.stackexchange.com/questions/32160/new-line-after-paragraph
-\paragraph{Heuristic 1: Remove Unused Intersections and Unused Streets} \mbox{} \\
-Remove unused intersections and unused streets from used intersections before creating the schedules. They contribute nothing and can only worsen the score. \\
+\paragraph{Heuristic 1: Remove Unused Intersections and Unused Streets} \label{para:heuristic_1} \mbox{} \\
+Remove unused intersections and unused streets from used intersections when creating initial schedules. They contribute nothing and can only worsen the score. \\
 
 This heuristic is an obvious one; unused intersections are never used and only add unnecessary complexity. Unused streets prolong the traffic light cycle for the whole intersection, which very frequently leads to longer waiting times and thus a lower score. Now, let us move on to some less obvious insights.
 
@@ -122,7 +122,8 @@ This heuristic is an obvious one; unused intersections are never used and only a
 
 \paragraph{Blocked Streets and Blocked Intersections} \textit{Blocked street} is an unscheduled street or a street with a green light scheduled for 0 seconds. \textit{Blocked intersection} is an intersection with no schedule or with all incoming streets blocked.
 
-\paragraph{Heuristic 2: Fix the Schedule for Trivial Intersections, Optimize Only Non-trivial Schedules} Trivial intersections do not require optimization; their schedule can be fixed by giving a green light to the only used incoming street for the entire duration. Only the schedules of non-trivial intersections need to be optimized. This can substantially reduce the number of optimized parameters. \\
+\paragraph{Heuristic 2: Fix the Schedule for Trivial Intersections, Optimize Only Non-trivial Schedules} \label{para:heuristic_2}
+Trivial intersections do not require optimization; their schedule can be fixed by giving a green light to the only used incoming street for the entire duration. Only the schedules of non-trivial intersections need to be optimized. This can substantially reduce the number of optimized parameters. \\
 
 This heuristic is not straightforward, so let us think about it in more detail. For trivial intersections, we have two meaningful schedule options:
 \begin{enumerate}
@@ -156,5 +157,5 @@ The different options for creating initial schedules are described in Section~\r
 
 
 The only case where larger data are passed between C++ and Python is when working with the \textit{non-trivial schedules}.
-As explained in Section~\ref{sec:further_insights_and_heuristics}, these are the only schedules that require optimization.
+As explained in \hyperref[para:heuristic_2]{Heuristic 2}, these are the only schedules that require optimization.
 Since the optimization loop is implemented in Python using parts of the DEAP library~\cite{fortin2012deap}, it must retrieve these schedules from the simulator, modify them externally, and then send the modified schedules back into the simulator to evaluate their score.
