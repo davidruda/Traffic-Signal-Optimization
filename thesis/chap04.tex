@@ -18,10 +18,11 @@ Times initializations include:
     \item \textit{default} - all times are set to 1 second
     \item \textit{scaled} - time for each street is a total number of cars using this street divided by a single given constant (the divisor)
 \end{itemize}
+Default order and default times is our \textit{baseline} solution.
 Both order initialization and times initialization are hyperparameters. To decide which setting to use for optimization, we experimentally compared scores of different initialization options across all datasets.
 
 The results are shown in Figure~\ref{fig:init_comparison}. We can see that by using other ``smarter'' initialization methods, we can significantly improve the baseline solution and start optimizing from much better starting points.
-We decided to use \textit{adaptive order} and \textit{default times} for datasets B, C, and D, and \textit{random order} and \textit{scaled times} for datasets E and F (See Table~\ref{tab:hyperparams_datasets_specific}).
+We decided to use \textit{adaptive order} and \textit{default times} for datasets B, C, and D, and \textit{random order} and \textit{scaled times} for datasets E and F (see Table~\ref{tab:hyperparams_datasets_specific}).
 
 \begin{figure}[h]
     \centering

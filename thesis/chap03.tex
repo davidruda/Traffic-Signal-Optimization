@@ -12,7 +12,7 @@ solution but are frequently used in practice because they can find good solution
 
 Hill climbing \cite{russell2020artificial, luke2013essentials} is one of the simplest local search algorithms. It keeps track of the current state and on each iteration moves to the neighboring state with the highest value, i.e., it moves in the direction that provides the biggest improvement. If there are no neighboring states with a higher value, the algorithm terminates. The greedy nature of hill climbing is both its strength and its weakness. It can make rapid progress towards a solution but once it gets stuck in a local optimum it cannot escape it.
 
-A lot of variants of this algorithm exist. In our experiments, we use a version called \textit{first-choice hill climbing} (See Algorithm~\ref{alg:first_choice_hill_climbing}). This version randomly generates next states until it finds one with a higher value than the current state and then moves to this state. This is a good strategy when there are many neighboring states, which is exactly our case.
+A lot of variants of this algorithm exist. In our experiments, we use a version called \textit{first-choice hill climbing} (see Algorithm~\ref{alg:first_choice_hill_climbing}). This version randomly generates next states until it finds one with a higher value than the current state and then moves to this state. This is a good strategy when there are many neighboring states, which is exactly our case.
 
 % \xxx{\textbf{- mention parallel hill climbing (if i'll use it)}}
 
@@ -37,7 +37,7 @@ A lot of variants of this algorithm exist. In our experiments, we use a version 
 
 \section{Simulated annealing} \label{sec:simulated_annealing}
 
-Simulated annealing \cite{russell2020artificial, luke2013essentials} builds up on the idea of hill climbing and solves the problem of getting stuck in local optima (See Algorithm~\ref{alg:simulated_annealing}). In each iteration, it randomly generates a next state. If the state is better, it is always accepted. Otherwise, the worse state is accepted with some probability. The probability decreases exponentially with how much worse the state is and with the current value of the ``cooling'' schedule. By allowing moves to worse states, the algorithm can escape local optima and therefore find better solutions.
+Simulated annealing \cite{russell2020artificial, luke2013essentials} builds up on the idea of hill climbing and solves the problem of getting stuck in local optima (see Algorithm~\ref{alg:simulated_annealing}). In each iteration, it randomly generates a next state. If the state is better, it is always accepted. Otherwise, the worse state is accepted with some probability. The probability decreases exponentially with how much worse the state is and with the current value of the ``cooling'' schedule. By allowing moves to worse states, the algorithm can escape local optima and therefore find better solutions.
 
 The idea of the cooling schedule is inpired by the process of annealing in metallurgy, where metals are heated to a high temperature and then slowly cooled down to reach a strong, crystalline structure. Analogously, we want to allow worse moves more often at the beginning during the exploration phase and then gradually decrease that chance to hopefully converge to the best solution. Obviously, the choice of the schedule is absolutely crucial for the performance of the algorithm and has to be tuned specifically for each problem.
 
@@ -74,7 +74,7 @@ The idea of the cooling schedule is inpired by the process of annealing in metal
 Initially proposed by Holland \cite{holland1975adaptation} and Goldberg \cite{goldberg1989genetic}, genetic algorithm \cite{russell2020artificial,vanneschi2023lectures} belongs to the group of \textit{evolutionary algorithms}. Those algorithms are inpired by the seminal Darwin's theory of evolution, particularly by the idea of \textit{natural selection} \cite{darwin1859origin}. It states that the individuals with better traits suited to their environment are more likely to adapt, survive and reproduce. Over successive generations, these advantageous traits become more common in the population, leading to the emergence of new species.
 
 This biological motivation is translated into the context of evolutionary algorithms in the following way. We work with a set of individuals called a \textit{population}. Each individual in this population represents a solution to a given problem. The algorithm runs in iterations called \textit{generations}. In each generation, it selects some individuals, modifies them using the so-called \textit{genetic operators} and then selects which individuals survive to the next generation. The selection process prefers individuals that are better at solving the problem, i.e., individuals with higher fitness.
-There are many different evolutionary algorithms with even more variations that follow the previous description. Let us now focus specifically on the genetic algorithm (See Algorithm~\ref{alg:genetic_algorithm}).
+There are many different evolutionary algorithms with even more variations that follow the previous description. Let us now focus specifically on the genetic algorithm (see Algorithm~\ref{alg:genetic_algorithm}).
 
 \begin{algorithm}
     % https://tex.stackexchange.com/questions/150184/how-to-avoid-uppercase-function-name-while-using-function

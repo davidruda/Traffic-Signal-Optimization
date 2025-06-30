@@ -1,7 +1,6 @@
 \chapter{Problem description} \label{chap:problem_description}
 
-
-In this chapter, we introduce the optimization problem that we address in this thesis. Section~\ref{sec:competition_overview} briefly mentions the competition setting in which the problem was originally assigned. Section~\ref{sec:original_problem_statement} presents the original problem statement and describes it in detail. Section~\ref{sec:further_insights_and_heuristics} provides additional insights and heuristics that we use to simplify the problem and improve solutions. \xxx{Section~\ref{sec:simulator} ...}
+This chapter introduces the optimization problem addressed in this thesis. Section~\ref{sec:competition_overview} provides a brief overview of the competition setting where the problem was initially assigned. In Section~\ref{sec:original_problem_statement}, the original problem statement is presented and explained in detail. Section~\ref{sec:further_insights_and_heuristics} explores additional insights and heuristics that we use to simplify the problem and improve solutions. Section~\ref{sec:datasets} describes the datasets provided with the problem. Finally, Section~\ref{sec:simulator} presents the custom simulator tool that we developed to evaluate solutions to the problem.
 
 \section{Competition overview} \label{sec:competition_overview}
 
@@ -21,7 +20,7 @@ In short, the task is as follows:
 \begin{quote}
     \textit{Given a city plan describing intersections and streets and cars with planned paths through the city, optimize the schedule of traffic lights to minimize the total amount of time spent in traffic, and help as many cars as possible reach their destination before a specified deadline.}
 \end{quote}
-In terms of graph theory, the city plan is a \textit{directed graph}. The intersections are \textit{vertices} and the streets are \textit{directed edges} (See Figure~\ref{fig:hashcode_city_plan}). The planned path for each car is indeed a \textit{path} in this graph because it has a different start and end, and no intersection is repeated.
+In terms of graph theory, the city plan is a \textit{directed graph}. The intersections are \textit{vertices} and the streets are \textit{directed edges} (see Figure~\ref{fig:hashcode_city_plan}). The planned path for each car is indeed a \textit{path} in this graph because it has a different start and end, and no intersection is repeated.
 
 \begin{figure}
     \centering
@@ -48,7 +47,7 @@ In each intersection $i \in I$, there is a traffic light at the end of each \tex
 
 When the light is red, cars arriving at the end of a street queue up and wait for the light to turn green. The queue does not take up any space and does not change the distance cars have to travel. When the light is green, one car can pass through an intersection every second. Passing through an intersection, i.e., moving from the end of an incoming street to the beginning of an outgoing street, takes no additional time.
 
-For each intersection $i \in I$, we can set a traffic light schedule. This schedule determines the order and duration of green light for the incoming streets of the intersection. The schedule repeats in a cycle until the end of the simulation (See Figure~\ref{fig:hashcode_traffic_lights}). Each street can appear at most once in the schedule. If a street is not included in the schedule, it is red the whole time, and any waiting cars are blocked. By default, intersections have no schedule and all streets are red.
+For each intersection $i \in I$, we can set a traffic light schedule. This schedule determines the order and duration of green light for the incoming streets of the intersection. The schedule repeats in a cycle until the end of the simulation (see Figure~\ref{fig:hashcode_traffic_lights}). Each street can appear at most once in the schedule. If a street is not included in the schedule, it is red the whole time, and any waiting cars are blocked. By default, intersections have no schedule and all streets are red.
 
 % https://tex.stackexchange.com/questions/69869/image-taking-up-full-page
 \begin{figure}[ht] % h = here, t = top, p = page of floats
@@ -70,7 +69,7 @@ For each intersection $i \in I$, we can set a traffic light schedule. This sched
 
 Furthermore, we have a set of cars $C$, where $1 \leq \abs{C} \leq 10^3$. Each car $c \in C$ has a given path through the city. The path is a sequence of streets the car has to drive through. The number of streets in the path is limited: $\forall c \in C \;\; 2 \leq \abs{\bm{p_c}} \leq 10^3$. No intersection or street can be repeated in the path.
 
-At the beginning of the simulation, all cars are at the end of the first street in their path. They either wait if the light is red or are ready to move if the light is green. If more cars start at the end of the same street, they queue up according to their IDs in the input file (See Figure~\ref{fig:hashcode_street}). When a car reaches the end of the last street in its path, it is immediately removed from the street.
+At the beginning of the simulation, all cars are at the end of the first street in their path. They either wait if the light is red or are ready to move if the light is green. If more cars start at the end of the same street, they queue up according to their IDs in the input file (see Figure~\ref{fig:hashcode_street}). When a car reaches the end of the last street in its path, it is immediately removed from the street.
 
 \begin{figure}[ht] % h = here, t = top, p = page of floats
     \centering
@@ -133,6 +132,64 @@ Empirically speaking, the vast majority of trivial intersections should be kept 
 Furthermore, we argue that we can omit the second option because we can achieve a similar result in a different way. Suppose that blocking a particular trivial intersection improves the score. This means that there must be a problematic car passing through this intersection. However, the problematic car must eventually reach some non-trivial intersection via a street, and this street can still be blocked during optimization. We therefore leave this up to the optimization algorithm, hoping that it explores this option if it is indeed beneficial.
 
 As previously mentioned, this smart heuristic is important because it allows us to focus only on the non-trivial intersections and simplifies the optimization process. To put it into perspective, approximately $80 \%$ of used intersections in dataset B are trivial, $60 \%$ in dataset C, and $50 \%$ in dataset E. This enables us to skip optimizing thousands of parameters.
+
+\section{Datasets} \label{sec:datasets}
+
+In this section, we briefly describe all datasets provided with the problem. The datasets vary in the size and structure of their city plans. We define the size of a dataset as the number of parameters we need to optimize.
+The number of parameters for each dataset is twice the total number of used streets in non-trivial intersections (one parameter for the order and one for the green light duration). Note that this is only one way to compare the datasets, and it does not account for the actual paths cars must take or how convoluted those paths may be.
+
+\begin{figure}[h]
+    \centering
+    % \includegraphics[width=\linewidth]{img/hashcode/figure5.png}
+    % \includegraphics[width=.6\linewidth]{img/hashcode/figure5.png}
+    \includegraphics[width=.5\linewidth]{img/hashcode/figure5.png}
+    \caption[Visualization of dataset A]{
+        Visualization of dataset A \cite{google2023google}.
+    }
+    \label{fig:hashcode_dataset_a}
+\end{figure}
+
+\paragraph{A - An example: 4 parameters} Simple toy problem dataset used for debugging (see Figure~\ref{fig:hashcode_dataset_a}).
+
+\paragraph{B - By the ocean: 5,974 parameters} Dataset based on a real city plan of Lisbon, Portugal (see Figure~\ref{fig:hashcode_dataset_b}).
+
+\paragraph{C - Checkmate: 14,008 parameters} Dataset with a chessboard-like pattern and regular structure of intersections and streets (see Figure~\ref{fig:hashcode_dataset_c_e}).
+
+% https://codeforces.com/blog/entry/88188#comment-765574
+\paragraph{D - Daily commute: 167,748 parameters} By far the largest dataset with a challenging-to-navigate network from the \textit{Barabási-Albert} distribution.
+
+\paragraph{E - Etoile: 1,386 parameters} Nicknamed \textit{Etoile}\footnote{\textit{Étoile} means star in French.}, this dataset is a one big star, meaning there is one very important intersection in the middle with hundrets of incoming streets (see Figure~\ref{fig:hashcode_dataset_c_e}).
+
+\paragraph{F - Forever jammed: 10,002 parameters} Medium sized dataset but again with a complex network difficult to optimize.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\linewidth]{img/screenshots/hashcode_datasets_b.png}
+    % \includegraphics[width=.8\linewidth]{img/screenshots/hashcode_datasets_b.png}
+    \caption[Visualization of dataset B]{
+        Dataset B based on the real data of Lisbon on the right\footnotemark.
+    }
+    \label{fig:hashcode_dataset_b}
+\end{figure}
+
+\footnotetext{Screenshot from \href{https://www.youtube.com/watch?v=YPOVd-hQUjA}{Hash Code 2021: Online Qualification Round Livestream}.}
+
+\bigskip
+
+As mentioned in Section~\ref{sec:competition_overview}, each dataset yields an absolute score within a different range. To compare the performance across all datasets, we normalize the scores to a 0--1 scale, where 0 represents a baseline solution with default order and default times (see Section~\ref{sec:initial_schedules} for details), and 1 corresponds to the maximum known score\footnote{See the maximum known scores \href{https://github.com/sagishporer/hashcode-2021-qualification\#score}{here}.} for the dataset. Note that the baseline is already a good solution, so there may be limited room for improvement---for example, in dataset B.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\linewidth]{img/screenshots/hashcode_datasets_c_e.png}
+    % \includegraphics[width=.8\linewidth]{img/screenshots/hashcode_datasets_c_e.png}
+    \caption[Visualization of datasets C and E]{
+        Visualization of datasets C and E\protect\footnotemark.
+    }
+    \label{fig:hashcode_dataset_c_e}
+    \end{figure}
+
+\footnotetext{\xxx{Screenshot from \href{https://www.youtube.com/watch?v=YPOVd-hQUjA}{Hash Code 2021: Online Qualification Round Livestream}.}}
+
 
 \section{Simulator} \label{sec:simulator}
 
