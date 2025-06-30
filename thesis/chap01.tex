@@ -1,9 +1,9 @@
-\chapter{Problem Description} \label{chap:problem_description}
+\chapter{Problem description} \label{chap:problem_description}
 
 
 In this chapter, we introduce the optimization problem that we address in this thesis. Section~\ref{sec:competition_overview} briefly mentions the competition setting in which the problem was originally assigned. Section~\ref{sec:original_problem_statement} presents the original problem statement and describes it in detail. Section~\ref{sec:further_insights_and_heuristics} provides additional insights and heuristics that we use to simplify the problem and improve solutions. \xxx{Section~\ref{sec:simulator} ...}
 
-\section{Competition Overview} \label{sec:competition_overview}
+\section{Competition overview} \label{sec:competition_overview}
 
 The problem we address in this thesis was originally assigned in the qualifying round of Google Hash Code 2021. Google Hash Code was a global team programming competition, running between 2014--2022, where teams of 2--4 competitors solved an optimization problem with the goal of achieving the best score in a limited time of 4 hours.
 
@@ -14,7 +14,7 @@ Most teams were able to construct trivial solutions, which they then tried to im
 
 The total score was the sum of the scores of all 6 datasets (A--F). The first dataset (A) served as a ``toy problem'' mainly for debugging purposes, but the rest of the datasets were large enough for optimization. It should be noted that the distribution of points among the datasets is uneven, so the contestants mostly focused on the datasets with the highest possible score (D, F) and pragmatically skipped optimizing the rest (B, C, E).
 
-\section{Original Problem Statement} \label{sec:original_problem_statement}
+\section{Original problem statement} \label{sec:original_problem_statement}
 
 The full problem statement\footnote{\url{https://github.com/google/coding-competitions-archive/blob/main/hashcode/hashcode_2021_qualification_round.pdf}} is available in the Google Coding Competitions archive~\cite{google2023google}. Here we describe only important details for the reader.
 In short, the task is as follows:
@@ -33,8 +33,7 @@ In terms of graph theory, the city plan is a \textit{directed graph}. The inters
     \label{fig:hashcode_city_plan}
 \end{figure}
 
-\subsection{Streets and Intersections}
-%\paragraph{Streets and intersections}
+\subsection{Streets and intersections}
 
 In the city, we have a set of intersections
 $I$, where $2 \leq \abs{I} \leq 10^5$,
@@ -43,7 +42,7 @@ $S \subseteq \{(u, v) | u,v \in I \land u \neq v\}$, where $2 \leq \abs{S} \leq 
 Each street $s \in S$ is a unique one-way connection between two different intersections $u$, $v$; two distinct streets in opposite directions between the same two intersections $(u, v)$, $(v, u)$ are allowed. Each street $s \in S$ has a fixed time $l(s) \in \mathbb{N}_+$ that it takes a car to get from the beginning to the end of the street, independently of the other cars on the street.
 Each intersection $i \in I$ has a set of incoming streets $S_i^+ \subset S$, where $|S_i^+| \geq 1$, and a set of outgoing streets $S_i^- \subset S$, where $|S_i^-| \geq 1$; thus each intersection has at least one incoming street and at least one outgoing street.
 
-\subsection{Traffic Lights and Schedules}
+\subsection{Traffic lights and schedules}
 
 In each intersection $i \in I$, there is a traffic light at the end of each \textit{incoming} street $s^+ \in S_i^+$. The traffic light has two states---green and red. Green means the cars from this street can pass through the intersection and continue to any \textit{outgoing} street $s^- \in S_i^-$ in their path. Red means the cars must stop until the light turns green again. At most one traffic light can be green at each intersection at any time.
 
@@ -104,25 +103,25 @@ The $SCORE$ of a solution $\bm{\theta}$ is defined as
     SCORE(\bm{\theta}) = \sum_{c \in C} score(c; \bm{\theta}).
 \end{equation}
 
-\section{Further Insights and Heuristics} \label{sec:further_insights_and_heuristics}
+\section{Further insights and heuristics} \label{sec:further_insights_and_heuristics}
 
 In this section, we introduce some additional terms and heuristics for the problem. These are our own observations and are not part of the original problem statement. Thanks to these heuristics, we can simplify the solution creation, achieve better scores, and reduce the number of parameters to optimize.
 
-\paragraph{Used and Unused Streets} \textit{Unused street} is a street that is either not used by any car at all or it is the final destination of all cars that use it (i.e. traffic light for this street is not needed). \textit{Used street} is a street that is used by at least one car and is not the final destination of at least one car that uses it.
+\paragraph{Used and unused streets} \textit{Unused street} is a street that is either not used by any car at all or it is the final destination of all cars that use it (i.e. traffic light for this street is not needed). \textit{Used street} is a street that is used by at least one car and is not the final destination of at least one car that uses it.
 
-\paragraph{Used and Unused Intersections} \textit{Unused intersection} is an intersection where all incoming streets are unused streets. \textit{Used intersection} is an intersection with at least one used incoming street.
+\paragraph{Used and unused intersections} \textit{Unused intersection} is an intersection where all incoming streets are unused streets. \textit{Used intersection} is an intersection with at least one used incoming street.
 
 % https://tex.stackexchange.com/questions/32160/new-line-after-paragraph
-\paragraph{Heuristic 1: Remove Unused Intersections and Unused Streets} \label{para:heuristic_1} \mbox{} \\
+\paragraph{Heuristic 1: Remove unused intersections and unused streets} \label{para:heuristic_1} \mbox{} \\
 Remove unused intersections and unused streets from used intersections when creating initial schedules. They contribute nothing and can only worsen the score. \\
 
 This heuristic is an obvious one; unused intersections are never used and only add unnecessary complexity. Unused streets prolong the traffic light cycle for the whole intersection, which very frequently leads to longer waiting times and thus a lower score. Now, let us move on to some less obvious insights.
 
-\paragraph{Trivial and Non-trivial Intersections} \textit{Trivial intersection} is an intersection with exactly one used incoming street. \textit{Non-trivial intersection} is an intersection with two or more used incoming streets.
+\paragraph{Trivial and non-trivial intersections} \textit{Trivial intersection} is an intersection with exactly one used incoming street. \textit{Non-trivial intersection} is an intersection with two or more used incoming streets.
 
-\paragraph{Blocked Streets and Blocked Intersections} \textit{Blocked street} is an unscheduled street or a street with a green light scheduled for 0 seconds. \textit{Blocked intersection} is an intersection with no schedule or with all incoming streets blocked.
+\paragraph{Blocked streets and blocked intersections} \textit{Blocked street} is an unscheduled street or a street with a green light scheduled for 0 seconds. \textit{Blocked intersection} is an intersection with no schedule or with all incoming streets blocked.
 
-\paragraph{Heuristic 2: Fix the Schedule for Trivial Intersections, Optimize Only Non-trivial Schedules} \label{para:heuristic_2}
+\paragraph{Heuristic 2: Fix the schedule for trivial intersections, optimize only non-trivial schedules} \label{para:heuristic_2}
 Trivial intersections do not require optimization; their schedule can be fixed by giving a green light to the only used incoming street for the entire duration. Only the schedules of non-trivial intersections need to be optimized. This can substantially reduce the number of optimized parameters. \\
 
 This heuristic is not straightforward, so let us think about it in more detail. For trivial intersections, we have two meaningful schedule options:
@@ -138,7 +137,7 @@ As previously mentioned, this smart heuristic is important because it allows us 
 \section{Simulator} \label{sec:simulator}
 
 This section briefly presents a custom simulator that we developed to help us optimize the problem. We explain its motivation and describe the functionality relevant to optimization.
-\xxx{For more details on the code and implementation, please refer to the Developer Documentation in Appendix~\ref{chap:developer_documentation}.}
+\xxx{For more details on the code and implementation, please refer to the Developer documentation in Appendix~\ref{chap:developer_documentation}.}
 
 \bigskip
 
@@ -153,7 +152,7 @@ Below are the features of the simulator package that are important for optimizat
     \item Running the simulation to evaluate given schedules.
     \item Getting and setting the non-trivial schedules in a format suitable for optimization.
 \end{itemize}
-The different options for creating initial schedules are described in Section~\ref{sec:initial_solutions} and the format of the non-trivial schedules is described in Section~\ref{sec:coding_of_a_solution}.
+The different options for creating initial schedules are described in Section~\ref{sec:initial_schedules} and the format of the non-trivial schedules is described in Section~\ref{sec:coding_of_a_solution}.
 
 
 The only case where larger data are passed between C++ and Python is when working with the \textit{non-trivial schedules}.

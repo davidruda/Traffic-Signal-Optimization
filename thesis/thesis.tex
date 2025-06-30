@@ -134,6 +134,10 @@
 % \makeglossaries
 % \input abbreviations.tex
 
+% Change these to use sentence case
+\renewcommand{\listfigurename}{List of figures}
+\renewcommand{\listtablename}{List of tables}
+
 %%% Title page and various mandatory informational pages
 \begin{document}
 \include{title}
@@ -164,12 +168,12 @@
 
 %%% Abbreviations used in the thesis, if any, including their explanation
 %%% In mathematical theses, it could be better to move the list of abbreviations to the beginning of the thesis.
-\chapwithtoc{List of Abbreviations}
+\chapwithtoc{List of abbreviations}
 
 \begin{description}
-	\item[GA] Genetic Algorithm
-	\item[HC] Hill Climbing
-	\item[SA] Simulated Annealing 
+	\item[GA] genetic algorithm
+	\item[HC] hill climbing
+	\item[SA] simulated annealing 
 \end{description}
 
 % \printglossary[title={List of Abbreviations}]

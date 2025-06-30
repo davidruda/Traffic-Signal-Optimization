@@ -1,4 +1,4 @@
-\chapter{Theory of Optimization Methods} \label{chap:optimization_methods}
+\chapter{Theory of optimization methods} \label{chap:optimization_methods}
 
 In this chapter, we cover the theory of the methods we use to optimize the Traffic signaling problem. Specifically, we describe \textit{hill climbing} (Section~\ref{sec:hill_climbing}), \textit{simulated annealing} (Section~\ref{sec:simulated_annealing}) and \textit{genetic algorithm} (Section~\ref{sec:genetic_algorithm}). In Section~\ref{sec:initialization} and Section~\ref{sec:parallelization} we discuss common methods for initializing and parallelizing the algorithms.
 
@@ -8,7 +8,7 @@ Because the state space of optimized problems can be very large or even infinite
 the~best
 solution but are frequently used in practice because they can find good solutions in reasonable time. Our three chosen methods are all examples of heuristic algorithms.
 
-\section{Hill Climbing} \label{sec:hill_climbing}
+\section{Hill climbing} \label{sec:hill_climbing}
 
 Hill climbing \cite{russell2020artificial, luke2013essentials} is one of the simplest local search algorithms. It keeps track of the current state and on each iteration moves to the neighboring state with the highest value, i.e., it moves in the direction that provides the biggest improvement. If there are no neighboring states with a higher value, the algorithm terminates. The greedy nature of hill climbing is both its strength and its weakness. It can make rapid progress towards a solution but once it gets stuck in a local optimum it cannot escape it.
 
@@ -35,7 +35,7 @@ A lot of variants of this algorithm exist. In our experiments, we use a version 
 \end{algorithmic}
 \end{algorithm}
 
-\section{Simulated Annealing} \label{sec:simulated_annealing}
+\section{Simulated annealing} \label{sec:simulated_annealing}
 
 Simulated annealing \cite{russell2020artificial, luke2013essentials} builds up on the idea of hill climbing and solves the problem of getting stuck in local optima (See Algorithm~\ref{alg:simulated_annealing}). In each iteration, it randomly generates a next state. If the state is better, it is always accepted. Otherwise, the worse state is accepted with some probability. The probability decreases exponentially with how much worse the state is and with the current value of the ``cooling'' schedule. By allowing moves to worse states, the algorithm can escape local optima and therefore find better solutions.
 
@@ -66,7 +66,7 @@ The idea of the cooling schedule is inpired by the process of annealing in metal
     \end{algorithmic}
 \end{algorithm}
 
-\section{Genetic Algorithm} \label{sec:genetic_algorithm}
+\section{Genetic algorithm} \label{sec:genetic_algorithm}
 
 % https://martinpilat.com/en/nature-inspired-algorithms/evolutionary-algorithms-introduction
 % https://martinpilat.com/en/nature-inspired-algorithms/evolutionary-algorithms-continuous-and-combinatorial-optimization
@@ -120,7 +120,7 @@ There are many different evolutionary algorithms with even more variations that 
 
 For the selection of parents for the next generation, common methods include the \textit{roulette wheel selection} and the \textit{tournament selection} \cite{vanneschi2023lectures}. Roulette wheel selection selects individuals with a probability directly proportional to their fitness. Its downside is that it does not work for negative fitness and can be sensitive to changes is fitness values. Tournament selection works by repeatedly sampling a few individuals and selecting the best one among them. Thus, it is not dependent on specific values and can be used with any fitness function.
 
-\subsection{Crossover and Mutation}
+\subsection{Crossover and mutation}
 
 The offspring is created from the selected parents using genetic operators \textit{crossover} and \textit{mutation}. Crossover combines two parents to produce two new children. There are many different ways to perform crossover, the most common being the \textit{one-point crossover}. Since individuals are usually represented as strings or arrays of numbers, one-point crossover simply picks a point in the individual and creates two new individuals by copying the first part from one parent and the second part from the other parent and vice versa. This can be extended to the \textit{two-point crossover} or the \textit{k-point crossover} in general. Other examples of crossover, e.g., if an individual represents a permutation and simple swapping of parts cannot be used, include the \textit{order crossover (OX)} or the \textit{partially mapped crossover\footnote{Also called \textit{partially matched crossover}.} (PMX)} \cite{vanneschi2023lectures}.
 

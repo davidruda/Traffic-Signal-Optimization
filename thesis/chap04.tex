@@ -1,14 +1,12 @@
-\chapter{Application of Optimization Algorithms}
+\chapter{Application of optimization algorithms}
 
-In this chapter, we describe the problem specific details of our chosen optimization algorithms.
+In this chapter, we describe the problem specific details of our chosen optimization algorithms. Section~\ref{sec:initial_schedules} presents different options for creating initial schedules and explains which ones were chosen for optimization. Section~\ref{sec:coding_of_a_solution} describes the format of non-trivial schedules, which we optimize. \xxx{Section ...}
 
-\section{Coding of a Solution} \label{sec:coding_of_a_solution}
+\section{Initial schedules} \label{sec:initial_schedules}
 
-The solution is encoded as a \textbf{list of intersection schedules}, where each schedule consists of two parts: \textit{order} and \textit{times}. Order is an array of street indices that defines the order in which the streets have the green light. Times is an array of integers that defines the duration of the green light with respect to the street order. To keep the two parts consistent, any changes to the order array are also applied to the corresponding times array.
+The creation of initial schedules is part of the simulator's functionality and makes use of \hyperref[para:heuristic_1]{Heuristic 1}.
+Each schedule of an intersection consists of two parts: \textit{order} and \textit{times}. Order is an array of street indices that defines the order in which the streets have the green light. Times is an array of integers that defines the duration of the green light with respect to the street order. To keep the two parts consistent, any changes to the order array must also be applied to the corresponding times array.
 
-\section{Initial Solutions} \label{sec:initial_solutions}
-
-The creation of an initial solution is a part of the simulator functionality and uses \hyperref[para:heuristic_1]{Heuristic 1}.
 We provide a few different initialization options for both order and times. Order initializations include:
 \begin{itemize}
     \item \textit{default} - simply uses the order given by street IDs in the input file
@@ -18,7 +16,7 @@ We provide a few different initialization options for both order and times. Orde
 Times initializations include:
 \begin{itemize}
     \item \textit{default} - all times are set to 1 second
-    \item \textit{scaled} - time for each street is a total number of cars using this street divided by a single given constant (divisor)
+    \item \textit{scaled} - time for each street is a total number of cars using this street divided by a single given constant (the divisor)
 \end{itemize}
 Both order initialization and times initialization are hyperparameters. To decide which setting to use for optimization, we experimentally compared scores of different initialization options across all datasets.
 
@@ -39,11 +37,20 @@ We decided to use \textit{adaptive order} and \textit{default times} for dataset
     \label{fig:init_comparison}
 \end{figure}
 
-\section{Algorithm Specifics \xxx{Generating New Solutions}}
+\section{Coding of non-trivial schedules} \label{sec:coding_of_a_solution}
+
+As explained in Section~\ref{sec:further_insights_and_heuristics}, specifically in \hyperref[para:heuristic_2]{Heuristic 2}, we only optimize the non-trivial schedules. The simulator returns the non-trivial schedules in the following format:
+\begin{quote}
+    a \textbf{list of pairs}, where each pair consists of \textbf{order} and \textbf{times} arrays.
+\end{quote}
+Analogously, the simulator accepts the non-trivial schedules in the same format when updating them for evaluation.
 
 Since the solution structure is quite complex and each schedule of an intersection can have a different number of streets, we apply the operators for each intersection separately.
 
-\section{Genetic Algorithm}
+\section{Algorithm specifics \xxx{Generating new solutions}}
+
+
+\section{Genetic algorithm}
 
 \paragraph{Crossover}
 
@@ -57,13 +64,13 @@ For each intersection, we randomly decide whether to mutate only the order, only
 
 We use the \textit{tournament selection} with \textit{elitism}. The tournament size and the elitism rate are hyperparameters.
 
-\section{Hill Climbing}
+\section{Hill climbing}
 
 As mentioned in Section~\ref{sec:hill_climbing}, we randomly generate the next state because there is no explicit neighborhood structure. To do so, we simply reuse the mutation operator from the genetic algorithm.
 
-\section{Simulated Annealing}
+\section{Simulated annealing}
 
-We use the same strategy to generate the next state as in Hill Climbing, i.e., apply the mutation from the genetic algorithm. For the temperature cooling schedule, introduced in Section~\ref{sec:simulated_annealing}, we use a linear decay. It is defined as
+We use the same strategy to generate the next state as in hill climbing, i.e., apply the mutation from the genetic algorithm. For the temperature cooling schedule, introduced in Section~\ref{sec:simulated_annealing}, we use a linear decay. It is defined as
 \begin{equation}
     schedule(t) = T_0 \cdot \left(1 - \frac{t}{T}\right) + \varepsilon,
 \end{equation}
