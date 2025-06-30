@@ -176,7 +176,7 @@ The number of parameters for each dataset is twice the total number of used stre
 
 \bigskip
 
-As mentioned in Section~\ref{sec:competition_overview}, each dataset yields an absolute score within a different range. To compare the performance across all datasets, we normalize the scores to a 0--1 scale, where 0 represents a baseline solution with default order and default times (see Section~\ref{sec:initial_schedules} for details), and 1 corresponds to the maximum known score\footnote{See the maximum known scores \href{https://github.com/sagishporer/hashcode-2021-qualification\#score}{here}.} for the dataset. Note that the baseline is already a good solution, so there may be limited room for improvement---for example, in dataset B.
+As mentioned in Section~\ref{sec:competition_overview}, each dataset yields an absolute score within a different range. To compare the performance across all datasets, we normalize the scores to a 0--1 scale, where 0 represents a baseline solution (see Section~\ref{sec:initial_schedules} for details), and 1 corresponds to the maximum known score\footnote{See the maximum known scores \href{https://github.com/sagishporer/hashcode-2021-qualification\#score}{here}.} for the dataset. Note that the baseline is already a good solution, so there may be limited room for improvement---for example, in dataset B.
 
 \begin{figure}[h]
     \centering
@@ -193,8 +193,8 @@ As mentioned in Section~\ref{sec:competition_overview}, each dataset yields an a
 
 \section{Simulator} \label{sec:simulator}
 
-This section briefly presents a custom simulator that we developed to help us optimize the problem. We explain its motivation and describe the functionality relevant to optimization.
-\xxx{For more details on the code and implementation, please refer to the Developer documentation in Appendix~\ref{chap:developer_documentation}.}
+This section provides a brief overview of the custom simulator that we developed to serve as a black-box fitness function for the optimization algorithms. We discuss the motivation behind its design and describe the functionality relevant to the optimization process.
+\xxx{For further details on the code and implementation, please refer to the Developer documentation in Appendix~\ref{chap:developer_documentation}.}
 
 \bigskip
 

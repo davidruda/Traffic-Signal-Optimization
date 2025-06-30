@@ -5,7 +5,7 @@ In this chapter, we describe the problem specific details of our chosen optimiza
 \section{Initial schedules} \label{sec:initial_schedules}
 
 The creation of initial schedules is part of the simulator's functionality and makes use of \hyperref[para:heuristic_1]{Heuristic 1}.
-Each schedule of an intersection consists of two parts: \textit{order} and \textit{times}. Order is an array of street indices that defines the order in which the streets have the green light. Times is an array of integers that defines the duration of the green light with respect to the street order. To keep the two parts consistent, any changes to the order array must also be applied to the corresponding times array.
+Each schedule of an intersection consists of two parts: \textit{order} and \textit{times}. Order is an array of street indices that defines the order in which the streets have the green light. Times is an array of integers that defines the duration of the green light with respect to the street order. To keep the two parts consistent, \textit{any changes to the order array must also be applied to the corresponding times array}.
 
 We provide a few different initialization options for both order and times. Order initializations include:
 \begin{itemize}
@@ -18,8 +18,9 @@ Times initializations include:
     \item \textit{default} - all times are set to 1 second
     \item \textit{scaled} - time for each street is a total number of cars using this street divided by a single given constant (the divisor)
 \end{itemize}
-Default order and default times is our \textit{baseline} solution.
-Both order initialization and times initialization are hyperparameters. To decide which setting to use for optimization, we experimentally compared scores of different initialization options across all datasets.
+Default order and default times represent our \textit{baseline} solution.
+
+Both \texttt{order initialization} and \texttt{times initialization} are hyperparameters. To decide which setting to use for optimization, we experimentally compared scores of different initialization options across all datasets.
 
 The results are shown in Figure~\ref{fig:init_comparison}. We can see that by using other ``smarter'' initialization methods, we can significantly improve the baseline solution and start optimizing from much better starting points.
 We decided to use \textit{adaptive order} and \textit{default times} for datasets B, C, and D, and \textit{random order} and \textit{scaled times} for datasets E and F (see Table~\ref{tab:hyperparams_datasets_specific}).
@@ -46,30 +47,33 @@ As explained in Section~\ref{sec:further_insights_and_heuristics}, specifically 
 \end{quote}
 Analogously, the simulator accepts the non-trivial schedules in the same format when updating them for evaluation.
 
-Since the solution structure is quite complex and each schedule of an intersection can have a different number of streets, we apply the operators for each intersection separately.
+This is the format---the encoding of a state or solution, if you will---that we use for all of the optimization algorithms. In this setup, we simply treat the non-trivial schedules as states within a black-box optimization.
+Since the state structure is quite complex, and each intersection's schedule can have a different number of streets, any modifications are applied separately for each intersection.
 
-\section{Algorithm specifics \xxx{Generating new solutions}}
+\section{Genetic algorithm} \label{sec:genetic_algorithm_application}
 
+In this section, we apply the theory introduced in Section~\ref{sec:genetic_algorithm} and describe our design of the genetic algorithm, including the selection, crossover, and mutation operators, as well as the corresponding hyperparameters. We begin with this method, as the other algorithms reuse its mutation operator to generate new states.
 
-\section{Genetic algorithm}
+\subsection{Selection}
 
-\paragraph{Crossover}
+For selecting individuals for reproduction, we use \textit{tournament selection} combined with \textit{elitism}. The corresponding hyperparameters are \texttt{tournament size} and \texttt{elitism}, which defines the percentage of top-performing individuals that are directly selected for reproduction.
+\subsection{Crossover}
 
-For each intersection, we randomly decide whether to crossover only the order, only the times, or both. We use the \textit{order crossover (OX)} for order and the \textit{two-point crossover} for times. The probability of performing crossover is one of the hyperparameters.
+For each intersection, we randomly decide whether to crossover only the order, only the times, or both. We use \textit{order crossover (OX)} for modifying the order, and \textit{two-point crossover} for modifying the times. Crossover is performed with a probability defined by the hyperparameter \texttt{crossover probability}.
 
-\paragraph{Mutation}
+\subsection{Mutation}
 
-For each intersection, we randomly decide whether to mutate only the order, only the times, or both. For order, we use the \textit{index shuffle}, and for times, we add plus or minus one to some values at random. The probability of performing mutation and the probability of mutating each value are tuneable hyperparameters.
+For each intersection, we randomly decide whether to mutate only the order, only the times, or both. We use \textit{index shuffle} for modifying the order, and for the times, we add or subtract one to some values at random. Mutation is performed with a probability defined by the hyperparameter \texttt{mutation probability}. When mutation is applied, the hyperparameter \texttt{mutation bit rate} controls how likely each individual value is to be modified. It can be given either as a probability or as an integer specifying the expected number of modified values in the state.
 
-\paragraph{Selection}
+\bigskip
 
-We use the \textit{tournament selection} with \textit{elitism}. The tournament size and the elitism rate are hyperparameters.
+The remaining hyperparameters of the genetic algorithm are \texttt{population size} and \texttt{generations}---their names are quite self-explanatory. Together with the crossover and mutation probabilities, these hyperparameters control the total number of fitness evaluations (i.e., simulation runs) performed by the algorithm.
 
-\section{Hill climbing}
+\section{Hill climbing} \label{sec:hill_climbing_application}
 
 As mentioned in Section~\ref{sec:hill_climbing}, we randomly generate the next state because there is no explicit neighborhood structure. To do so, we simply reuse the mutation operator from the genetic algorithm.
 
-\section{Simulated annealing}
+\section{Simulated annealing} \label{sec:simulated_annealing_application}
 
 We use the same strategy to generate the next state as in hill climbing, i.e., apply the mutation from the genetic algorithm. For the temperature cooling schedule, introduced in Section~\ref{sec:simulated_annealing}, we use a linear decay. It is defined as
 \begin{equation}
