@@ -12,9 +12,7 @@ solution but are frequently used in practice because they can find good solution
 
 Hill climbing \cite{russell2020artificial, luke2013essentials} is one of the simplest local search algorithms. It keeps track of the current state and on each iteration moves to the neighboring state with the highest value, i.e., it moves in the direction that provides the biggest improvement. If there are no neighboring states with a higher value, the algorithm terminates. The greedy nature of hill climbing is both its strength and its weakness. It can make rapid progress towards a solution but once it gets stuck in a local optimum it cannot escape it.
 
-A lot of variants of this algorithm exist. In our experiments, we use a version called \textit{first-choice hill climbing} (see Algorithm~\ref{alg:first_choice_hill_climbing}). This version randomly generates next states until it finds one with a higher value than the current state and then moves to this state. This is a good strategy when there are many neighboring states, which is exactly our case.
-
-% \xxx{\textbf{- mention parallel hill climbing (if i'll use it)}}
+A lot of variants of this algorithm exist. In our experiments, we use a version called \textit{first-choice hill climbing} (see Algorithm~\ref{alg:first_choice_hill_climbing}). This version randomly generates next states until it finds one with a higher value than the current state and then moves to this state. This strategy works well when there are many neighboring states or when no defined neighborhood structure exists, which is exactly our case.
 
 \begin{algorithm}
 % https://tex.stackexchange.com/questions/150184/how-to-avoid-uppercase-function-name-while-using-function

@@ -1,6 +1,6 @@
 \chapter{Application of optimization algorithms}
 
-In this chapter, we describe the problem specific details of our chosen optimization algorithms. Section~\ref{sec:initial_schedules} presents different options for creating initial schedules and explains which ones were chosen for optimization. Section~\ref{sec:coding_of_a_solution} describes the format of non-trivial schedules, which we optimize. \xxx{Section ...}
+In this chapter, we describe the problem-specific details of our chosen optimization algorithms. Section~\ref{sec:initial_schedules} presents different options for creating initial schedules and explains which ones were chosen for optimization. Section~\ref{sec:coding_of_a_solution} describes the format of non-trivial schedules that we optimize. Sections~\ref{sec:genetic_algorithm_application},~\ref{sec:hill_climbing_application}, and~\ref{sec:simulated_annealing_application} cover the exact configuration of genetic algorithm, hill climbing, and simulated annealing, respectively, including their hyperparameters. Section~\ref{sec:hyperparameter_search} explains how we searched for the best hyperparameters and summarizes the final settings for each algorithm and dataset.
 
 \section{Initial schedules} \label{sec:initial_schedules}
 
@@ -61,7 +61,7 @@ For selecting individuals for reproduction, we use \textit{tournament selection}
 
 For each intersection, we randomly decide whether to crossover only the order, only the times, or both. We use \textit{order crossover (OX)} for modifying the order, and \textit{two-point crossover} for modifying the times. Crossover is performed with a probability defined by the hyperparameter \texttt{crossover probability}.
 
-\subsection{Mutation}
+\subsection{Mutation} \label{sec:mutation_application}
 
 For each intersection, we randomly decide whether to mutate only the order, only the times, or both. We use \textit{index shuffle} for modifying the order, and for the times, we add or subtract one to some values at random. Mutation is performed with a probability defined by the hyperparameter \texttt{mutation probability}. When mutation is applied, the hyperparameter \texttt{mutation bit rate} controls how likely each individual value is to be modified. It can be given either as a probability or as an integer specifying the expected number of modified values in the state.
 
@@ -71,18 +71,212 @@ The remaining hyperparameters of the genetic algorithm are \texttt{population si
 
 \section{Hill climbing} \label{sec:hill_climbing_application}
 
-As mentioned in Section~\ref{sec:hill_climbing}, we randomly generate the next state because there is no explicit neighborhood structure. To do so, we simply reuse the mutation operator from the genetic algorithm.
+As explained in Section~\ref{sec:hill_climbing}, we use a variant of the algorithm that generates next states randomly because there is no explicit neighborhood structure. We simply apply the mutation operator from the genetic algorithm (see Section~\ref{sec:mutation_application}) to generate the next state. Note that we again use the hyperparameter \texttt{mutation bit rate} but not the mutation probability because the mutation is always applied. The only other hyperparameter is \texttt{iterations}, which sets the number of iterations the algorithm runs for.
 
 \section{Simulated annealing} \label{sec:simulated_annealing_application}
 
-We use the same strategy to generate the next state as in hill climbing, i.e., apply the mutation from the genetic algorithm. For the temperature cooling schedule, introduced in Section~\ref{sec:simulated_annealing}, we use a linear decay. It is defined as
+Introduced in Section~\ref{sec:simulated_annealing}, this algorithm uses the same startegy to generate next states as presented in Section~\ref{sec:hill_climbing_application}. That means it has the same hyperaparameters \texttt{mutation bit rate} and \texttt{iterations}. The only additional hyperparameter is \texttt{initial temperature}, which sets the initial temperature of the cooling schedule. For the cooling schedule, we use a linear decay. It is defined as
 \begin{equation}
-    schedule(t) = T_0 \cdot \left(1 - \frac{t}{T}\right) + \varepsilon,
+    schedule(t) = \tau_{init} \cdot \left(1 - \frac{t}{T}\right) + \varepsilon,
 \end{equation}
-where $T_0$ is the initial temperature, and $T$ is the total number of iterations. Both of these values are hyperparameters, with the initial temperature especially requiring careful tuning for each dataset to achieve good results.
-\section{Hyperparameters}
+where $\tau_{init}$ is the \texttt{initial temperature}, $t$ is the current iteration, and $T$ is the total number of \texttt{iterations}.
+% Both of these values are hyperparameters, with the initial temperature especially requiring careful tuning for each dataset to achieve good results.
 
-All three aforementioned algorithms depend on the setting of multiple hyperparameters. To find the best hyperparameters for our experiments, we use a \textit{greedy search}. We focus on optimizing one hyperparameter at a time and try to find the best value for it. Other hyperparameters are fixed; either heuristically or to an already optimized value based on the previous runs. We start by tuning more general parameters like the \textit{population size} and gradually move to more specific ones like the \textit{mutation bit rate}. We heuristically try a number of reasonable values for each parameter, e.g., [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0] for the mutation probability. We perform runs with additional values if the results are not satisfactory. Every setting is tested on 10 different fixed seeds and the results are averaged.
+\section{Hyperparameter search} \label{sec:hyperparameter_search}
 
-Most of the hyperparameters were tuned on smaller datasets E and B. However, \xxx{some parameters are highly dependent on the dataset (temperature) and those were also tested on the larger datasets}.
+Performance of all three aforementioned algorithms largely depends on the setting of their hyperparameters.
+To find the best hyperparameters for the experiments, we use a form of \textit{greedy search}. That is, we only focus on optimizing one hyperparameter at a time and try to find the best value for it. Other hyperparameters are currently fixed---either heuristically or set to their already optimized values.
+We test a number of reasonable values for each hyperparameter and perform runs with additional values if the results are not satisfactory.
+Each setting is tested on 10 different fixed seeds and the results are averaged.
 
+To maintain comparability, we allocate an equal budget of fitness evaluations to all three algorithms. For hill climbing and simulated annealing, this budget is easily enforced via the \texttt{iterations} hyperparameter. For genetic algorithm, the number of evaluations is stochastic and cannot be precisely set; however, we always set the \texttt{generations} hyperparameter so that the expected total number of fitness evaluations matches the predefined budget.
+
+For each dataset, we use the best initialization options that we selected in Section~\ref{sec:initial_schedules}.
+
+% TABLE WITH TESTED HYPERPARAMETER VALUES
+\begin{table}[h]
+\centering\footnotesize\sf
+
+\begin{tabular}{l@{\hspace{0.5cm}}c}
+% \toprule
+% \multicolumn{2}{l}{\textbf{Tested values}} \\
+Crossover probability & $[0.2, 0.3, \cdots 0.8]$ \\
+Mutation probability & $[0.1, 0.2, \cdots 1.0]$ \\
+Tournament size & $[2, 3, \cdots, 10]$ \\
+Elitism & $[0, 0.05, 0.1, \cdots, 0.3]$ \\
+Population size & $[10, 20, \cdots, 100]$ \\
+% \midrule
+Mutation bit rate & $[1, 2, \cdots, 20]$ \\
+Initial temperature & many values between $0.1$ and $500$ \\
+% \bottomrule
+\end{tabular}
+
+\caption[Tested hyperparameter values]{Ranges of tested hyperparameter values.}
+\label{tab:hyperparams_tested_values}
+\end{table}
+
+To give a clearer picture of the values explored, Table~\ref{tab:hyperparams_tested_values} summarizes the ranges used in the hyperparameter search. 
+The genetic algorithm parameters---\texttt{crossover probability}, \texttt{mutation probability}, \texttt{tournament size}, and \texttt{elitism}---were tested only on smaller datasets E and B to reduce search complexity, because they seemed generalizable across datasets. Other parameters, especially the \texttt{mutation bit rate} and \texttt{initial temperature}, are highly dataset-dependent and were tuned separately for each algorithm and dataset.
+
+\newpage
+
+Finally, Tables~\ref{tab:hyperparams_shared} and~\ref{tab:hyperparams_datasets_specific} provide a detailed overview of the selected hyperparameters for the experiments. For clarity, the first table lists the hyperparameters that are shared across all datasets, while the second table shows dataset-specific hyperparameters.
+
+% TABLE WITH SHARED HYPERPARAMETERS
+\begin{table}[h]
+\centering\footnotesize\sf
+
+\begin{tabular}{l@{}c}
+% \toprule
+\multicolumn{2}{l}{\textbf{Genetic Algorithm}} \\
+Crossover probability & 0.6 \\
+Mutation probability & 0.4 \\
+Tournament size & 3 \\
+Elitism & 0.05 \\
+\midrule
+\multicolumn{2}{l}{\textbf{Hill Climbing}} \\
+Iterations & 450000 \\
+\midrule
+\multicolumn{2}{l}{\textbf{Simulated Annealing}} \\
+Iterations & 450000 \\
+% \bottomrule
+\end{tabular}
+
+\caption[Shared hyperparameters]{Shared hyperparameters for all datasets.}
+\label{tab:hyperparams_shared}
+\end{table}
+
+% TABLE WITH DATASET-SPECIFIC HYPERPARAMETERS
+\begin{table}[h]
+\centering\footnotesize\sf
+
+\begin{minipage}[t]{0.48\textwidth}
+\centering
+\begin{tabular}{l@{\hspace{0.5cm}}c}
+% \toprule
+\multicolumn{2}{c}{\textbf{Dataset E}} \\
+\midrule
+Order initialization & random \\
+Times initialization & scaled \\
+\midrule
+\multicolumn{2}{l}{\textbf{Genetic Algorithm}} \\
+Population size & 90 \\
+Generations & 6667 \\
+Mutation bit rate & 9 \\
+\midrule
+\multicolumn{2}{l}{\textbf{Hill Climbing}} \\
+Mutation bit rate & 15 \\
+\midrule
+\multicolumn{2}{l}{\textbf{Simulated Annealing}} \\
+Mutation bit rate & 5 \\
+Initial temperature & 275 \\
+% \bottomrule
+\end{tabular}
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.48\textwidth}
+\centering
+\begin{tabular}{l@{\hspace{0.5cm}}c}
+% \toprule
+\multicolumn{2}{c}{\textbf{Dataset B}} \\
+\midrule
+Order initialization & adaptive \\
+Times initialization & default \\
+\midrule
+\multicolumn{2}{l}{\textbf{Genetic Algorithm}} \\
+Population size & 10 \\
+Generations & 60000 \\
+Mutation bit rate & 2 \\
+\midrule
+\multicolumn{2}{l}{\textbf{Hill Climbing}} \\
+Mutation bit rate & 4 \\
+\midrule
+\multicolumn{2}{l}{\textbf{Simulated Annealing}} \\
+Mutation bit rate & 1 \\
+Initial temperature & 0.25 \\
+% \bottomrule
+\end{tabular}
+\end{minipage}
+\newline
+\newline
+\newline
+\begin{minipage}[t]{0.48\textwidth}
+\centering
+\begin{tabular}{l@{\hspace{0.5cm}}c}
+% \toprule
+\multicolumn{2}{c}{\textbf{Dataset F}} \\
+\midrule
+Order initialization & random \\
+Times initialization & scaled \\
+\midrule
+\multicolumn{2}{l}{\textbf{Genetic Algorithm}} \\
+Population size & 50 \\
+Generations & 12000 \\
+Mutation bit rate & 2 \\
+\midrule
+\multicolumn{2}{l}{\textbf{Hill Climbing}} \\
+Mutation bit rate & 5 \\
+\midrule
+\multicolumn{2}{l}{\textbf{Simulated Annealing}} \\
+Mutation bit rate & 3 \\
+Initial temperature & 15 \\
+% \bottomrule
+\end{tabular}
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.48\textwidth}
+\centering
+\begin{tabular}{l@{\hspace{0.5cm}}c}
+% \toprule
+\multicolumn{2}{c}{\textbf{Dataset C}} \\
+\midrule
+Order initialization & adaptive \\
+Times initialization & default \\
+\midrule
+\multicolumn{2}{l}{\textbf{Genetic Algorithm}} \\
+Population size & 20 \\
+Generations & 30000 \\
+Mutation bit rate & 2 \\
+\midrule
+\multicolumn{2}{l}{\textbf{Hill Climbing}} \\
+Mutation bit rate & 4 \\
+\midrule
+\multicolumn{2}{l}{\textbf{Simulated Annealing}} \\
+Mutation bit rate & 2 \\
+Initial temperature & 0.1 \\
+% \bottomrule
+\end{tabular}
+\end{minipage}
+\newline
+\newline
+\newline
+\begin{minipage}[t]{0.48\textwidth}
+\centering
+\begin{tabular}{l@{\hspace{0.5cm}}c}
+% \toprule
+\multicolumn{2}{c}{\textbf{Dataset D}} \\
+\midrule
+Order initialization & adaptive \\
+Times initialization & default \\
+\midrule
+\multicolumn{2}{l}{\textbf{Genetic Algorithm}} \\
+Population size & 40 \\
+Generations & 15000 \\
+Mutation bit rate & 2 \\
+\midrule
+\multicolumn{2}{l}{\textbf{Hill Climbing}} \\
+Mutation bit rate & 2 \\
+\midrule
+\multicolumn{2}{l}{\textbf{Simulated Annealing}} \\
+Mutation bit rate & 2 \\
+Initial temperature & 0.1 \\
+% \bottomrule
+\end{tabular}
+\end{minipage}
+
+\caption[Dataset-specific hyperparameters]{
+    Dataset-specific hyperparameters.
+    The order and times initializations are the same for all three methods for each dataset.
+}
+\label{tab:hyperparams_datasets_specific}
+\end{table}
