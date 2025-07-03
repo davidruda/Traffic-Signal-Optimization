@@ -8,11 +8,41 @@ In the second experiment, we compare different optimization methods on datasets 
 
 \subsection*{Methodology}
 
-We compare the three previously mentioned optimization methods: \textit{genetic algorithm}, \textit{hill climbing} and \textit{simulated annealing}. For each dataset and method, 10 runs with different seeds were performed and averaged to obtain reliable results. ...
+We compare the three previously mentioned optimization methods: \textit{\textbf{genetic algorithm}}, \textit{\textbf{hill climbing}} and \textit{\textbf{simulated annealing}}. For each dataset and method, 10 runs with different seeds were performed and averaged to obtain reliable results. ...
 
-\subsection*{Results}
+\newpage
 
-\begin{figure}
+\begin{figure}[h]
+    \centering
+    % \includegraphics[width=\linewidth]{img/screenshots/hashcode_datasets_c_e.png}
+    % \includegraphics[width=.8\linewidth]{img/screenshots/hashcode_datasets_c_e.png}
+    \includegraphics[width=\linewidth]{img/experiments/e_Genetic Algorithm_Hill Climbing_Simulated Annealing.pdf}
+    \caption[Results for dataset E]{
+        Results for dataset E.
+    }
+    \label{fig:dataset_e_experiment}
+\end{figure}
+
+\begin{table}[h]
+\centering\footnotesize\sf
+\begin{tabular}{lccc}
+\toprule
+& Normalized Score & Score & Time \\
+\midrule
+\textcolor{myblue}{\textbf{Genetic Algorithm}} & 87.82 & 767,768 & 0:06:43 \\
+\textcolor{myorange}{\textbf{Hill Climbing}} & 86.79 & 766,798 & 0:06:58 \\
+\textcolor{mygreen}{\textbf{Simulated Annealing}} & \textbf{101.08} & 780,299 & 0:07:03 \\
+\bottomrule
+\end{tabular}
+%}{  % uncomment if you use the \floatbox (as above), erase otherwise
+\caption[Results for dataset E]{Results for dataset E.}
+%}  % uncomment if you use the \floatbox
+\label{tab:dataset_e_results}
+\end{table}
+
+\newpage
+
+\begin{figure}[h]
     \centering
     % \includegraphics[width=\linewidth]{img/screenshots/hashcode_datasets_c_e.png}
     % \includegraphics[width=.8\linewidth]{img/screenshots/hashcode_datasets_c_e.png}
@@ -22,6 +52,55 @@ We compare the three previously mentioned optimization methods: \textit{genetic 
     }
     \label{fig:dataset_b_experiment}
 \end{figure}
+
+\begin{table}[h]
+\centering\footnotesize\sf
+\begin{tabular}{lccc}
+\toprule
+& Normalized Score & Score & Time \\
+\midrule
+\textcolor{myblue}{\textbf{Genetic Algorithm}} & 91.29 & 4,570,095 & 0:42:15 \\
+\textcolor{myorange}{\textbf{Hill Climbing}} & 87.40 & 4,569,945 & 0:55:35 \\
+\textcolor{mygreen}{\textbf{Simulated Annealing}} & \textbf{96.84} & 4,570,309 & 0:55:12 \\
+\bottomrule
+\end{tabular}
+%}{  % uncomment if you use the \floatbox (as above), erase otherwise
+\caption[Results for dataset B]{Results for dataset B.}
+%}  % uncomment if you use the \floatbox
+\label{tab:dataset_b_results}
+\end{table}
+
+\newpage
+
+\begin{figure}[h]
+    \centering
+    % \includegraphics[width=\linewidth]{img/screenshots/hashcode_datasets_c_e.png}
+    % \includegraphics[width=.8\linewidth]{img/screenshots/hashcode_datasets_c_e.png}
+    \includegraphics[width=\linewidth]{img/experiments/f_Genetic Algorithm_Hill Climbing_Simulated Annealing.pdf}
+    \caption[Results for dataset F]{
+        Results for dataset F.
+    }
+    \label{fig:dataset_f_experiment}
+\end{figure}
+
+\begin{table}[h]
+\centering\footnotesize\sf
+\begin{tabular}{lccc}
+\toprule
+& Normalized Score & Score & Time \\
+\midrule
+\textcolor{myblue}{\textbf{Genetic Algorithm}} & 93.44 & 1,437,086 & 1:47:39 \\
+\textcolor{myorange}{\textbf{Hill Climbing}} & 92.99 & 1,434,129 & 2:38:58 \\
+\textcolor{mygreen}{\textbf{Simulated Annealing}} & \textbf{93.89} & 1,440,097 & 2:23:53 \\
+\bottomrule
+\end{tabular}
+%}{  % uncomment if you use the \floatbox (as above), erase otherwise
+\caption[Results for dataset F]{Results for dataset F.}
+%}  % uncomment if you use the \floatbox
+\label{tab:dataset_f_results}
+\end{table}
+
+\newpage
 
 \begin{figure}
     \centering
@@ -34,6 +113,25 @@ We compare the three previously mentioned optimization methods: \textit{genetic 
     \label{fig:dataset_c_experiment}
 \end{figure}
 
+\begin{table}[h]
+\centering\footnotesize\sf
+\begin{tabular}{lccc}
+\toprule
+& Normalized Score & Score & Time \\
+\midrule
+\textcolor{myblue}{\textbf{Genetic Algorithm}} & 93.60 & 1,314,347 & 1:54:28 \\
+\textcolor{myorange}{\textbf{Hill Climbing}} & 92.68 & 1,314,200 & 3:18:31 \\
+\textcolor{mygreen}{\textbf{Simulated Annealing}} & \textbf{100.65} & 1,315,476 & 2:58:44 \\
+\bottomrule
+\end{tabular}
+%}{  % uncomment if you use the \floatbox (as above), erase otherwise
+\caption[Results for dataset C]{Results for dataset C.}
+%}  % uncomment if you use the \floatbox
+\label{tab:dataset_c_results}
+\end{table}
+
+\newpage
+
 \begin{figure}
     \centering
     % \includegraphics[width=\linewidth]{img/screenshots/hashcode_datasets_c_e.png}
@@ -45,27 +143,22 @@ We compare the three previously mentioned optimization methods: \textit{genetic 
     \label{fig:dataset_d_experiment}
 \end{figure}
 
-\begin{figure}
-    \centering
-    % \includegraphics[width=\linewidth]{img/screenshots/hashcode_datasets_c_e.png}
-    % \includegraphics[width=.8\linewidth]{img/screenshots/hashcode_datasets_c_e.png}
-    \includegraphics[width=\linewidth]{img/experiments/e_Genetic Algorithm_Hill Climbing_Simulated Annealing.pdf}
-    \caption[Results for dataset E]{
-        Results for dataset E.
-    }
-    \label{fig:dataset_e_experiment}
-\end{figure}
-
-\begin{figure}
-    \centering
-    % \includegraphics[width=\linewidth]{img/screenshots/hashcode_datasets_c_e.png}
-    % \includegraphics[width=.8\linewidth]{img/screenshots/hashcode_datasets_c_e.png}
-    \includegraphics[width=\linewidth]{img/experiments/f_Genetic Algorithm_Hill Climbing_Simulated Annealing.pdf}
-    \caption[Results for dataset F]{
-        Results for dataset F.
-    }
-    \label{fig:dataset_f_experiment}
-\end{figure}
+\begin{table}[h]
+\centering\footnotesize\sf
+\begin{tabular}{lccc}
+\toprule
+& Normalized Score & Score & Time \\
+\midrule
+\textcolor{myblue}{\textbf{Genetic Algorithm}} & 90.23 & 2,508,730 & 9:12:47 \\
+\textcolor{myorange}{\textbf{Hill Climbing}} & \textbf{91.85} & 2,525,531 & 20:14:01 \\
+\textcolor{mygreen}{\textbf{Simulated Annealing}} & 91.53 & 2,522,204 & 22:17:16 \\
+\bottomrule
+\end{tabular}
+%}{  % uncomment if you use the \floatbox (as above), erase otherwise
+\caption[Results for dataset D]{Results for dataset D.}
+%}  % uncomment if you use the \floatbox
+\label{tab:dataset_d_results}
+\end{table}
 
 % \begin{table}[b!]
 
