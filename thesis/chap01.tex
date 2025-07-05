@@ -15,7 +15,7 @@ The total score was the sum of the scores of all 6 datasets (A--F). The first da
 
 \section{Original problem statement} \label{sec:original_problem_statement}
 
-The full problem statement\footnote{\url{https://github.com/google/coding-competitions-archive/blob/main/hashcode/hashcode_2021_qualification_round.pdf}} is available in the Google Coding Competitions archive~\cite{google2023google}. Here we describe only important details for the reader.
+The full problem statement\footnote{\url{https://github.com/google/coding-competitions-archive/blob/main/hashcode/hashcode_2021_qualification_round.pdf}} is available in the Google Coding Competitions archive~\cite{google2023google}. Here we describe only the parts that are important for understanding this work.
 In short, the task is as follows:
 \begin{quote}
     \textit{Given a city plan describing intersections and streets and cars with planned paths through the city, optimize the schedule of traffic lights to minimize the total amount of time spent in traffic, and help as many cars as possible reach their destination before a specified deadline.}
@@ -35,11 +35,11 @@ In terms of graph theory, the city plan is a \textit{directed graph}. The inters
 \subsection{Streets and intersections}
 
 In the city, we have a set of intersections
-$I$, where $2 \leq \abs{I} \leq 10^5$,
+$I$, where $\abs{I} \in [2, 10^5]$,
 and a set of streets
-$S \subseteq \{(u, v) | u,v \in I \land u \neq v\}$, where $2 \leq \abs{S} \leq 10^5$.
-Each street $s \in S$ is a unique one-way connection between two different intersections $u$, $v$; two distinct streets in opposite directions between the same two intersections $(u, v)$, $(v, u)$ are allowed. Each street $s \in S$ has a fixed time $l(s) \in \mathbb{N}_+$ that it takes a car to get from the beginning to the end of the street, independently of the other cars on the street.
-Each intersection $i \in I$ has a set of incoming streets $S_i^+ \subset S$, where $|S_i^+| \geq 1$, and a set of outgoing streets $S_i^- \subset S$, where $|S_i^-| \geq 1$; thus each intersection has at least one incoming street and at least one outgoing street.
+$S \subseteq \{(u, v) | u,v \in I \land u \neq v\}$, where $\abs{S} \in [2, 10^5]$.
+Each street $s \in S$ is a unique one-way connection between two different intersections $u$, $v$; two distinct streets $(u, v)$ and $(v, u)$ in opposite directions between the same two intersections are allowed. Each street $s \in S$ has a fixed time $l(s) \in \mathbb{N}_+$ that it takes a car to get from the beginning to the end of the street, independently of the other cars on the street.
+Each intersection $i \in I$ has a set of incoming streets $S_i^+ \subset S$, where $\abs{S_i^+} \geq 1$, and a set of outgoing streets $S_i^- \subset S$, where $\abs{S_i^-} \geq 1$; thus each intersection has at least one incoming street and at least one outgoing street.
 
 \subsection{Traffic lights and schedules}
 
@@ -67,7 +67,9 @@ For each intersection $i \in I$, we can set a traffic light schedule. This sched
 
 \subsection{Cars}
 
-Furthermore, we have a set of cars $C$, where $1 \leq \abs{C} \leq 10^3$. Each car $c \in C$ has a given path through the city. The path is a sequence of streets the car has to drive through. The number of streets in the path is limited: $\forall c \in C \;\; 2 \leq \abs{\bm{p_c}} \leq 10^3$. No intersection or street can be repeated in the path.
+Furthermore, we have a set of cars $C$, where $\abs{C} \in [1, 10^3]$. Each car $c \in C$ has a given path $\bm{p_c}$ through the city. The path $\bm{p_c}$ is a sequence of streets the car has to drive through.
+The number of streets in each path $\bm{p_c}$ is in the range $[2, 10^3]$.
+No intersection or street can be repeated in a path.
 
 At the beginning of the simulation, all cars are at the end of the first street in their path. They either wait if the light is red or are ready to move if the light is green. If more cars start at the end of the same street, they queue up according to their IDs in the input file (see Figure~\ref{fig:hashcode_street}). When a car reaches the end of the last street in its path, it is immediately removed from the street.
 
@@ -89,7 +91,15 @@ At the beginning of the simulation, all cars are at the end of the first street 
 
 \subsection{Score}
 
-The score of a solution is determined as follows: Let $\bm{\theta}$ denote the traffic light schedules. Given a duration of the simulation $\mathrm{D}$ in seconds, where $1 \leq \mathrm{D} \leq 10^4$, and a fixed bonus for reaching the destination $\mathrm{F}$, where $1 \leq \mathrm{F} \leq 10^3$, let $t(c; \bm{\theta}) \in \mathbb{N}$ be the time a car $c \in C$ reaches the destination. The $score$ of a car $c$ is defined as
+The score reflects the quality of the traffic light schedules: the more cars reach their destination, and the sooner they arrive, the higher the score.
+The objective is to maximize this value.
+In the context of optimization, the score serves as a \textit{fitness function}.
+
+The score is determined as follows. Let $\bm{\theta}$ denote the traffic light schedules, and let $C$ be the set of cars.
+Given a simulation duration $\mathrm{D} \in [1, 10^4]$ in seconds,
+and a fixed bonus awarded for reaching the destination $\mathrm{F} \in [1, 10^3]$,
+let $t(c; \bm{\theta}) \in \mathbb{N}$ be the time when a car $c \in C$ reaches its destination.
+The score of a single car $c$ under the schedules $\bm{\theta}$ is defined as
 \begin{equation}
     score(c; \bm{\theta}) =
     \begin{cases}
@@ -97,7 +107,7 @@ The score of a solution is determined as follows: Let $\bm{\theta}$ denote the t
         0, & \text{otherwise}.
     \end{cases}
 \end{equation}
-The $SCORE$ of a solution $\bm{\theta}$ is defined as
+Then, the total score of the schedules $\bm{\theta}$ is defined as
 \begin{equation}
     SCORE(\bm{\theta}) = \sum_{c \in C} score(c; \bm{\theta}).
 \end{equation}
