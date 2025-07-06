@@ -1,6 +1,8 @@
 \chapter{Problem description} \label{chap:problem_description}
 
-This chapter introduces the optimization problem addressed in this thesis. Section~\ref{sec:competition_overview} provides a brief overview of the competition setting where the problem was initially assigned. In Section~\ref{sec:original_problem_statement}, the original problem statement is presented and explained in detail. Section~\ref{sec:further_insights_and_heuristics} explores additional insights and heuristics that we use to simplify the problem and improve solutions. Section~\ref{sec:datasets} describes the datasets provided with the problem. Finally, Section~\ref{sec:simulator} presents the custom simulator tool that we developed to evaluate solutions to the problem.
+This chapter introduces the optimization problem addressed in this thesis. Section~\ref{sec:competition_overview} provides a brief overview of the competition setting where the problem was initially assigned. In Section~\ref{sec:original_problem_statement}, the original problem statement is presented and explained in detail.
+Section~\ref{sec:preprocessing} explains preprocessing steps that we apply to simplify the problem for optimization.
+Section~\ref{sec:datasets} describes the datasets provided with the problem. Finally, Section~\ref{sec:simulator} presents the custom simulator tool that we developed to evaluate solutions to the problem.
 
 \section{Competition overview} \label{sec:competition_overview}
 
@@ -67,7 +69,7 @@ For each intersection $i \in I$, we can set a traffic light schedule. This sched
 
 \subsection{Cars}
 
-Furthermore, we have a set of cars $C$, where $\abs{C} \in [1, 10^3]$. Each car $c \in C$ has a given path $\bm{p_c}$ through the city. The path $\bm{p_c}$ is a sequence of streets the car has to drive through.
+Furthermore, we have a set of cars $C$, where $\abs{C} \in [1, 10^3]$. Each car $c \in C$ has a given path $\bm{p_c}$ through the city. The path is a sequence of streets the car has to drive through.
 The number of streets in each path $\bm{p_c}$ is in the range $[2, 10^3]$.
 No intersection or street can be repeated in a path.
 
@@ -86,8 +88,6 @@ At the beginning of the simulation, all cars are at the end of the first street 
     }
     \label{fig:hashcode_street}
 \end{figure}
-
-\newpage
 
 \subsection{Score}
 
@@ -112,41 +112,113 @@ Then, the total score of the schedules $\bm{\theta}$ is defined as
     SCORE(\bm{\theta}) = \sum_{c \in C} score(c; \bm{\theta}).
 \end{equation}
 
-\section{Further insights and heuristics} \label{sec:further_insights_and_heuristics}
+\section{Preprocessing of a problem instance} \label{sec:preprocessing}
 
-In this section, we introduce some additional terms and heuristics for the problem. These are our own observations and are not part of the original problem statement. Thanks to these heuristics, we can simplify the solution creation, achieve better scores, and reduce the number of parameters to optimize.
+In this section, we introduce preprocessing steps that we apply to reduce the total number of parameters we need to optimize.
+These are our own observations and are not part of the original problem statement. After preprocessing, a substantial amount of intersections and streets is removed from optimization, which allows us to save resources and focus only on the important parameters.
 
-\paragraph{Used and unused streets} \textit{Unused street} is a street that is either not used by any car at all or it is the final destination of all cars that use it (i.e. traffic light for this street is not needed). \textit{Used street} is a street that is used by at least one car and is not the final destination of at least one car that uses it.
+\subsection{Preprocessing steps}
+Throughout this section, we introduce some additional terms to help us better describe the steps.
+
+\paragraph{Used and unused streets}
+\textit{Unused street} is a street that is the final destination of all cars that have it in their path (i.e., a traffic light for this street is not needed).
+\textit{Used street} is a street that is not the final destination of at least one car that has it in its path.
 
 \paragraph{Used and unused intersections} \textit{Unused intersection} is an intersection where all incoming streets are unused streets. \textit{Used intersection} is an intersection with at least one used incoming street.
 
 % https://tex.stackexchange.com/questions/32160/new-line-after-paragraph
-\paragraph{Heuristic 1: Remove unused intersections and unused streets} \label{para:heuristic_1} \mbox{} \\
-Remove unused intersections and unused streets from used intersections when creating initial schedules. They contribute nothing and can only worsen the score. \\
+\paragraph{Step 1: Remove unused intersections and unused streets} \label{para:step_1} \mbox{} \\
+Remove unused intersections and unused streets from used intersections. \\
 
-This heuristic is an obvious one; unused intersections are never used and only add unnecessary complexity. Unused streets prolong the traffic light cycle for the whole intersection, which very frequently leads to longer waiting times and thus a lower score. Now, let us move on to some less obvious insights.
+\hyperref[para:step_1]{Step 1} is an obvious one; unused intersections are never used and only add unnecessary complexity. Unused streets in used intersections prolong the traffic light cycle for the whole intersection, which very frequently leads to longer waiting times and thus a lower score. Now, let us move on to the next step.
 
-\paragraph{Trivial and non-trivial intersections} \textit{Trivial intersection} is an intersection with exactly one used incoming street. \textit{Non-trivial intersection} is an intersection with two or more used incoming streets.
+\paragraph{Trivial and non-trivial intersections}
+There are two types of used intersections: trivial and non-trivial.
+\textit{Trivial intersection} is an intersection with exactly one used incoming street. \textit{Non-trivial intersection} is an intersection with two or more used incoming streets.
 
-\paragraph{Blocked streets and blocked intersections} \textit{Blocked street} is an unscheduled street or a street with a green light scheduled for 0 seconds. \textit{Blocked intersection} is an intersection with no schedule or with all incoming streets blocked.
+\paragraph{Trivial and non-trivial streets}
+For completeness, we also split the used streets into trivial and non-trivial ones.
+\textit{Trivial street} is a used street in a trivial intersection. \textit{Non-trivial street} is a used street in a non-trivial intersection.
 
-\paragraph{Heuristic 2: Fix the schedule for trivial intersections, optimize only non-trivial schedules} \label{para:heuristic_2}
-Trivial intersections do not require optimization; their schedule can be fixed by giving a green light to the only used incoming street for the entire duration. Only the schedules of non-trivial intersections need to be optimized. This can substantially reduce the number of optimized parameters. \\
+\paragraph{Step 2: Fix the schedule for trivial intersections; optimize only schedules of non-trivial intersections} \label{para:step_2}
+For each trivial intersection, the schedule can be fixed by assigning a green light to its only used incoming street for the entire duration. Trivial intersections can then be removed from optimization, and only schedules of non-trivial intersections are optimized. \\
 
-This heuristic is not straightforward, so let us think about it in more detail. For trivial intersections, we have two meaningful schedule options:
+Let us think about \hyperref[para:step_2]{Step 2} in more detail. For trivial intersections, we have two meaningful schedule options:
 \begin{enumerate}
     \item Keep the light green the whole time.
     \item Keep the light red the whole time, effectively blocking all cars there.
 \end{enumerate}
-Empirically speaking, the vast majority of trivial intersections should be kept green anyway, otherwise many cars would not be able to reach their destination at all.
-Furthermore, we argue that we can omit the second option because we can achieve a similar result in a different way. Suppose that blocking a particular trivial intersection improves the score. This means that there must be a problematic car passing through this intersection. However, the problematic car must eventually reach some non-trivial intersection via a street, and this street can still be blocked during optimization. We therefore leave this up to the optimization algorithm, hoping that it explores this option if it is indeed beneficial.
+Empirically speaking, the vast majority of trivial intersections should be kept green, otherwise many cars would not be able to reach their destination at all.
 
-As previously mentioned, this smart heuristic is important because it allows us to focus only on the non-trivial intersections and simplifies the optimization process. To put it into perspective, approximately $80 \%$ of used intersections in dataset B are trivial, $60 \%$ in dataset C, and $50 \%$ in dataset E. This enables us to skip optimizing thousands of parameters.
+However, suppose that keeping the light red for some trivial intersection improves the score. This means that there must be a problematic car passing through this intersection. Such a car must eventually reach some non-trivial intersection via a street, and this street can still be set to have a red light the whole time during optimization. We therefore leave this up to the optimization algorithm, hoping that it explores this option if it is indeed beneficial. \\
+
+To demonstrate the usefulness of preprocessing, Tables~\ref{tab:intersection_statistics} and \ref{tab:street_statistics} show statistics of intersections and streets for each dataset. After applying both steps, we are only left with non-trivial intersections and non-trivial streets for optimization. This enables us to skip optimizing thousands of parameters.
+
+% TABLE OF INTERSECTION STATISTICS
+\begin{table}[h]
+\centering\footnotesize\sf
+
+\begin{tabular}{lr@{\hspace{0.1cm}}r@{\hspace{0.5cm}}r@{\hspace{0.1cm}}r@{\hspace{0.5cm}}r@{\hspace{0.1cm}}r}
+% \toprule
+& \multicolumn{6}{c}{\textbf{Intersections}} \\
+\midrule
+Dataset & \multicolumn{2}{c}{Unused} & \multicolumn{2}{c}{Trivial} & \multicolumn{2}{c}{Non-trivial} \\
+\midrule
+\textbf{A} & 1 & (25\%) & 2 & (50\%) & \textbf{1} & \textbf{(25\%)} \\
+\textbf{B} & 777 & (11\%) & 4,977 & (70\%) & \textbf{1,319} & \textbf{(19\%)} \\
+\textbf{C} & 2,340 & (23\%) & 4,468 & (45\%) & \textbf{3,192} & \textbf{(32\%)} \\
+\textbf{D} & 0 & (0\%) & 0 & (0\%) & \textbf{8,000} & \textbf{(100\%)} \\
+\textbf{E} & 0 & (0\%) & 263 & (53\%) & \textbf{237} & \textbf{(47\%)} \\
+\textbf{F} & 30 & (2\%) & 332 & (20\%) & \textbf{1,300} & \textbf{(78\%)} \\
+\midrule
+% \bottomrule
+\end{tabular}
+
+\caption[Intersection statistics]{Intersection statistics across all datasets.}
+\label{tab:intersection_statistics}
+\end{table}
+
+% TABLE OF STREET STATISTICS
+\begin{table}[h]
+\centering\footnotesize\sf
+
+\begin{tabular}{lr@{\hspace{0.1cm}}r@{\hspace{0.5cm}}r@{\hspace{0.1cm}}r@{\hspace{0.5cm}}r@{\hspace{0.1cm}}r}
+% \toprule
+& \multicolumn{6}{c}{\textbf{Streets}} \\
+\midrule
+Dataset & \multicolumn{2}{c}{Unused} & \multicolumn{2}{c}{Trivial} & \multicolumn{2}{c}{Non-trivial} \\
+\midrule
+\textbf{A} & 1 & (20\%) & 2 & (40\%) & \textbf{2} & \textbf{(40\%)} \\
+\textbf{B} & 1,138 & (12\%) & 4,977 & (55\%) & \textbf{2,987} & \textbf{(33\%)} \\
+\textbf{C} & 23,558 & (67\%) & 4,468 & (13\%) & \textbf{7,004} & \textbf{(20\%)} \\
+\textbf{D} & 12,054 & (13\%) & 0 & (0\%) & \textbf{83,874} & \textbf{(87\%)} \\
+\textbf{E} & 42 & (4\%) & 263 & (26\%) & \textbf{693} & \textbf{(70\%)} \\
+\textbf{F} & 4,667 & (47\%) & 332 & (3\%) & \textbf{5,001} & \textbf{(50\%)} \\
+\midrule
+% \bottomrule
+\end{tabular}
+
+\caption[Street statistics]{Street statistics across all datasets.}
+\label{tab:street_statistics}
+\end{table}
+
+From now on, whenever we refer to schedules, we mean the \textit{schedules of non-trivial intersections with non-trivial streets}, as these intersections and streets are the only ones that are left after preprocessing.
+
+\subsection{Schedules format} \label{subsec:schedules_format}
+
+Each schedule of an intersection consists of two parts: \textit{order} and \textit{times}. Order is an array of street indices that defines the order in which the streets have the green light. Times is an array of integers that defines the duration of the green light with respect to the street order.
+The schedules are then respresented in the following format:
+\begin{quote}
+    a \textbf{list of pairs}, where each pair consists of \textbf{order} and \textbf{times} arrays.
+\end{quote}
 
 \section{Datasets} \label{sec:datasets}
 
-In this section, we briefly describe all datasets provided with the problem. The datasets vary in the size and structure of their city plans. We define the size of a dataset as the number of parameters we need to optimize.
-The number of parameters for each dataset is twice the total number of used streets in non-trivial intersections (one parameter for the order and one for the green light duration). Note that this is only one way to compare the datasets, and it does not account for the actual paths cars must take or how convoluted those paths may be.
+This section briefly describes all datasets provided with the problem.
+The datasets vary in the size and structure of their city plans.
+In the previous section, we already showed statistics of intersections and streets (see Tables~\ref{tab:intersection_statistics} and \ref{tab:street_statistics}).
+Here we compare the datasets by the number of parameters we need to optimize.
+That is, twice the number of non-trivial streets---one parameter for the order and one for the time. Note that this is only one way to compare the datasets, and it does not account for the actual paths cars must take or how convoluted those paths may be.
 
 \begin{figure}[h]
     \centering
@@ -163,10 +235,20 @@ The number of parameters for each dataset is twice the total number of used stre
 
 \paragraph{B - By the ocean: 5,974 parameters} Dataset based on a real city plan of Lisbon, Portugal (see Figure~\ref{fig:hashcode_dataset_b}).
 
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\linewidth]{img/screenshots/hashcode_datasets_b.png}
+    % \includegraphics[width=.8\linewidth]{img/screenshots/hashcode_datasets_b.png}
+    \caption[Visualization of dataset B]{
+        Dataset B based on the real data of Lisbon on the right. Screenshot from \href{https://www.youtube.com/watch?v=YPOVd-hQUjA}{Hash Code 2021: Online Qualification Round Livestream}.
+    }
+    \label{fig:hashcode_dataset_b}
+\end{figure}
+
 \paragraph{C - Checkmate: 14,008 parameters} Dataset with a chessboard-like pattern and regular structure of intersections and streets (see Figure~\ref{fig:hashcode_dataset_c_e}).
 
 % https://codeforces.com/blog/entry/88188#comment-765574
-\paragraph{D - Daily commute: 167,748 parameters} By far the largest dataset with a challenging-to-navigate network from the \textit{Barabási-Albert} \cite{albert2002statistical} distribution.
+\paragraph{D - Daily commute: 167,748 parameters} By far the largest dataset with a challenging-to-navigate network from the \textit{Barabási-Albert} distribution \cite{albert2002statistical}.
 
 \paragraph{E - Etoile: 1,386 parameters} Nicknamed \textit{Etoile}\footnote{\textit{Étoile} means star in French.}, this dataset is a one big star, meaning there is one very important intersection in the middle with hundrets of incoming streets (see Figure~\ref{fig:hashcode_dataset_c_e}).
 
@@ -174,32 +256,15 @@ The number of parameters for each dataset is twice the total number of used stre
 
 \begin{figure}[h]
     \centering
-    \includegraphics[width=\linewidth]{img/screenshots/hashcode_datasets_b.png}
-    % \includegraphics[width=.8\linewidth]{img/screenshots/hashcode_datasets_b.png}
-    \caption[Visualization of dataset B]{
-        Dataset B based on the real data of Lisbon on the right\footnotemark.
-    }
-    \label{fig:hashcode_dataset_b}
-\end{figure}
-
-\footnotetext{Screenshot from \href{https://www.youtube.com/watch?v=YPOVd-hQUjA}{Hash Code 2021: Online Qualification Round Livestream}.}
-
-\bigskip
-
-As mentioned in Section~\ref{sec:competition_overview}, each dataset yields an absolute score within a different range. To compare the performance across all datasets, we normalize the scores to a 0--1 scale, where 0 represents a baseline solution (see Section~\ref{sec:initial_schedules} for details), and 1 corresponds to the maximum known score\footnote{See the maximum known scores \href{https://github.com/sagishporer/hashcode-2021-qualification\#score}{here}.} for the dataset. Note that the baseline is already a good solution, so there may be limited room for improvement---for example, in dataset B.
-
-\begin{figure}[h]
-    \centering
     \includegraphics[width=\linewidth]{img/screenshots/hashcode_datasets_c_e.png}
     % \includegraphics[width=.8\linewidth]{img/screenshots/hashcode_datasets_c_e.png}
     \caption[Visualization of datasets C and E]{
-        Visualization of datasets C and E\protect\footnotemark.
+        Visualization of datasets C and E. Screenshot from \href{https://www.youtube.com/watch?v=YPOVd-hQUjA}{Hash Code 2021: Online Qualification Round Livestream}.
     }
     \label{fig:hashcode_dataset_c_e}
     \end{figure}
 
-\footnotetext{\xxx{Screenshot from \href{https://www.youtube.com/watch?v=YPOVd-hQUjA}{Hash Code 2021: Online Qualification Round Livestream}.}}
-
+As mentioned in Section~\ref{sec:competition_overview}, each dataset yields an absolute score within a different range. To compare the performance across all datasets, we normalize the scores to a 0--1 scale, where 0 represents a baseline solution (see Section~\ref{sec:initial_schedules} for details), and 1 corresponds to the maximum known score\footnote{See the maximum known scores at \\\url{https://github.com/sagishporer/hashcode-2021-qualification\#score}.} for the dataset. Note that the baseline is already a good solution, so there may be limited room for improvement---for example, in dataset B.
 
 \section{Simulator} \label{sec:simulator}
 
@@ -209,19 +274,16 @@ This section provides a brief overview of the custom simulator that we developed
 \bigskip
 
 Our simulator replaces the original competition evaluation system, which was accessible only through the competition website via a user interface and is no longer available. It also adds several features on top of the original system.
-The simulator is written in C++ to be as fast and efficient as possible, but is wrapped as a Python package using the powerful pybind11 library~\cite{jakob2017pybind11}, making it very convenient to use.
+The simulator is written in C++ to be as fast and efficient as possible, and is wrapped as a Python package using the powerful pybind11 library~\cite{jakob2017pybind11}, making it very convenient to use.
 Inspired by libraries such as NumPy\footnote{\url{https://numpy.org/}} and PyTorch\footnote{\url{https://pytorch.org/}}, our goal is to provide an easy-to-use interface and seamless integration with the vital Python ecosystem, without compromising on top-tier performance.
 
-Below are the features of the simulator package that are important for optimization. These are implemented in C++ and exposed only through a lightweight Python API:
+Following are the features of the simulator package that are important for optimization. These features are implemented in C++ and exposed through a lightweight Python API:
 \begin{itemize}
     \item Reading and storing the input data.
-    \item Creating initial schedules using several different options.
+    \item Creating initial schedules using several different options (see Section~\ref{sec:initial_schedules}).
     \item Running the simulation to evaluate given schedules.
-    \item Getting and setting the non-trivial schedules in a format suitable for optimization.
+    \item Retrieving and updating schedules in a format described in Section~\ref{subsec:schedules_format}.
 \end{itemize}
-The different options for creating initial schedules are described in Section~\ref{sec:initial_schedules} and the format of the non-trivial schedules is described in Section~\ref{sec:coding_of_a_solution}.
 
-
-The only case where larger data are passed between C++ and Python is when working with the \textit{non-trivial schedules}.
-As explained in \hyperref[para:heuristic_2]{Heuristic 2}, these are the only schedules that require optimization.
-Since the optimization loop is implemented in Python using parts of the DEAP library~\cite{fortin2012deap}, it must retrieve these schedules from the simulator, modify them externally, and then send the modified schedules back into the simulator to evaluate their score.
+The only case where larger data are passed between C++ and Python is when retrieving and updating the schedules.
+Since the optimization loop is implemented in Python using parts of the DEAP library~\cite{fortin2012deap}, it must retrieve the schedules from the simulator, modify them externally, and then send them back into the simulator to evaluate their score.
