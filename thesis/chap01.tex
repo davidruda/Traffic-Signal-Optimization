@@ -159,9 +159,10 @@ To demonstrate the usefulness of preprocessing, Tables~\ref{tab:intersection_sta
 \centering\footnotesize\sf
 
 \begin{tabular}{lr@{\hspace{0.1cm}}r@{\hspace{0.5cm}}r@{\hspace{0.1cm}}r@{\hspace{0.5cm}}r@{\hspace{0.1cm}}r}
-% \toprule
+
 & \multicolumn{6}{c}{\textbf{Intersections}} \\
-\midrule
+\addlinespace[2pt]
+\toprule
 Dataset & \multicolumn{2}{c}{Unused} & \multicolumn{2}{c}{Trivial} & \multicolumn{2}{c}{Non-trivial} \\
 \midrule
 \textbf{A} & 1 & (25\%) & 2 & (50\%) & \textbf{1} & \textbf{(25\%)} \\
@@ -170,8 +171,7 @@ Dataset & \multicolumn{2}{c}{Unused} & \multicolumn{2}{c}{Trivial} & \multicolum
 \textbf{D} & 0 & (0\%) & 0 & (0\%) & \textbf{8,000} & \textbf{(100\%)} \\
 \textbf{E} & 0 & (0\%) & 263 & (53\%) & \textbf{237} & \textbf{(47\%)} \\
 \textbf{F} & 30 & (2\%) & 332 & (20\%) & \textbf{1,300} & \textbf{(78\%)} \\
-\midrule
-% \bottomrule
+\bottomrule
 \end{tabular}
 
 \caption[Intersection statistics]{Intersection statistics across all datasets.}
@@ -183,9 +183,10 @@ Dataset & \multicolumn{2}{c}{Unused} & \multicolumn{2}{c}{Trivial} & \multicolum
 \centering\footnotesize\sf
 
 \begin{tabular}{lr@{\hspace{0.1cm}}r@{\hspace{0.5cm}}r@{\hspace{0.1cm}}r@{\hspace{0.5cm}}r@{\hspace{0.1cm}}r}
-% \toprule
+
 & \multicolumn{6}{c}{\textbf{Streets}} \\
-\midrule
+\addlinespace[2pt]
+\toprule
 Dataset & \multicolumn{2}{c}{Unused} & \multicolumn{2}{c}{Trivial} & \multicolumn{2}{c}{Non-trivial} \\
 \midrule
 \textbf{A} & 1 & (20\%) & 2 & (40\%) & \textbf{2} & \textbf{(40\%)} \\
@@ -194,8 +195,7 @@ Dataset & \multicolumn{2}{c}{Unused} & \multicolumn{2}{c}{Trivial} & \multicolum
 \textbf{D} & 12,054 & (13\%) & 0 & (0\%) & \textbf{83,874} & \textbf{(87\%)} \\
 \textbf{E} & 42 & (4\%) & 263 & (26\%) & \textbf{693} & \textbf{(70\%)} \\
 \textbf{F} & 4,667 & (47\%) & 332 & (3\%) & \textbf{5,001} & \textbf{(50\%)} \\
-\midrule
-% \bottomrule
+\bottomrule
 \end{tabular}
 
 \caption[Street statistics]{Street statistics across all datasets.}
@@ -207,7 +207,13 @@ From now on, whenever we refer to schedules, we mean the \textit{schedules of no
 \subsection{Schedules format} \label{subsec:schedules_format}
 
 Each schedule of an intersection consists of two parts: \textit{order} and \textit{times}. Order is an array of street indices that defines the order in which the streets have the green light. Times is an array of integers that defines the duration of the green light with respect to the street order.
-The schedules are then respresented in the following format:
+For illustration, recall the schedule from Figure~\ref{fig:hashcode_traffic_lights}; street-a (ID 0) has a green light for 2 seconds, and then street-b (ID~1) has a green light for 3 seconds. This schedule is represented in our format as follows:
+\vspace{-0.4cm}
+\begin{align*}
+\text{Order} \quad& \text{Times} \\
+\Big([0, 1], \quad& [2, 3]\Big).
+\end{align*}
+Then, the schedules are collectively represented as
 \begin{quote}
     a \textbf{list of pairs}, where each pair consists of \textbf{order} and \textbf{times} arrays.
 \end{quote}
@@ -264,14 +270,16 @@ That is, twice the number of non-trivial streets---one parameter for the order a
     \label{fig:hashcode_dataset_c_e}
     \end{figure}
 
-As mentioned in Section~\ref{sec:competition_overview}, each dataset yields an absolute score within a different range. To compare the performance across all datasets, we normalize the scores to a 0--1 scale, where 0 represents a baseline solution (see Section~\ref{sec:initial_schedules} for details), and 1 corresponds to the maximum known score\footnote{See the maximum known scores at \\\url{https://github.com/sagishporer/hashcode-2021-qualification\#score}.} for the dataset. Note that the baseline is already a good solution, so there may be limited room for improvement---for example, in dataset B.
+\subsection{Score normalization} \label{subsec:score_normalization}
+
+As mentioned in Section~\ref{sec:competition_overview}, each dataset yields an absolute score within a different range. To compare the performance across all datasets, we normalize the scores to a 0--1 scale, where 0 represents our baseline solution (see Section~\ref{sec:initial_schedules} for details), and 1 corresponds to the maximum known score\footnote{See the maximum known scores at \\\url{https://github.com/sagishporer/hashcode-2021-qualification\#score}.} for the dataset. Note that the baseline is already a good solution, so there may be limited room for improvement---for example, in dataset B.
 
 \section{Simulator} \label{sec:simulator}
 
 This section provides a brief overview of the custom simulator that we developed to serve as a black-box fitness function for the optimization algorithms. We discuss the motivation behind its design and describe the functionality relevant to the optimization process.
 \xxx{For further details on the code and implementation, please refer to the Developer documentation in Appendix~\ref{chap:developer_documentation}.}
 
-\bigskip
+\medskip
 
 Our simulator replaces the original competition evaluation system, which was accessible only through the competition website via a user interface and is no longer available. It also adds several features on top of the original system.
 The simulator is written in C++ to be as fast and efficient as possible, and is wrapped as a Python package using the powerful pybind11 library~\cite{jakob2017pybind11}, making it very convenient to use.
@@ -280,7 +288,7 @@ Inspired by libraries such as NumPy\footnote{\url{https://numpy.org/}} and PyTor
 Following are the features of the simulator package that are important for optimization. These features are implemented in C++ and exposed through a lightweight Python API:
 \begin{itemize}
     \item Reading and storing the input data.
-    \item Creating initial schedules using several different options (see Section~\ref{sec:initial_schedules}).
+    \item Creating initial schedules using several different options listed in Section~\ref{sec:initial_schedules}.
     \item Running the simulation to evaluate given schedules.
     \item Retrieving and updating schedules in a format described in Section~\ref{subsec:schedules_format}.
 \end{itemize}
