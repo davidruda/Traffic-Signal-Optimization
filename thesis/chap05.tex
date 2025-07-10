@@ -1,162 +1,210 @@
 \chapter{Experimental results} \label{chap:experimental_results}
 
-In this chapter, we explain the setup of our experiments, describe how we measure the performance of different methods, and present the results. All experiments were performed using either the AMD EPYC 9454 or the AMD EPYC 9474F CPUs.
+This chapter presents the results of our experiments. Specifically, we compare the performance of three optimization algorithms:
+\begin{itemize}
+    \item \textit{genetic algorithm (GA)},
+    \item \textit{hill climbing (HC)},
+    \item \textit{simulated annealing (SA)},
+\end{itemize}
+on datasets B, C, D, E, and F.
+Section~\ref{sec:experimental_setup} explains the setup of the experiments and format of the results shown in the figures and tables. The following sections present the results for each dataset, including plots and tables summarizing the performance of each algorithm. The datasets are presented in ascending order of their size (see Section~\ref{sec:datasets} for more details).
 
-\section{\xxx{Experiment: Optimization}}
+\section{Experimental setup} \label{sec:experimental_setup}
 
-\xxx{In the second experiment, we compare different optimization methods on datasets B--F. The goal is to find if some method is superior to others or if the ideal method is dataset-dependent. We also want to see how much we can improve from the initial schedules.}
+As previously mentioned, Tables~\ref{tab:hyperparams_shared} and \ref{tab:hyperparams_datasets_specific} summarize the hyperparameters used for each algorithm and dataset. The experiments were performed on either AMD EPYC 9454 or AMD EPYC 9474F CPUs. Each setting was run with 10 different fixed seeds, and the results were averaged to ensure reliability. As explained in Section~\ref{sec:hyperparameter_search}, all three algorithms were run for the same fixed budget of fitness evaluations.
 
-\subsection*{\xxx{Methodology}}
+Note that comparing by number of evaluations is somewhat disadvantageous for the genetic algorithm, which inherently performs a broader search of the state space. Additionally, fitness evaluations within each population are computed in parallel, which can result in significantly faster runtimes compared to single-state methods. Nevertheless, we chose the number of fitness evaluations as the comparison metric instead of runtime, as it better reflects algorithmic efficiency and is independent of implementation details and the specific hardware used.
 
-\xxx{We compare the three previously mentioned optimization methods: \textit{\textbf{genetic algorithm}}, \textit{\textbf{hill climbing}} and \textit{\textbf{simulated annealing}}. For each dataset and method, 10 runs with different seeds were performed and averaged to obtain reliable results. ...}
+For each dataset, we provide a plot illustrating the performance of all three methods throughout the optimization process. The x-axis indicates the number of fitness evaluations, while the primary y-axis shows the normalized score (see Section~\ref{subsec:score_normalization}).
+For completeness, the secondary y-axis displays the absolute score.
+For genetic algorithm, the plotted curve represents the best score within the current population. For hill climbing and simulated annealing, the curve shows the current score at each step.  All curves are averaged over 10 runs, with the shaded areas indicating the standard deviation.
+
+For each dataset, we also include a table reporting the overall best score achieved by each algorithm, averaged over 10 runs, along with the total runtime. The runtime is included to give a general idea of how long each method took to run, but it should not be interpreted as an exact metric.
 
 \newpage
+\section{Dataset E} \label{sec:dataset_e}
+
+For dataset E, the smallest optimized dataset, \textit{SA} not only outperformed \textit{GA} and \textit{HC}, but even exceeded the best known score, which explains why its normalized score in Table~\ref{tab:dataset_e_results} is greater than 1. While \textit{GA} and \textit{HC} quickly reached good scores above 80\% of the best known score, they converged early and improved only slightly afterwards. In contrast, \textit{SA} started off slower and volatile, but continued to steadily improve its score throughout the optimization process (see Figure~\ref{fig:dataset_e_experiment}).
+
+\bigskip
 
 \begin{figure}[h]
     \centering
     % \includegraphics[width=\linewidth]{img/screenshots/hashcode_datasets_c_e.png}
     % \includegraphics[width=.8\linewidth]{img/screenshots/hashcode_datasets_c_e.png}
     \includegraphics[width=\linewidth]{img/experiments/e_Genetic Algorithm_Hill Climbing_Simulated Annealing.pdf}
-    \caption[Results for dataset E]{
-        Results for dataset E.
+    \caption[Performance of the algorithms on dataset E]{
+        Performance of the algorithms on dataset E.
     }
     \label{fig:dataset_e_experiment}
 \end{figure}
+
+\bigskip
 
 \begin{table}[h]
 \centering\footnotesize\sf
 \begin{tabular}{lccc}
 \toprule
-& Normalized Score & Score & Time \\
+& Normalized Score & Score & Runtime (mm:ss) \\
 \midrule
-\textcolor{myblue}{\textbf{Genetic Algorithm}} & 87.82 & 767,768 & 0:06:43 \\
-\textcolor{myorange}{\textbf{Hill Climbing}} & 86.79 & 766,798 & 0:06:58 \\
-\textcolor{mygreen}{\textbf{Simulated Annealing}} & \textbf{101.08} & 780,299 & 0:07:03 \\
+\textcolor{myblue}{\textbf{Genetic Algorithm}} & 0.88 & 767,768 & \textbf{06:58} \\
+\textcolor{myorange}{\textbf{Hill Climbing}} & 0.87 & 766,798 & 07:03 \\
+\textcolor{mygreen}{\textbf{Simulated Annealing}} & \textbf{1.01} & \textbf{780,299} & 07:10 \\
 \bottomrule
 \end{tabular}
-%}{  % uncomment if you use the \floatbox (as above), erase otherwise
-\caption[Results for dataset E]{Results for dataset E.}
-%}  % uncomment if you use the \floatbox
+\caption[Statistics for dataset E]{
+    Final statistics for dataset E.
+}
 \label{tab:dataset_e_results}
 \end{table}
 
 \newpage
+\section{Dataset B} \label{sec:dataset_b}
+
+For dataset B, \textit{SA} again achieved the best score among the three algorithms. This time, it performed the best since the very beginning of the optimization process (see Figure~\ref{fig:dataset_b_experiment}). Although close, it fell short of the best known score, reaching 97\% of it (see Table~\ref{tab:dataset_b_results}). \textit{HC} started off similarly to \textit{SA}, but again converged early and ultimately performed the worst---though it still achieved a good score. \textit{GA} performed noticeably better than \textit{HC} but did not reach the performance of \textit{SA}. Note that the parallel fitness evaluation in \textit{GA} starts to show its advantage, with the \textit{GA} runtime being approximately one-third shorter than the other two algorithms (see Table~\ref{tab:dataset_b_results}).
+
+\bigskip
 
 \begin{figure}[h]
     \centering
     % \includegraphics[width=\linewidth]{img/screenshots/hashcode_datasets_c_e.png}
     % \includegraphics[width=.8\linewidth]{img/screenshots/hashcode_datasets_c_e.png}
     \includegraphics[width=\linewidth]{img/experiments/b_Genetic Algorithm_Hill Climbing_Simulated Annealing.pdf}
-    \caption[Results for dataset B]{
-        Results for dataset B.
+    \caption[Performance of the algorithms on dataset B]{
+        Performance of the algorithms on dataset B.
     }
     \label{fig:dataset_b_experiment}
 \end{figure}
+
+\bigskip
 
 \begin{table}[h]
 \centering\footnotesize\sf
 \begin{tabular}{lccc}
 \toprule
-& Normalized Score & Score & Time \\
+& Normalized Score & Score & Runtime (h:mm:ss) \\
 \midrule
-\textcolor{myblue}{\textbf{Genetic Algorithm}} & 91.29 & 4,570,095 & 0:42:15 \\
-\textcolor{myorange}{\textbf{Hill Climbing}} & 87.40 & 4,569,945 & 0:55:35 \\
-\textcolor{mygreen}{\textbf{Simulated Annealing}} & \textbf{96.84} & 4,570,309 & 0:55:12 \\
+\textcolor{myblue}{\textbf{Genetic Algorithm}} & 0.91 & 4,570,095 & \textbf{0:42:29} \\
+\textcolor{myorange}{\textbf{Hill Climbing}} & 0.87 & 4,569,945 & 1:00:08 \\
+\textcolor{mygreen}{\textbf{Simulated Annealing}} & \textbf{0.97} & \textbf{4,570,309} & 0:59:07 \\
 \bottomrule
 \end{tabular}
-%}{  % uncomment if you use the \floatbox (as above), erase otherwise
-\caption[Results for dataset B]{Results for dataset B.}
-%}  % uncomment if you use the \floatbox
+\caption[Statistics for dataset B]{
+    Final statistics for dataset B.
+}
 \label{tab:dataset_b_results}
 \end{table}
 
 \newpage
+\section{Dataset F} \label{sec:dataset_f}
+
+For dataset F, the performance of all three algorithms is much closer than in previous datasets, due to starting from a really good initial solution. Nonetheless, \textit{SA} achieved the highest score, \textit{HC} performed the worst, and \textit{GA} was in between (see Table~\ref{tab:dataset_f_results}). As shown in Figure~\ref{fig:dataset_f_experiment}, the shaded areas representing standard deviation overlap quite a lot, indicating that there is not a big difference between the algorithms. \textit{GA} again demonstrated a significantly shorter runtime.
+
+\bigskip
 
 \begin{figure}[h]
     \centering
     % \includegraphics[width=\linewidth]{img/screenshots/hashcode_datasets_c_e.png}
     % \includegraphics[width=.8\linewidth]{img/screenshots/hashcode_datasets_c_e.png}
     \includegraphics[width=\linewidth]{img/experiments/f_Genetic Algorithm_Hill Climbing_Simulated Annealing.pdf}
-    \caption[Results for dataset F]{
-        Results for dataset F.
+    \caption[Performance of the algorithms on dataset F]{
+        Performance of the algorithms on dataset F.
     }
     \label{fig:dataset_f_experiment}
 \end{figure}
 
+\bigskip
+
 \begin{table}[h]
 \centering\footnotesize\sf
 \begin{tabular}{lccc}
 \toprule
-& Normalized Score & Score & Time \\
+& Normalized Score & Score & Runtime (h:mm:ss) \\
 \midrule
-\textcolor{myblue}{\textbf{Genetic Algorithm}} & 93.44 & 1,437,086 & 1:47:39 \\
-\textcolor{myorange}{\textbf{Hill Climbing}} & 92.99 & 1,434,129 & 2:38:58 \\
-\textcolor{mygreen}{\textbf{Simulated Annealing}} & \textbf{93.89} & 1,440,097 & 2:23:53 \\
+\textcolor{myblue}{\textbf{Genetic Algorithm}} & 0.93 & 1,437,086 & \textbf{1:48:33} \\
+\textcolor{myorange}{\textbf{Hill Climbing}} & 0.93 & 1,434,129 & 2:41:04 \\
+\textcolor{mygreen}{\textbf{Simulated Annealing}} & \textbf{0.94} & \textbf{1,440,097} & 2:28:03 \\
 \bottomrule
 \end{tabular}
-%}{  % uncomment if you use the \floatbox (as above), erase otherwise
-\caption[Results for dataset F]{Results for dataset F.}
-%}  % uncomment if you use the \floatbox
+\caption[Statistics for dataset F]{
+    Final statistics for dataset F.
+}
 \label{tab:dataset_f_results}
 \end{table}
 
 \newpage
+\section{Dataset C} \label{sec:dataset_c}
 
-\begin{figure}
+For dataset C, the curves shown in Figure~\ref{fig:dataset_c_experiment} resemble those observed for dataset B (see Figure~\ref{fig:dataset_b_experiment}). \textit{SA} consistently outperformed the other algorithms from the start and again exceeded the best known score, with the normalized score above 1 (see Table~\ref{tab:dataset_c_results}). \textit{GA} and \textit{HC} performed similarly, with \textit{GA} narrowly outperforming \textit{HC}. As in previous datasets, \textit{GA} finished in a significantly shorter time (see Table~\ref{tab:dataset_c_results}).
+
+\bigskip
+
+\begin{figure}[h]
     \centering
     % \includegraphics[width=\linewidth]{img/screenshots/hashcode_datasets_c_e.png}
     % \includegraphics[width=.8\linewidth]{img/screenshots/hashcode_datasets_c_e.png}
     \includegraphics[width=\linewidth]{img/experiments/c_Genetic Algorithm_Hill Climbing_Simulated Annealing.pdf}
-    \caption[Results for dataset C]{
-        Results for dataset C.
+    \caption[Performance of the algorithms on dataset C]{
+        Performance of the algorithms on dataset C.
     }
     \label{fig:dataset_c_experiment}
 \end{figure}
 
+\bigskip
+
 \begin{table}[h]
 \centering\footnotesize\sf
 \begin{tabular}{lccc}
 \toprule
-& Normalized Score & Score & Time \\
+& Normalized Score & Score & Runtime (h:mm:ss) \\
 \midrule
-\textcolor{myblue}{\textbf{Genetic Algorithm}} & 93.60 & 1,314,347 & 1:54:28 \\
-\textcolor{myorange}{\textbf{Hill Climbing}} & 92.68 & 1,314,200 & 3:18:31 \\
-\textcolor{mygreen}{\textbf{Simulated Annealing}} & \textbf{100.65} & 1,315,476 & 2:58:44 \\
+\textcolor{myblue}{\textbf{Genetic Algorithm}} & 0.94 & 1,314,347 & \textbf{2:02:52} \\
+\textcolor{myorange}{\textbf{Hill Climbing}} & 0.93 & 1,314,200 & 3:33:10 \\
+\textcolor{mygreen}{\textbf{Simulated Annealing}} & \textbf{1.01} & \textbf{1,315,476} & 3:26:31 \\
 \bottomrule
 \end{tabular}
-%}{  % uncomment if you use the \floatbox (as above), erase otherwise
-\caption[Results for dataset C]{Results for dataset C.}
-%}  % uncomment if you use the \floatbox
+\caption[Statistics for dataset C]{
+    Final statistics for dataset C.
+}
 \label{tab:dataset_c_results}
 \end{table}
 
 \newpage
+\section{Dataset D} \label{sec:dataset_d}
 
-\begin{figure}
+For dataset D, the largest dataset by far, the results are different from all previous datasets. \textit{HC}, the weakest algorithm in the previous cases, performed the best here, although only slightly ahead of \textit{SA} (see Figure~\ref{fig:dataset_d_experiment}). It is likely that the algorithms would have benefited from running for more evaluations, as their performance curves had not yet fully converged.
+\textit{GA}, in particular, performed the worst here, but completed in less than half the time of the other two algorithms (see Table~\ref{tab:dataset_d_results}), fully utilizing its parallel evaluation.
+However, the runtimes for this dataset were already much longer than for the rest of the datasets combined, showing how large and demanding dataset D really was.
+
+\bigskip
+
+\begin{figure}[h]
     \centering
     % \includegraphics[width=\linewidth]{img/screenshots/hashcode_datasets_c_e.png}
     % \includegraphics[width=.8\linewidth]{img/screenshots/hashcode_datasets_c_e.png}
     \includegraphics[width=\linewidth]{img/experiments/d_Genetic Algorithm_Hill Climbing_Simulated Annealing.pdf}
-    \caption[Results for dataset D]{
-        Results for dataset D.
+    \caption[Performance of the algorithms on dataset D]{
+        Performance of the algorithms on dataset D.
     }
     \label{fig:dataset_d_experiment}
 \end{figure}
+
+\bigskip
 
 \begin{table}[h]
 \centering\footnotesize\sf
 \begin{tabular}{lccc}
 \toprule
-& Normalized Score & Score & Time \\
+& Normalized Score & Score & Runtime (hh:mm:ss) \\
 \midrule
-\textcolor{myblue}{\textbf{Genetic Algorithm}} & 90.23 & 2,508,730 & 9:12:47 \\
-\textcolor{myorange}{\textbf{Hill Climbing}} & \textbf{91.85} & 2,525,531 & 20:14:01 \\
-\textcolor{mygreen}{\textbf{Simulated Annealing}} & 91.53 & 2,522,204 & 22:17:16 \\
+\textcolor{myblue}{\textbf{Genetic Algorithm}} & 0.90 & 2,508,730 & \textbf{09:41:52} \\
+\textcolor{myorange}{\textbf{Hill Climbing}} & \textbf{0.92} & \textbf{2,525,531} & 20:59:59 \\
+\textcolor{mygreen}{\textbf{Simulated Annealing}} & 0.92 & 2,522,204 & 22:39:17 \\
 \bottomrule
 \end{tabular}
-%}{  % uncomment if you use the \floatbox (as above), erase otherwise
-\caption[Results for dataset D]{Results for dataset D.}
-%}  % uncomment if you use the \floatbox
+\caption[Statistics for dataset D]{
+    Final statistics for dataset D.
+}
 \label{tab:dataset_d_results}
 \end{table}
 
@@ -189,47 +237,15 @@ In this chapter, we explain the setup of our experiments, describe how we measur
 
 % \end{table}
 
-\begin{table}
-% uncomment the following line if you use the fitted top captions for tables
-% (see the \floatsetup[table] comments in `macros.tex`.
-%\floatbox{table}[\FBwidth]{
-\centering\footnotesize\sf
-\begin{tabular}{llrl}
-\toprule
-Column A & Column 2 & Numbers & More \\
-\midrule
-Asd & QWERTY & 123123 & -- \\
-Asd qsd 1sd & \textcolor{red}{BAD} & 234234234 & This line should be helpful. \\
-Asd & \textcolor{blue}{INTERESTING} & 123123123 & -- \\
-Asd qsd 1sd & \textcolor{violet!50}{PLAIN WEIRD} & 234234234 & -- \\
-Asd & QWERTY & 123123 & -- \\
-\addlinespace % a nice non-intrusive separator of data groups (or final table sums)
-Asd qsd 1sd & \textcolor{green!80!black}{GOOD} & 234234299 & -- \\
-Asd & NUMBER & \textbf{123123} & -- \\
-Asd qsd 1sd & \textcolor{orange}{DANGEROUS} & 234234234 & (no data) \\
-\bottomrule
-\end{tabular}
-%}{  % uncomment if you use the \floatbox (as above), erase otherwise
-\caption{An example table.  Table caption should clearly explain how to interpret the data in the table. Use some visual guide, such as boldface or color coding, to highlight the most important results (e.g., comparison winners).}
-%}  % uncomment if you use the \floatbox
-\label{tab:z}
-\end{table}
-
-\begin{table}
-% uncomment the following line if you use the fitted top captions for tables
-% (see the \floatsetup[table] comments in `macros.tex`.
-%\floatbox{table}[\FBwidth]{
-\centering\footnotesize\sf
-\begin{tabular}{llrl}
-\toprule
-Dataset & GA & HC & SA \\
-\midrule
-B & \textbf{0.95} & 0.90 & 0.85 \\
-C & 0.90 & 0.88 & 0.87 \\
-D & 0.98 & 0.96 & 0.95 \\
-E & 0.92 & 0.91 & 0.89 \\
-F & 0.93 & 0.90 & 0.88 \\
-\bottomrule
+% \begin{table}
+% % uncomment the following line if you use the fitted top captions for tables
+% % (see the \floatsetup[table] comments in `macros.tex`.
+% %\floatbox{table}[\FBwidth]{
+% \centering\footnotesize\sf
+% \begin{tabular}{llrl}
+% \toprule
+% Column A & Column 2 & Numbers & More \\
+% \midrule
 % Asd & QWERTY & 123123 & -- \\
 % Asd qsd 1sd & \textcolor{red}{BAD} & 234234234 & This line should be helpful. \\
 % Asd & \textcolor{blue}{INTERESTING} & 123123123 & -- \\
@@ -240,9 +256,9 @@ F & 0.93 & 0.90 & 0.88 \\
 % Asd & NUMBER & \textbf{123123} & -- \\
 % Asd qsd 1sd & \textcolor{orange}{DANGEROUS} & 234234234 & (no data) \\
 % \bottomrule
-\end{tabular}
-%}{  % uncomment if you use the \floatbox (as above), erase otherwise
-\caption{An example table.  Table caption should clearly explain how to interpret the data in the table. Use some visual guide, such as boldface or color coding, to highlight the most important results (e.g., comparison winners).}
-%}  % uncomment if you use the \floatbox
-\label{tab:results}
-\end{table}
+% \end{tabular}
+% %}{  % uncomment if you use the \floatbox (as above), erase otherwise
+% \caption{An example table.  Table caption should clearly explain how to interpret the data in the table. Use some visual guide, such as boldface or color coding, to highlight the most important results (e.g., comparison winners).}
+% %}  % uncomment if you use the \floatbox
+% \label{tab:z}
+% \end{table}

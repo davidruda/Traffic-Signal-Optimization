@@ -71,6 +71,7 @@ For each intersection, we randomly decide whether to mutate only the order, only
 \bigskip
 
 The remaining hyperparameters of the genetic algorithm are \textit{population size} and \textit{generations}---their names are quite self-explanatory. Together with the crossover and mutation probabilities, these hyperparameters control the total number of fitness evaluations (i.e., simulation runs) performed by the algorithm.
+Additionally, utilizing the approach from Section~\ref{sec:parallelization}, we run fitness evaluations within each population in parallel.
 
 \section{Hill climbing} \label{sec:hill_climbing_application}
 
