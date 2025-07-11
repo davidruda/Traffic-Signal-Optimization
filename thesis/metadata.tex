@@ -51,20 +51,26 @@ Computational resources were provided by the e-INFRA CZ project (ID:90254), supp
 }
 
 % Abstract (recommended length around 80-200 words; this is not a copy of your thesis assignment!)
-\def\Abstract{%
-\xxx{Use the most precise, shortest sentences that state what problem the
-thesis addresses, how it is approached, pinpoint the exact result achieved, and
-describe the applications and significance of the results. Highlight anything
-novel that was discovered or improved by the thesis. Maximum length is 200
-words, but try to fit into 120. Abstracts are often used for deciding if
-a reviewer will be suitable for the thesis; a well-written abstract thus
-increases the probability of getting a reviewer who will like the thesis.}
+\def\Abstract{
+As cities grow and traffic congestion worsens, traffic signal optimization becomes an increasingly important real-world problem for ensuring efficient urban mobility.
+This thesis explores a simplified version of the problem, originally presented in the Google Hash Code competition.
+The task involves optimizing the schedules of traffic lights at city intersections to maximize the number of cars reaching their destinations before a deadline, while minimizing the overall time spent in traffic.
+We develop a fast and efficient simulator to evaluate solutions for the task.
+We then integrate this simulator into an optimization pipeline with three heuristic algorithms: Genetic Algorithm, Hill Climbing, and Simulated Annealing. We experimentally compare these algorithms on the provided datasets, achieving new best scores on two datasets.
+% \xxx{Use the most precise, shortest sentences that state what problem the
+% thesis addresses, how it is approached, pinpoint the exact result achieved, and
+% describe the applications and significance of the results. Highlight anything
+% novel that was discovered or improved by the thesis. Maximum length is 200
+% words, but try to fit into 120. Abstracts are often used for deciding if
+% a reviewer will be suitable for the thesis; a well-written abstract thus
+% increases the probability of getting a reviewer who will like the thesis.}
 }
 
 % 3 to 5 keywords (recommended) separated by \sep
 % Keywords are useful for indexing and searching for the theses by topic.
 \def\ThesisKeywords{%
-\xxx{keyword\sep key phrase}
+% \xxx{keyword\sep key phrase} \sep
+traffic signal optimization \sep Google Hash Code \sep genetic algorithm \sep hill climbing \sep simulated annealing
 }
 
 % If any of your metadata strings contains TeX macros, you need to provide
