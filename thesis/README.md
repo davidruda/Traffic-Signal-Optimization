@@ -1,5 +1,33 @@
 # A template for typesetting thesis at MFF UK in LaTeX
 
+## Validate PDF/A
+
+Source: https://github.com/mff-cuni-cz/cuni-thesis-validator
+
+First, pull the docker image:
+```sh
+docker pull ghcr.io/mff-cuni-cz/cuni-thesis-validator:latest
+```
+
+Run the verification:
+```sh
+cd path/to/thesis/directory/with/thesis/pdf
+docker run -v $PWD:/thesis ghcr.io/mff-cuni-cz/cuni-thesis-validator verify /thesis/thesis.pdf | grep validationReports
+```
+
+## Convert problematic PDFs to PDF/A
+
+Source: https://github.com/exaexa/better-mff-thesis
+
+Use the `pdfa.sh` script, e.g.:
+```sh
+cd img/experiments
+shopt -s extglob
+for f in !(pdfa-*.pdf); do
+    ../../pdfa.sh "$f"
+done
+```
+
 ## Overview
 
 This is a LaTeX template for typesetting of bachelor, master, dissertation
