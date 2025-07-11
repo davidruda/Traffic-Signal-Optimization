@@ -19,21 +19,25 @@
 % 4) Metaheuristiky
 % 5) Náhradní modely
 
-Due to its significant impact on urban mobility and the environment, Traffic Signal Control (TSC) is a widely studied problem \cite{zhao2012computational}. As the number of vehicles on the road continues to increase \cite{caves2004encyclopedia}, its importance is growing even further.
-Traffic signal optimization is known to be a cost-effective method for reducing congestion without physically changing the road infrastructure \cite{wang2021traffic}.
-Optimized traffic lights reduce delays at intersections \cite{mu2022traffic}, which directly translates into time savings for commuters and improves the overall efficiency of transportation networks.
-Additionally, TSC plays a critical role in reducing vehicle emissions \cite{gunarathne2023traffic}, helping to reduce pollution and promote environmental sustainability.
+Due to its significant impact on urban mobility and the environment, Traffic Signal Control (TSC) is a widely studied problem~\cite{zhao2012computational}. As the number of vehicles on the road continues to increase~\cite{caves2004encyclopedia}, its importance is growing even further.
+Traffic signal optimization is known to be a cost-effective method for reducing congestion without physically changing the road infrastructure~\cite{wang2021traffic}.
+Optimized traffic lights reduce delays at intersections~\cite{mu2022traffic}, which directly translates into time savings for commuters and improves the overall efficiency of transportation networks.
+Additionally, TSC plays a critical role in reducing vehicle emissions~\cite{gunarathne2023traffic}, helping to reduce pollution and promote environmental sustainability.
 
-There are many approaches to solving TSC \cite{qadri2020state}. Early static, fixed-time designs have evolved into real-time adaptive systems and data-driven algorithms, utilizing data from various detectors and sensors. In practice, commonly used are adaptive traffic control systems (ATCS) such as SCOOT, SCATS, and SURTRAC \cite{smith2013surtrac}, which continuously adjust splits, offsets, and cycle lengths network-wide. In addition, optimization-based methods---such as Genetic Algorithm (GA) \cite{costa2020intersection}, Simulated Annealing (SA) \cite{qadri2020state}, and Model Predictive Control (MPC) \cite{ye2019survey}---have also been employed for traffic signal planning and coordination. More recently, learning-based methods, particularly those based on Reinforcement Learning (RL) and Deep Reinforcement Learning (DRL), are increasingly being explored as alternatives to traditionally used methods \cite{zhao2024survey, saadi2025survey}.
+There are many approaches to solving TSC~\cite{qadri2020state}. Early static, fixed-time designs have evolved into real-time adaptive systems and data-driven algorithms, utilizing data from various detectors and sensors. In practice, commonly used are adaptive traffic control systems (ATCS) such as SCOOT, SCATS, and SURTRAC~\cite{smith2013surtrac}, which continuously adjust splits, offsets, and cycle lengths network-wide. In addition, optimization-based methods---such as Genetic Algorithm (GA)~\cite{costa2020intersection}, Simulated Annealing (SA)~\cite{qadri2020state}, and Model Predictive Control (MPC)~\cite{ye2019survey}---have also been employed for traffic signal planning and coordination. More recently, learning-based methods, particularly those based on Reinforcement Learning (RL) and Deep Reinforcement Learning (DRL), are increasingly being explored as alternatives to traditionally used methods~\cite{zhao2024survey, saadi2025survey}.
 
-\section*{Contribution of the thesis}
+In this thesis, we focus on the Traffic signaling problem from the Google Hash Code competition~\cite{google2023google}. It serves as a simplified version of the real-world problem of traffic signal optimization in a city. First, we implement a fast and efficient C++ simulator for the problem and wrap it as a Python package to enable easy use and integration with the broader Python ecosystem.
+We then utilize the simulator as a black-box fitness function for three heuristic algorithms to optimize the traffic light schedules.
 
-In this thesis, we focus on the Traffic signaling problem from the Google Hash Code 2021 competition \cite{google2023google}. It serves as a simplified version of the real-world problem of traffic signal optimization in a city. First, we implement a fast and efficient C++ simulator of the problem and wrap it as a Python package to allow for easy use and integration with the wide ecosystem of Python libraries. Then, we use the simulator to optimize the traffic light schedules using three heuristic algorithms: Genetic Algorithm (GA), Hill Climbing (HC), and Simulated Annealing (SA). We experimentally compare the performance of these algorithms on provided datasets of different sizes and structures.
+Hill Climbing (HC) is the simplest of the methods and it has been used by some participants both during and after the competition.
+Genetic Algorithm (GA) is a more complex method that, to the best of our knowledge, has not been applied to this particular competition problem before.
+As a third method, we choose Simulated Annealing (SA), a metaheuristic that can be viewed as a simple extension of HC. However, it appeared to be a suitable choice after initial tests suggested that GA's broader search capabilities may not be so beneficial for this problem.
+We then experimentally compare the performance of these algorithms on the provided competition datasets, which vary in size and structure.
 
-The thesis is structured as follows. Chapter~\ref{chap:problem_description} describes the Traffic signaling problem in detail, including the city layout, cars, traffic lights, and scoring system. Chapter~\ref{chap:optimization_methods} covers the theory of the optimization algorithms used in this thesis. Chapter ...
-
-\xxx{Chapter~\ref{chap:experimental_results} presents the expertiments comparing the optimization algorithms on the provided datasets.}
-\xxx{Appendix~\ref{chap:user_guide} provides a user guide detailing how to use the simulator, run optimization, and execute the scripts used to replicate our experiments.
+The thesis is structured as follows:
+Chapter~\ref{chap:problem_description} presents the Traffic signaling problem in detail, along with preprocessing steps, datasets, and the simulator.
+Chapter~\ref{chap:optimization_methods} covers the theory of the optimization methods used in the thesis.
+Chapter~\ref{chap:algorithms_application} describes the application of the optimization methods to our specific problem, including initialization, algorithm operators, and hyperparameters.
+Chapter~\ref{chap:experimental_results} presents the experimental results comparing the performance of the algorithms on the provided datasets.
+\xxx{Appendix~\ref{chap:user_guide} provides a user guide detailing how to use the simulator, run optimization, and execute the scripts for performing the experiments.
 Appendix~\ref{chap:developer_documentation} contains developer documentation describing the implementation details of the simulator and optimization.}
-
-\xxx{Blackbox optimization}
