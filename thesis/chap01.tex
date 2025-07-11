@@ -6,7 +6,7 @@ Section~\ref{sec:datasets} describes the datasets provided with the problem. Fin
 
 \section{Competition overview} \label{sec:competition_overview}
 
-The problem we address in this thesis was originally assigned in the qualifying round of Google Hash Code 2021. Google Hash Code was a global team programming competition, running between 2014--2022, where teams of 2--4 competitors solved an optimization problem with the goal of achieving the best score in a limited time of 4 hours.
+The problem we address in this thesis was originally assigned in the qualifying round of Google Hash Code 2021. Google Hash Code was a global team programming competition, running between 2014--2022, where teams of 2--4 competitors solved an optimization problem with the goal of achieving the best score in a limited time of 4 hours. Despite its discontinuation, the competition remains a valuable resource for a wide range of optimization problems and have been the subject of various follow-up studies and articles~\cite{rodrigues2023principled, li2022building}.
 
 The usual solution procedure for our problem was as follows: Read the input data, create a trivial solution and write it to the output file in the specified format, and upload the solution to the evaluation system. The evaluation system not only displayed the score, but also some informative statistics, such as the number of cars that reached the finish before the deadline, the cars that arrived earliest and latest, the average cycle length of traffic lights at intersections, etc.
 For some datasets, an interactive visualization of the evaluation process was also available, allowing to see the structure of a particular dataset. Although a local simulator was not needed to solve the problem, the manual upload of the solution to the evaluation system was slow and cumbersome and therefore not suitable for the use of efficient optimization algorithms.
@@ -277,7 +277,7 @@ As mentioned in Section~\ref{sec:competition_overview}, each dataset yields an a
 \section{Simulator} \label{sec:simulator}
 
 This section provides a brief overview of the custom simulator that we developed to serve as a black-box fitness function for the optimization algorithms. We discuss the motivation behind its design and describe the functionality relevant to the optimization process.
-\xxx{For further details on the code and implementation, please refer to the Developer documentation in Appendix~\ref{chap:developer_documentation}.}
+\xxx{For further details on the code and implementation, please refer to the developer documentation in Appendix~\ref{chap:developer_documentation}.}
 
 \medskip
 
