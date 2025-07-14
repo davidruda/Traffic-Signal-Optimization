@@ -1,7 +1,15 @@
 \chapter*{Conclusion}
 \addcontentsline{toc}{chapter}{Conclusion}
 
-In this thesis, we ...
+In this thesis, we addressed the Traffic signaling problem from the Google Hash Code competition, which serves as a simplified version of the real-world problem of traffic signal optimization. We began by implementing a fast and efficient simulator in C++, which we wrapped as a Python package. We then integrated the simulator into a Python optimization pipeline as a black-box fitness function. This setup enabled quick evaluation of solutions and allowed us to perform many iterations of our three chosen optimization algorithms: \textit{Genetic Algorithm (GA)}, \textit{Hill Climbing (HC)}, and \textit{Simulated Annealing (SA)}. We then compared the performance of these algorithms on the provided competition datasets of different sizes and structures.
 
-\section*{Future work / Improvements}
-% \addcontentsline{toc}{section}{Future work / Improvements}
+Our experiments showed that all three algorithms achieved good results across all datasets. However, \textit{SA} consistently outperformed the others on every dataset except the largest one, dataset D, where the otherwise weakest \textit{HC} performed slightly better---likely because the algorithms had not yet fully converged. Furthermore, \textit{SA} was able to surpass the max known scores in datasets C and E, achieving new best results. \textit{GA} generally performed better than \textit{HC}, but only by a small margin.
+The performance of all algorithms was highly dependent on the choice of hyperparameter values.
+
+The superior performance of \textit{SA} compared to \textit{HC} is unsurprising, as \textit{SA} is a more capable algorithm in theory. Its ability to move to worse states obviously broadens the search and helps to escape local optima. Nonetheless, based on our experimental experience, we believe that simply always moving to a state with the same fitness value as the current state is the key factor behind \textit{SA}'s success.
+
+On the other hand, \textit{GA}'s performance was somewhat below expectations, especially considering the additional complexity involved compared to the single-state methods. There are several possible reasons for this. As previously hinted, comparing the algorithms by the number of evaluations is disadvantageous for \textit{GA}. Moreover, greedily optimizing one hyperparameter at a time may be less optimal for \textit{GA} because it has more hyperparameters---some form of grid search could be more appropriate. Additionally, the initial population might have lacked diversity or been completely homogeneous. Unfortunately, we were unable to come up with initializations that would increase diversity and still achieve good results.
+Lastly, we think that our optimization problem does not benefit much from the broader search capabilities of \textit{GA} and is rather suited to methods that refine a single solution.
+
+For future work, we could try to improve the performance of \textit{GA} by exploring additional initializations, performing a wider hyperparameter grid search, or using some form of informed crossover or mutation. It would also be interesting to run \textit{GA} for the same amount of time as \textit{SA} to see if it can catch up. This approach could maybe better reflect the real-world scenario where we are constrained by time and aim to fully utilize \textit{GA}'s parallel fitness evaluation.
+Additionally, we could test other single-state optimization methods such as \textit{Iterated Local Search} or \textit{Tabu Search}.
