@@ -21,6 +21,8 @@ For genetic algorithm, the plotted curve represents the best score within the cu
 
 For each dataset, we also include a table reporting the overall best score achieved by each algorithm, averaged over 10 runs, along with the total runtime. The runtime is included to give a general idea of how long each method took to run, but it should not be interpreted as an exact metric.
 
+Finally, we summarize in Table~\ref{tab:best_scores} the best scores achieved by each algorithm in a single run (out of 10 seeds), and compare them to the maximum known score for each dataset. The schedules corresponding to the best score for each dataset are included in the thesis attachment.
+
 \newpage
 \section{Dataset E} \label{sec:dataset_e}
 
@@ -207,6 +209,28 @@ However, the runtimes for this dataset were already much longer than for the res
 }
 \label{tab:dataset_d_results}
 \end{table}
+
+\begin{table}
+\centering\footnotesize\sf
+
+\begin{tabular}{lr@{\hspace{0.5cm}}r@{\hspace{0.5cm}}r@{\hspace{0.5cm}}r}
+\toprule
+Dataset & \textcolor{myblue}{\textbf{GA}} & \textcolor{myorange}{\textbf{HC}} & \textcolor{mygreen}{\textbf{SA}} & \textit{Max known score} \\
+\midrule
+\textbf{B} & 4,570,168 & 4,569,994 & 4,570,346 & \textit{4,570,431} \\
+\textbf{C} & 1,314,597 & 1,314,584 & \textbf{1,315,702} & \textit{1,315,372} \\
+\textbf{D} & 2,512,355 & 2,528,954 & 2,525,797 & \textit{2,610,027} \\
+\textbf{E} & 771,025 & 768,443 & \textbf{782,044} & \textit{779,279} \\
+\textbf{F} & 1,440,172 & 1,439,639 & 1,443,333 & \textit{1,480,489} \\
+\bottomrule
+\end{tabular}
+
+\caption[Best scores]{
+    Best scores achieved in a single run (out of 10 seeds) by each algorithm, compared to the max known score. Bold values indicate newly achieved best scores that outperform the max known score. The schedules corresponding to the best score for each dataset are included in the thesis attachment.
+}
+\label{tab:best_scores}
+\end{table}
+
 
 % \begin{table}[b!]
 
