@@ -2,8 +2,6 @@ default:
     image: python:3.13
     before_script:
         - gcc --version
-        # `git` is required by `FetchContent` in `CMakelists.txt`
-        - git --version
         - python3 -V
         - python3 -m venv .venv
         - source .venv/bin/activate
