@@ -13,7 +13,10 @@ default:
 test_package_cmake:
     allow_failure: true
     script:
+        # `git` is required by `FetchContent` in `CMakelists.txt`
+        - git --version
         - pip install cmake
+        - cmake --version
         - make test_package_cmake
 
 
