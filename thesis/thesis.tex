@@ -123,6 +123,10 @@
 % A simple format with alphanumeric references:
 %\usepackage[natbib,style=alphabetic]{biblatex}
 
+% Use this to fix overfull hboxes in the bibliography
+% https://tex.stackexchange.com/questions/171999/overfull-hbox-in-biblatex
+\emergencystretch=1em
+
 % Load the file with bibliography entries
 \addbibresource{bibliography.bib}
 
