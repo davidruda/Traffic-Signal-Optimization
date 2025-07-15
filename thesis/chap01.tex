@@ -128,9 +128,9 @@ Throughout this section, we introduce some additional terms to help us better de
 
 % https://tex.stackexchange.com/questions/32160/new-line-after-paragraph
 \paragraph{Step 1: Remove unused intersections and unused streets} \label{para:step_1} \mbox{} \\
-Remove unused intersections and unused streets from used intersections. \\
+Remove unused intersections and unused incoming streets from used intersections. \\
 
-\hyperref[para:step_1]{Step 1} is an obvious one; unused intersections are never used and only add unnecessary complexity. Unused streets in used intersections prolong the traffic light cycle for the whole intersection, which very frequently leads to longer waiting times and thus a lower score. Now, let us move on to the next step.
+\hyperref[para:step_1]{Step 1} is an obvious one; unused intersections are never used and only add unnecessary complexity. Unused incoming streets in used intersections prolong the traffic light cycle for the whole intersection, which very frequently leads to longer waiting times and thus a lower score. Now, let us move on to the next step.
 
 \paragraph{Trivial and non-trivial intersections}
 There are two types of used intersections: trivial and non-trivial.
@@ -138,7 +138,7 @@ There are two types of used intersections: trivial and non-trivial.
 
 \paragraph{Trivial and non-trivial streets}
 For completeness, we also split the used streets into trivial and non-trivial ones.
-\textit{Trivial street} is a used street in a trivial intersection. \textit{Non-trivial street} is a used street in a non-trivial intersection.
+\textit{Trivial street} is a used incoming street in a trivial intersection. \textit{Non-trivial street} is a used incoming street in a non-trivial intersection.
 
 \paragraph{Step 2: Fix the schedule for trivial intersections; optimize only schedules of non-trivial intersections} \label{para:step_2}
 For each trivial intersection, the schedule can be fixed by assigning a green light to its only used incoming street for the entire duration. Trivial intersections can then be removed from optimization, and only schedules of non-trivial intersections are optimized. \\

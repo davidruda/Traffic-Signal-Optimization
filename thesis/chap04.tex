@@ -11,7 +11,7 @@ Here we describe the different options for initializing both \textit{order} and 
 \begin{itemize}
     \item \textit{default} - simply uses the order given by street IDs in the input file
     \item \textit{random} - takes a random permutation of the streets
-    \item \textit{adaptive} - determines the order during a simulation run; whenever a street is used for the first time, it is assigned to the earliest free position in the order array (only usable with the \textit{default times} initialization)
+    \item \textit{adaptive} - determines the order during a simulation run---each street is assigned to the earliest free position in the order array when used for the first time (only compatible with the \textit{default times} initialization; with other options, it may result in an inconsistent format and fail to generate schedules)
 \end{itemize}
 The times initialization options include:
 \begin{itemize}
@@ -45,7 +45,12 @@ Random option is stochastic and is therefore averaged over 100 trials.
     \label{fig:init_comparison}
 \end{figure}
 
-The results are shown in Figure~\ref{fig:init_comparison}. We can see that by using other ``smarter'' initialization methods, we can significantly improve the baseline solution and start optimizing from a much better starting point.
+The results are shown in Figure~\ref{fig:init_comparison}.
+The \textcolor{mygreen}{\textbf{random}} option performs similarly to the \textcolor{myblue}{\textbf{default}} option---since the default order is neither optimized nor intentionally poor, it is reasonable that the random order has comparable performance on average.
+The \textcolor{myorange}{\textbf{adaptive}} option achieves strong results, especially on datasets B, C, and D. This is likely because streets in these datasets are mostly used by one or a few cars, making the specific order very important and the default times a suitable choice.
+The \textcolor{myred}{\textbf{scaled}} option performs best on datasets E and F. Unsure about the reason for dataset E, but dataset F contains many streets used by hundreds of cars, so it makes sense to increase the green light time for these streets.
+
+We see that using other ``smarter'' initialization methods can significantly improve the baseline solution, enabling the optimization process to begin from a much better starting point.
 We decided to use \textit{adaptive order} and \textit{default times} for datasets B, C, and D, and \textit{random order} and \textit{scaled times} for datasets E and F (see Table~\ref{tab:hyperparams_datasets_specific}).
 
 \section{Modifying the schedules} \label{sec:modifying_the_schedules}
@@ -122,6 +127,8 @@ Initial temperature & many values between $0.1$ and $500$ \\
 To give a clearer picture of the values explored, Table~\ref{tab:hyperparams_tested_values} summarizes the ranges used in the hyperparameter search.
 The genetic algorithm parameters---\textit{crossover probability}, \textit{mutation probability}, \textit{tournament size}, and \textit{elitism}---were tested only on smaller datasets E and B to reduce search complexity, because they seemed generalizable across datasets. Other parameters, especially the \textit{mutation bit rate} and \textit{initial temperature}, are highly dataset-dependent and were tuned separately for each algorithm and dataset.
 
+Finally, Tables~\ref{tab:hyperparams_shared} and~\ref{tab:hyperparams_datasets_specific} provide a detailed overview of the selected hyperparameters for the experiments. For clarity, the first table lists the hyperparameters that are shared across all datasets, while the second table shows dataset-specific hyperparameters.
+
 % TABLE WITH SHARED HYPERPARAMETERS
 \begin{table}[h]
 \centering\footnotesize\sf
@@ -145,8 +152,6 @@ Iterations & 450,000 \\
 \caption[Shared hyperparameters]{Shared hyperparameters for all datasets.}
 \label{tab:hyperparams_shared}
 \end{table}
-
-Finally, Tables~\ref{tab:hyperparams_shared} and~\ref{tab:hyperparams_datasets_specific} provide a detailed overview of the selected hyperparameters for the experiments. For clarity, the first table lists the hyperparameters that are shared across all datasets, while the second table shows dataset-specific hyperparameters.
 
 % TABLE WITH DATASET-SPECIFIC HYPERPARAMETERS
 \begin{table}[hb!]
