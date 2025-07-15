@@ -2,18 +2,17 @@
 
 This guide is intended for users interested in running the code associated with this thesis. It is logically divided into two parts:
 \begin{itemize}
-    \item \textbf{Simulator} - a standalone tool for running the Traffic signaling problem (described in Chapter~\ref{chap:problem_description}) with various handy features, wrapped into the \verb|traffic_signaling| Python package 
-    \item \textbf{Optimization} - scripts for running the optimization and experiments, built on top of the simulator
+    \item \textbf{Simulator} - a standalone tool for evaluating the Traffic signaling problem (described in Chapter~\ref{chap:problem_description}) with various handy features, wrapped into the \verb|traffic-signaling| Python package
+    \item \textbf{Optimization and Experiments} - scripts for running the optimization and experiments, which use the simulator
 \end{itemize}
 
 \section{Prerequisites}
 
-TL;DR: If you just want to setup the environment for optimization, run
-\begin{verbatim}
-    make setup
-\end{verbatim}
+When listing version requirements for the tools below, we specify the \textit{minimum} supported version. As of July 2025, the latest available versions (e.g., Python 3.13) are also compatible. However, we cannot guarantee compatibility with all future versions.
 
-To build and install the \verb|traffic_signaling| package, you need:
+\bigskip
+
+To build and install the \verb|traffic-signaling| package, you need:
 \begin{itemize}
     \item \textbf{C++ compiler} with C++20 code support; e.g., gcc 11, clang 16, or MSVC 19.29 (or later versions)
     \item \textbf{Python} 3.10 or later
@@ -30,9 +29,103 @@ To build and install the \verb|traffic_signaling| package, you need:
 \end{verbatim}
     \end{itemize}
 \end{itemize}
-For running the optimization, you also need to install packages from \\
-the \verb|requirements.txt| file
-% Assuming you are in the root directory of the repository, you can install the package with
+Optionally, if you want to run all unit tests for both C++ and Python, you also need:
+\begin{itemize}
+    \item \textbf{Git}
+    \item \textbf{CMake} 3.24 or later
+\end{itemize}
+
+\newpage
+
+\section{Simulator}
+
+\textbf{If you just want to run the optimization and do not want to use the simulator as a standalone tool, you can skip this section.}
+
+\bigskip
+
+After satisfying the prerequisites, you can simply build and install \\
+the \verb|traffic-signaling| Python package by running the following command in the top-level directory:
+\begin{verbatim}
+    pip install ./traffic_signaling
+\end{verbatim}
+This will install the package into your Python environment (preferably into a virtual environment), making it available for use in your Python scripts.
+
+The packages has the following functionality:
+\begin{itemize}
+    \item \xxx{TODO}
+\end{itemize}
+
+\bigskip
+
+To run Python unit tests for the package using Python's \verb|unittest| built-in framework, use the following command in the top-level directory:
+\begin{verbatim}
+    make test_package_python
+\end{verbatim}
+To run both C++ and Python unit tests using CMake, use the following command in the top-level directory:
+\begin{verbatim}
+    make test_package_cmake
+\end{verbatim}
+Note that this will create a virtual environment \verb|.venv| and install there all required packages using pip.
+
+\section{Optimization}
+
+\textbf{If you just want to quickly setup the environment for optimization, run the following command in the top-level directory:}
+\begin{verbatim}
+    make setup
+\end{verbatim}
+This will create a virtual environment \verb|.venv|, build and install the simulator and other necessary packages using pip into it, and compile \verb|operators.py| file using Cython\footnote{\url{https://cython.org/}} for better performance during optimization. Do not forget to activate the virtual environment before running any scripts with e.g.
+\begin{verbatim}
+    source .venv/bin/activate
+\end{verbatim}
+Now you can run the optimization algorithms using the \verb|optimizer.py| script. The script has two required positional arguments:
+\begin{itemize}
+    \item \verb|algorithm| - algorithm to use for optimization; possible values are \verb|ga|, \verb|hc|, \verb|sa|
+    \item \verb|data| - input dataset to use; possible values are \verb|a|, \verb|b|, \verb|c|, \verb|d|, \verb|e|, \verb|f|
+\end{itemize}
+After specifying the required arguments, you can easily run the script with e.g.:
+\begin{verbatim}
+    python3 optimizer.py hc e
+\end{verbatim}
+This will run the Hill Climbing algorithm on dataset E using default values. However, you probably want to explicitly set some parameters, especially the hyperparameter values. If you prefer, you can run
+\begin{verbatim}
+    python3 optimizer.py --help
+\end{verbatim}
+to see the full usage. Below is a concise list of the arguments:
+\begin{itemize}
+    \item \verb|--order_init| - \textit{order initialization} hyperparameter; possible values are \verb|adaptive|, \verb|random|, \verb|default|
+    \item \verb|--times_init| - \textit{times initialization} hyperparameter; possible values are \verb|scaled|, \verb|default|
+    \item \verb|--mutation_bit_rate| - \textit{mutation bit rate} hyperparameter
+    \item \verb|--population| - \textit{population size} hyperparameter (GA only)
+    \item \verb|--generations| - \textit{generations} hyperparameter (GA only)
+    \item \verb|--crossover| - \textit{crossover probability} hyperparameter (GA only)
+    \item \verb|--mutation| - \textit{mutation probability} hyperparameter (GA only)
+    \item \verb|--elitism| - \textit{elitism} hyperparameter (GA only)
+    \item \verb|--tournsize| - \textit{tournament size} hyperparameter (GA only)
+    \item \verb|--iterations| - \textit{iterations} hyperparameter (HC and SA)
+    \item \verb|--temperature| - \textit{initial temperature} hyperparameter (SA only)
+    \item \verb|--seed| - value of the random seed for reproducibility
+    \item \verb|--threads| - number of threads for parallel evaluation
+    \item \verb|--logdir| - custom name of the directory with results and logs
+    \item \verb|--verbose| - whether to print detailed output during optimization
+    \item \verb|--no-save| - skip saving results to the log directory
+\end{itemize}
+
+\bigskip
+
+Optionally, you can run unit tests for the optimizer with the following command in the top-level directory:
+\begin{verbatim}
+    make test_optimizer
+\end{verbatim}
+
+%     \item packages listed in the \verb|requirements-test.txt| file; install with
 % \begin{verbatim}
-%     pip install ./traffic_signaling
+%     pip install -r requirements-test.txt
 % \end{verbatim}
+
+% For running the optimization, you further need:
+% \begin{itemize}
+%     \item packages listed in the \verb|requirements.txt| file; install with
+% \begin{verbatim}
+%     pip install -r requirements.txt
+% \end{verbatim}
+% \end{itemize}
