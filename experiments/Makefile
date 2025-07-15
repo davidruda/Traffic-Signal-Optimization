@@ -47,15 +47,36 @@ plot_f: run_f
 	$(PYTHON) plot_experiments.py f "Genetic Algorithm" "Hill Climbing" "Simulated Annealing" $(STD) --downsample $(DOWNSAMPLE)
 
 ##################################### Run ######################################
-run_b: logs/b/Genetic\ Algorithm logs/b/Hill\ Climbing logs/b/Simulated\ Annealing
+run_b: run_b_ga run_b_hc run_b_sa
 
-run_c: logs/c/Genetic\ Algorithm logs/c/Hill\ Climbing logs/c/Simulated\ Annealing
+run_c: run_c_ga run_c_hc run_c_sa
 
-run_d: logs/d/Genetic\ Algorithm logs/d/Hill\ Climbing logs/d/Simulated\ Annealing
+run_d: run_d_ga run_d_hc run_d_sa
 
-run_e: logs/e/Genetic\ Algorithm logs/e/Hill\ Climbing logs/e/Simulated\ Annealing
+run_e: run_e_ga run_e_hc run_e_sa
 
-run_f: logs/f/Genetic\ Algorithm logs/f/Hill\ Climbing logs/f/Simulated\ Annealing
+run_f: run_f_ga run_f_hc run_f_sa
+
+############################## Run single method ###############################
+run_b_ga: logs/b/Genetic\ Algorithm
+run_b_hc: logs/b/Hill\ Climbing
+run_b_sa: logs/b/Simulated\ Annealing
+
+run_c_ga: logs/c/Genetic\ Algorithm
+run_c_hc: logs/c/Hill\ Climbing
+run_c_sa: logs/c/Simulated\ Annealing
+
+run_d_ga: logs/d/Genetic\ Algorithm
+run_d_hc: logs/d/Hill\ Climbing
+run_d_sa: logs/d/Simulated\ Annealing
+
+run_e_ga: logs/e/Genetic\ Algorithm
+run_e_hc: logs/e/Hill\ Climbing
+run_e_sa: logs/e/Simulated\ Annealing
+
+run_f_ga: logs/f/Genetic\ Algorithm
+run_f_hc: logs/f/Hill\ Climbing
+run_f_sa: logs/f/Simulated\ Annealing
 
 #################################### Data b ####################################
 logs/b/Genetic\ Algorithm:
