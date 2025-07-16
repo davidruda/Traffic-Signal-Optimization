@@ -89,7 +89,10 @@ BEST_DIVISOR = {
 
 def normalized_score(score: int, data: str) -> float:
     """
-    Normalizes the absolute score value between 0 and 1 for the given dataset.
+    Normalize the absolute score value between 0 and 1 for the given dataset.
+
+    :param score: Absolute score value to normalize.
+    :param data: Dataset name; ('a', 'b', 'c', 'd', 'e', 'f').
 
     The score is normalized between the default score (baseline) and the maximum known score.
     """
@@ -97,13 +100,18 @@ def normalized_score(score: int, data: str) -> float:
 
 def absolute_score(norm_score: float, data: str) -> int:
     """
-    Converts the normalized score back to the absolute score for the given dataset.
+    Convert the normalized score back to the absolute score for the given dataset.
+
+    :param norm_score: Normalized score value between 0 and 1.
+    :param data: Dataset name; ('a', 'b', 'c', 'd', 'e', 'f').
     """
     return int(norm_score * (MAX_KNOWN_SCORE[data] - DEFAULT_SCORE[data]) + DEFAULT_SCORE[data])
 
 def get_data_filename(data: str) -> str:
     """
-    Returns the path to the data file for the given dataset.
+    Return the path to the data file for the given dataset.
+
+    :param data: Dataset name; ('a', 'b', 'c', 'd', 'e', 'f').
     """
     data = data.lower()
     if data not in TEST_DATA:
@@ -114,6 +122,8 @@ def get_data_filename(data: str) -> str:
 
 def create_city_plan(data: str) -> CityPlan:
     """
-    Factory function to create a CityPlan object from the given dataset.
+    Create a CityPlan object from the given dataset.
+
+    :param data: Dataset name; ('a', 'b', 'c', 'd', 'e', 'f').
     """
     return CityPlan(get_data_filename(data))
