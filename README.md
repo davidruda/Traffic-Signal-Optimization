@@ -10,7 +10,7 @@ This repository contains the code of my bachelor thesis.
 | [`optimizer.py`](./optimizer.py) </br> [`operators.py`](./operators.py) | Scripts for running the optimization using Genetic Algorithm, Hill Climbing, and Simulated Annealing. |
 | | |
 | [`experiments/`](./experiments/README.md) | Contains scripts for running the experiments presented in the thesis, see the [`README`](./experiments/README.md) for more details. </br> Also see [`best_solutions`](./experiments/best_solutions/README.md) for the best schedules found during the experiments. |
-| [`Makefile`](./Makefile) | Provides a convenient way to setup the environment for optimization and running experiments (see [Optimization](#optimization)). Also enables to easily run unit tests.  |
+| [`Makefile`](./Makefile) | Provides a convenient way to set up the environment for optimization and running experiments (see [Optimization](#optimization)). Also enables to easily run unit tests.  |
 
 ## Prerequisites
 

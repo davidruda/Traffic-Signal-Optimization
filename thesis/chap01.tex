@@ -6,7 +6,7 @@ Section~\ref{sec:datasets} describes the datasets provided with the problem. Fin
 
 \section{Competition overview} \label{sec:competition_overview}
 
-The problem we address in this thesis was originally assigned in the qualifying round of Google Hash Code 2021. Google Hash Code was a global team programming competition, running between 2014--2022, where teams of 2--4 competitors solved an optimization problem with the goal of achieving the best score in a limited time of 4 hours. Despite its discontinuation, the competition remains a valuable resource for a wide range of optimization problems and have been the subject of various follow-up studies and articles~\cite{rodrigues2023principled, li2022building}.
+The problem we address in this thesis was originally assigned in the qualifying round of Google Hash Code 2021. Google Hash Code was a global team programming competition, running between 2014--2022, where teams of 2--4 competitors solved an optimization problem with the goal of achieving the best score in a limited time of 4 hours. Despite its discontinuation, the competition remains a valuable resource for a wide range of optimization problems and has been the subject of various follow-up studies and articles~\cite{rodrigues2023principled, li2022building}.
 
 The usual solution procedure for our problem was as follows: Read the input data, create a trivial solution and write it to the output file in the specified format, and upload the solution to the evaluation system. The evaluation system not only displayed the score, but also some informative statistics, such as the number of cars that reached the finish before the deadline, the cars that arrived earliest and latest, the average cycle length of traffic lights at intersections, etc.
 For some datasets, an interactive visualization of the evaluation process was also available, allowing to see the structure of a particular dataset. Although a local simulator was not needed to solve the problem, the manual upload of the solution to the evaluation system was slow and cumbersome and therefore not suitable for the use of efficient optimization algorithms.
@@ -130,7 +130,7 @@ Throughout this section, we introduce some additional terms to help us better de
 \paragraph{Step 1: Remove unused intersections and unused streets} \label{para:step_1} \mbox{} \\
 Remove unused intersections and unused incoming streets from used intersections. \\
 
-\hyperref[para:step_1]{Step 1} is an obvious one; unused intersections are never used and only add unnecessary complexity. Unused incoming streets in used intersections prolong the traffic light cycle for the whole intersection, which very frequently leads to longer waiting times and thus a lower score. Now, let us move on to the next step.
+\hyperref[para:step_1]{Step 1} is an obvious one; unused intersections are never used and only add unnecessary complexity. Unused incoming streets in used intersections prolong the traffic light cycle for the whole intersection, which very frequently leads to longer waiting times and thus a lower score. We now proceed to the next step.
 
 \paragraph{Trivial and non-trivial intersections}
 There are two types of used intersections: trivial and non-trivial.
@@ -256,7 +256,7 @@ That is, twice the number of non-trivial streets---one parameter for the order a
 % https://codeforces.com/blog/entry/88188#comment-765574
 \paragraph{D - Daily commute: 167,748 parameters} By far the largest dataset with a challenging-to-navigate network from the \textit{Barabási-Albert} distribution \cite{albert2002statistical}.
 
-\paragraph{E - Etoile: 1,386 parameters} Nicknamed \textit{Etoile}\footnote{\textit{Étoile} means star in French.}, this dataset is a one big star, meaning there is one very important intersection in the middle with hundrets of incoming streets (see Figure~\ref{fig:hashcode_dataset_c_e}).
+\paragraph{E - Etoile: 1,386 parameters} Nicknamed \textit{Etoile}\footnote{\textit{Étoile} means star in French.}, this dataset is a one big star, meaning there is one very important intersection in the middle with hundreds of incoming streets (see Figure~\ref{fig:hashcode_dataset_c_e}).
 
 \paragraph{F - Forever jammed: 10,002 parameters} Medium sized dataset but again with a complex network difficult to optimize.
 
@@ -277,7 +277,7 @@ As mentioned in Section~\ref{sec:competition_overview}, each dataset yields an a
 \section{Simulator} \label{sec:simulator}
 
 This section provides a brief overview of the custom simulator that we developed to serve as a black-box fitness function for the optimization algorithms. We discuss the motivation behind its design and describe the functionality relevant to the optimization process.
-For further information on using the simulator or regarding its implementation, please refer to the User guide in Appendix~\ref{chap:user_guide} and the Developer documentation in Appendix~\ref{chap:developer_documentation}.
+For further information on using the simulator or regarding its implementation, please refer to the user guide in Appendix~\ref{chap:user_guide} and the developer documentation in Appendix~\ref{chap:developer_documentation}.
 
 \medskip
 

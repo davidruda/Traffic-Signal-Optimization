@@ -34,7 +34,7 @@ A lot of variants of this algorithm exist. In our experiments, we use a version 
 
 Simulated annealing \cite{russell2020artificial, luke2013essentials} builds up on the idea of hill climbing and solves the problem of getting stuck in local optima (see Algorithm~\ref{alg:simulated_annealing}). In each iteration, it randomly generates a next state. If the state is better, it is always accepted. Otherwise, the worse state is accepted with some probability. The probability decreases exponentially with how much worse the state is and with the current value of the ``cooling'' schedule. By allowing moves to worse states, the algorithm can escape local optima and therefore find better solutions.
 
-The idea of the cooling schedule is inpired by the process of annealing in metallurgy, where metals are heated to a high temperature and then slowly cooled down to reach a strong, crystalline structure. Analogously, we want to allow worse moves more often at the beginning during the exploration phase and then gradually decrease that chance to hopefully converge to the best solution. Obviously, the choice of the schedule is absolutely crucial for the performance of the algorithm and has to be tuned specifically for each problem.
+The idea of the cooling schedule is inspired by the process of annealing in metallurgy, where metals are heated to a high temperature and then slowly cooled down to reach a strong, crystalline structure. Analogously, we want to allow worse moves more often at the beginning during the exploration phase and then gradually decrease that chance to hopefully converge to the best solution. Obviously, the choice of the schedule is absolutely crucial for the performance of the algorithm and has to be tuned specifically for each problem.
 
 \begin{algorithm}
     % https://tex.stackexchange.com/questions/150184/how-to-avoid-uppercase-function-name-while-using-function
@@ -111,7 +111,7 @@ There are many different evolutionary algorithms with even more variations that 
 
 \subsection{Selection}
 
-For the selection of parents for the next generation, common methods include the \textit{roulette wheel selection} and the \textit{tournament selection} \cite{vanneschi2023lectures}. Roulette wheel selection selects individuals with a probability directly proportional to their fitness. Its downside is that it does not work for negative fitness and can be sensitive to changes is fitness values. Tournament selection works by repeatedly sampling a few individuals and selecting the best one among them. Thus, it is not dependent on specific values and can be used with any fitness function.
+For the selection of parents for the next generation, common methods include the \textit{roulette wheel selection} and the \textit{tournament selection} \cite{vanneschi2023lectures}. Roulette wheel selection selects individuals with a probability directly proportional to their fitness. Its downside is that it does not work for negative fitness and can be sensitive to changes in fitness values. Tournament selection works by repeatedly sampling a few individuals and selecting the best one among them. Thus, it is not dependent on specific values and can be used with any fitness function.
 
 \subsection{Crossover and mutation}
 
@@ -132,8 +132,8 @@ When using optimization algorithms, it is always important to balance the trade-
 
 \section{Parallelization} \label{sec:parallelization}
 
-As hinted in the previous sections, heuristic algorithms can run for a long time. It is not uncommon to compute hundrets of thousands of fitness evaluations---imagine a genetic algorithm with a population size of 200, run for 1000 generations. These evaluations can take a while, especially if they are simulations, games, neural network training, or similar. As a result, we may want to use parallelization to speed up this process and fully utilize our computational resources.
+As hinted in the previous sections, heuristic algorithms can run for a long time. It is not uncommon to compute hundreds of thousands of fitness evaluations---imagine a genetic algorithm with a population size of 200, run for 1000 generations. These evaluations can take a while, especially if they are simulations, games, neural network training, or similar. As a result, we may want to use parallelization to speed up this process and fully utilize our computational resources.
 
-Single-state methods like hill climbing and simulated annealing are inherently sequential and thus difficult to parallelize. But we can at least run multiple independent instances of the algorithm in parallel. Note that this different from methods like \textit{beam search}, where useful information is shared between the instances.
+Single-state methods like hill climbing and simulated annealing are inherently sequential and thus difficult to parallelize. But we can at least run multiple independent instances of the algorithm in parallel. Note that this is different from methods like \textit{beam search}, where useful information is shared between the instances.
 
 For population methods like genetic algorithm, parallelization makes much more sense. The most common way is to run the fitness evaluations of individuals in parallel. This is great because the evaluations are completely independent of each other and the fitness computation is often the biggest bottleneck of the whole algorithm. Other parts, such as mutation and crossover, can also be parallelized across individuals, but these are usually much faster than the evaluation and may not provide much speedup, if any.

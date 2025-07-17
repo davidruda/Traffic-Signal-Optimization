@@ -40,7 +40,7 @@ Random option is stochastic and is therefore averaged over 100 trials.
     \caption[Comparison of initialization options]{
         Comparison of different initialization options for each dataset.
         Y-axis shows the normalized score (see Section~\ref{subsec:score_normalization}).
-        The black error bars show the 95\% confidence interval.
+        The black error bars indicate the 95\% confidence intervals.
     }
     \label{fig:init_comparison}
 \end{figure}
@@ -84,7 +84,7 @@ As explained in Section~\ref{sec:hill_climbing}, we use a variant of the algorit
 
 \section{Simulated annealing} \label{sec:simulated_annealing_application}
 
-Introduced in Section~\ref{sec:simulated_annealing}, this algorithm uses the same startegy to generate next states as presented in Section~\ref{sec:hill_climbing_application}. That means it has the same hyperaparameters \textit{mutation bit rate} and \textit{iterations}. The only additional hyperparameter is \textit{initial temperature}, which sets the initial temperature of the cooling schedule. For the cooling schedule, we use a linear decay. It is defined as
+Introduced in Section~\ref{sec:simulated_annealing}, this algorithm uses the same strategy to generate next states as presented in Section~\ref{sec:hill_climbing_application}. That means it has the same hyperparameters \textit{mutation bit rate} and \textit{iterations}. The only additional hyperparameter is \textit{initial temperature}, which sets the initial temperature of the cooling schedule. For the cooling schedule, we use a linear decay. It is defined as
 \begin{equation}
     schedule(t) = \tau_{init} \cdot \left(1 - \frac{t}{T}\right) + \varepsilon,
 \end{equation}
