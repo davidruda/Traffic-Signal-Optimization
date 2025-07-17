@@ -103,6 +103,8 @@ This will create a virtual environment \verb|.venv|, build and install the simul
 \begin{verbatim}
     source .venv/bin/activate
 \end{verbatim}
+If you encounter any issues, try running \verb|make clean| and then \verb|make setup| again.
+
 Now you can run the optimization algorithms using the \verb|optimizer.py| script. The script has two required positional arguments:
 \begin{itemize}
     \item \verb|algorithm| - algorithm to use for optimization; possible values are \verb|ga|, \verb|hc|, \verb|sa|
