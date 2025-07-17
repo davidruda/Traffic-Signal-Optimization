@@ -90,7 +90,7 @@ for experiment in args.experiments:
 fig, ax1 = plt.subplots()
 
 for df, experiment in zip(dfs, args.experiments):
-    ax1.plot(df['evaluations'], df['norm_max'], label=experiment)
+    ax1.plot(df['evaluations'], df['norm_max'], label=experiment.replace('_', ' '))
     if args.std:
         ax1.fill_between(
             df['evaluations'],

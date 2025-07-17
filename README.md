@@ -80,6 +80,8 @@ Do not forget to activate the virtual environment before running any scripts, e.
 source .venv/bin/activate
 ```
 
+If you encounter any issues, try running `make clean` and then `make setup` again.
+
 Now you can run the optimization algorithms using the [`optimizer.py`](./optimizer.py) script. The script has two required positional arguments:
 
 - `algorithm` – algorithm to use for optimization; possible values are `ga`, `hc`, `sa`
