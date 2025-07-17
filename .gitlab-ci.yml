@@ -32,6 +32,14 @@ test_optimizer:
         - make test_optimizer
 
 
+test_experiments:
+    allow_failure: true
+    script:
+        - pip install -r requirements.txt
+        - cd experiments
+        - make test
+
+
 thesis_pdf:
     image: aergus/latex
     allow_failure: true
