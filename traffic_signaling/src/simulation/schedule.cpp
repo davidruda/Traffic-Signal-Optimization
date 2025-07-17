@@ -5,8 +5,6 @@
 #include "simulation/schedule.hpp"
 #include "city_plan/street.hpp"
 
-// TODO: add comments with explanations of the complicated parts
-
 namespace simulation {
 
 namespace {
@@ -34,7 +32,7 @@ std::optional<unsigned long> Schedule::next_green(unsigned long street_id, unsig
         return {};
     }
     auto &&green_light = green_lights_.at(street_id);
-    // if duration of the green light is zero
+    // if the duration of the green light is zero
     if (green_light.empty()) {
         return {};
     }
@@ -81,7 +79,7 @@ void Schedule::set(std::vector<unsigned long> &&order, std::vector<unsigned long
             const city_plan::Street &street = intersection_.used_streets()[street_index];
             street_index = street.id();
         };
-        // convert order -street indices to street ids
+        // convert relative order street indices to street ids
         std::ranges::for_each(order, street_index_to_street_id);
     }
     for (size_t i = 0; i < order.size(); ++i) {

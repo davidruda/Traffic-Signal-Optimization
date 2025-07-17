@@ -159,6 +159,7 @@ void Simulation::create_schedules(std::string order, std::string times, unsigned
 
 void Simulation::initialize_run() {
     for (auto &&car: cars_) {
+        // Add an event for each car at the start of its path
         add_event(car, 0);
     }
 }
@@ -345,9 +346,6 @@ std::vector<std::pair<std::vector<unsigned long>, std::vector<unsigned long>>> S
         return {non_trivial_schedules_view.begin(), non_trivial_schedules_view.end()};
 }
 
-// TODO: maybe rewrite this function specifically for python types
-// relative_order - whether the order is of indices relative to the intersection
-// or absolute street ids
 void Simulation::set_non_trivial_schedules(
     std::vector<std::pair<std::vector<unsigned long>, std::vector<unsigned long>>> &&schedules,
     bool relative_order
@@ -357,7 +355,6 @@ void Simulation::set_non_trivial_schedules(
     for (auto &&intersection: city_plan_.non_trivial_intersections()) {
         auto &&[order, times] = schedules[i++];
 
-        // TODO: maybe solve the relative/absolute street id problem differently
         if (relative_order) {
             auto &&used_streets = intersection.used_streets();
             auto street_ids = order | std::views::transform([&](unsigned long street_index) {
@@ -370,12 +367,14 @@ void Simulation::set_non_trivial_schedules(
 }
 
 Simulation default_simulation(const city_plan::CityPlan &city_plan) {
+    // factory function creating a simulation with default schedules
     Simulation s{city_plan};
     s.default_schedules();
     return s;
 }
 
 Simulation adaptive_simulation(const city_plan::CityPlan &city_plan) {
+    // factory function creating a simulation with adaptive schedules
     Simulation s{city_plan};
     s.adaptive_schedules();
     return s;

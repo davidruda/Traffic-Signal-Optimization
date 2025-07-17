@@ -122,7 +122,7 @@ def get_data_filename(data: str) -> str:
 
 def create_city_plan(data: str) -> CityPlan:
     """
-    Create a CityPlan object from the given dataset.
+    Create a `CityPlan` object from the given dataset.
 
     :param data: Dataset name; ('a', 'b', 'c', 'd', 'e', 'f').
     """
