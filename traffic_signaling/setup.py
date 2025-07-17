@@ -3,6 +3,9 @@ from glob import glob
 from pybind11.setup_helpers import Pybind11Extension, build_ext
 from setuptools import setup
 
+# If the package somehow builds in Debug mode,
+# try running `CPPFLAGS="-O3" pip install ./traffic_signaling`
+
 __version__ = '0.0.1'
 
 PACKAGE_NAME = 'traffic_signaling'
