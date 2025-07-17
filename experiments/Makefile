@@ -23,7 +23,15 @@ DOWNSAMPLE=100
 
 all: init_experiment plots
 
-.PHONY: all init_experiment plots plot_b plot_c plot_d plot_e plot_f run_b run_c run_d run_e run_f
+.PHONY: all init_experiment plots plot_b plot_c plot_d plot_e plot_f run_b run_c run_d run_e run_f test
+
+# Simple sanity check
+test:
+	$(PYTHON) optimize_experiment.py "Test" \
+		"ga e --order_init random --times_init scaled --population 50 --generations 30 --mutation_bit_rate 5 --crossover 0.6 --mutation 0.4 --tournsize 3 --elitism 0.05 --threads $(THREADS)" \
+		$(PARALLEL)
+	cat logs/e/Test/seed_*/output.log
+	
 
 init_experiment:
 	$(PYTHON) init_experiment.py

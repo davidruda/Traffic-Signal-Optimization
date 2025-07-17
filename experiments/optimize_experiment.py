@@ -13,9 +13,10 @@ args = parser.parse_args()
 SEEDS = [42, 1, 1999, 27, 9, 123, 21, 11, 7, 16384]
 
 if platform.system() == 'Windows':
-    PYTHON = '../.venv/Scripts/python'
+    PYTHON = os.path.join(os.path.dirname(__file__), '..', '.venv', 'Scripts', 'python')
 else:
-    PYTHON = '../.venv/bin/python'
+    PYTHON = os.path.join(os.path.dirname(__file__), '..', '.venv', 'bin', 'python')
+
 
 DATA = args.parameters.split()[1]
 EXPERIMENT_DIR = f'logs/{DATA}/{args.name}'

@@ -10,6 +10,7 @@ Be aware that running `make all` would take a very long time and you don't want 
 
 | command | description |
 |---------|-------------|
+| `make test` | run a simple sanity check experiment |
 | `make init_experiment` | run a quick experiment comparing different initialization methods |
 | `make run_{b,c,d,e,f}_{ga,hc,sa}` | run a specific algorithm on a specific dataset (using 10 runs with different fixed seeds) |
 | `make run_{b,c,d,e,f}` | run all algorithms on a specific dataset |

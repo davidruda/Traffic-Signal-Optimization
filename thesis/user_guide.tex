@@ -163,6 +163,7 @@ Optionally, you can run unit tests for the optimizer with the following command 
 
 To replicate the experiments presented in this thesis, ensure that you have already run the \verb|make setup| command, then navigate to the \verb|experiments| directory. We recommend reading the \verb|experiments/README.md| file for more details, but for convenience, we also include the list of commands below. We strongly suggest running each algorithm and dataset separately.
 \begin{itemize}
+    \item \verb|make test| - run a simple sanity check experiment
     \item \verb|make init_experiment| - run a quick experiment comparing different initialization methods
     \item \verb|make run_{b,c,d,e,f}_{ga,hc,sa}| - run a specific algorithm on a specific dataset (using 10 runs with different fixed seeds)
     \item \verb|make run_{b,c,d,e,f}| - run all algorithms on a specific dataset
