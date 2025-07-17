@@ -1,4 +1,5 @@
-CMAKE_BUILD_DIR=build/cmake
+BUILD_DIR=build
+CMAKE_BUILD_DIR=$(BUILD_DIR)/cmake
 
 BUILD_TYPE=Release
 EXTRA_FLAGS=
@@ -24,7 +25,7 @@ all: test_package_cmake test
 .PHONY: all clean setup test test_package_cmake test_package_python test_optimizer
 
 clean:
-	rm -rf $(VENV) $(CMAKE_BUILD_DIR) operators*.{c,pyd,so}
+	rm -rf $(VENV) $(BUILD_DIR) operators*.c operators*.pyd operators*.so traffic_signaling/*.egg-info
 
 # Create a ready-to-use environment for the optimization
 setup: $(VENV) $(COMPILED_OPERATORS)
