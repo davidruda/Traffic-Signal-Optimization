@@ -1,0 +1,5 @@
+# Exclude Jupyter notebook from language stats on GitHub
+#
+# https://www.reddit.com/r/github/comments/1ehrtwc/how_to_get_rid_of_languages_used/
+# https://stackoverflow.com/questions/76774719/how-to-ignore-specific-directory-for-language-stats-in-github
+*.ipynb -linguist-detectable
