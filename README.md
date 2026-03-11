@@ -1,6 +1,11 @@
 # Traffic Signal Optimization
 
-This repository contains the code of my bachelor thesis.
+This repository contains the source code for my bachelor thesis:
+- 🚀 A fast C++ simulator for the __Traffic signaling problem🚦🚗__ from Google Hash Code 2021, with [pybind11](https://github.com/pybind/pybind11) bindings
+- 🧬 Heuristic optimization algorithms (Genetic Algorithm, Hill Climbing, Simulated Annealing)
+- 📊 Experiments comparing the optimization algorithms and reporting new best scores
+
+_For the thesis text itself, please refer to [bachelor-thesis](https://github.com/davidruda/bachelor-thesis) repository._
 
 ## Repository structure
 
