@@ -1,0 +1,22 @@
+name: Python test setup
+description: Shared Python and venv setup for CI test jobs
+runs:
+  using: composite
+  # This is a local composite action (stored in this repo), used by jobs in
+  # .github/workflows/ci.yml to avoid repeating the same setup commands.
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v6
+      with:
+        python-version: "3.13"
+
+    # Shared commands that run before each job's test-specific commands.
+    - name: Setup venv and test dependencies
+      shell: bash
+      run: |
+        gcc --version
+        python3 -V
+        python3 -m venv .venv
+        source .venv/bin/activate
+        pip install --upgrade pip
+        pip install -r requirements-test.txt

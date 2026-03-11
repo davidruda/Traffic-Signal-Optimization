@@ -1,0 +1,61 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test_package_cmake:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v6
+      # Shared setup is implemented as a local composite action to avoid repeating the same commands in each job.
+      - uses: ./.github/actions/python-test-setup
+
+      - name: CMake package test
+        run: |
+          git --version
+          pip install cmake
+          cmake --version
+          make test_package_cmake
+
+  test_package_python:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v6
+      # Shared setup is implemented as a local composite action to avoid repeating the same commands in each job.
+      - uses: ./.github/actions/python-test-setup
+
+      - name: Python package test
+        run: |
+          .venv/bin/pip install ./traffic_signaling
+          make test_package_python
+
+  test_optimizer:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v6
+      # Shared setup is implemented as a local composite action to avoid repeating the same commands in each job.
+      - uses: ./.github/actions/python-test-setup
+
+      - name: Optimizer tests
+        run: |
+          .venv/bin/pip install -r requirements.txt
+          make test_optimizer
+
+  test_experiments:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v6
+      # Shared setup is implemented as a local composite action to avoid repeating the same commands in each job.
+      - uses: ./.github/actions/python-test-setup
+
+      - name: Experiments tests
+        run: |
+          .venv/bin/pip install -r requirements.txt
+          cd experiments
+          make test
